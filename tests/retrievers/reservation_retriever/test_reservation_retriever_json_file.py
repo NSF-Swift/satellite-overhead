@@ -41,5 +41,5 @@ class TestReservationRetrieverJsonFile:
                     begin=datetime(year=1994, month=7, day=16, hour=3),
                     end=datetime(year=1994, month=7, day=18, hour=2)
                 )
-            ),
+            )
         ]

@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import List
 
@@ -6,6 +7,13 @@ from satellite_determination.dataclasses.reservation import Reservation
 from satellite_determination.dataclasses.satellite import Satellite
 from satellite_determination.dataclasses.time_window import TimeWindow
 from satellite_determination.validator.validator import Validator
+
+
+@dataclass
+class SuggestedReservation:
+    ideal_reservation: Reservation
+    overhead_satellites: List[OverheadWindow]
+    suggested_start_time: datetime
 
 
 class WindowFinder:
@@ -21,13 +29,20 @@ class WindowFinder:
         self._start_time_increments = start_time_increments
         self._validator = validator
 
-    def find(self) -> List[datetime]:
+    def find(self) -> List[SuggestedReservation]:
         potential_time_windows = [TimeWindow(begin=start_time, end=start_time + self._ideal_reservation.time.duration)
                                   for start_time in self._potential_start_times]
         potential_reservations = [Reservation(facility=self._ideal_reservation.facility, time=time) for time in potential_time_windows]
-        reservations_sorted_by_number_of_overhead_satellites =\
-            sorted(potential_reservations, key=lambda reservation: len(self._satellites_overhead(reservation=reservation)))
-        return [reservation.time.begin for reservation in reservations_sorted_by_number_of_overhead_satellites]
+        overhead_satellites = [self._satellites_overhead(reservation=reservation) for reservation in potential_reservations]
+        sort_indices = sorted(range(len(potential_reservations)), key=lambda index: len(overhead_satellites[index]))
+        return [
+            SuggestedReservation(
+                ideal_reservation=self._ideal_reservation,
+                overhead_satellites=overhead_satellites[index],
+                suggested_start_time=potential_reservations[index].time.begin
+            )
+            for index in sort_indices
+        ]
 
     def _satellites_overhead(self, reservation: Reservation) -> List[OverheadWindow]:
         return self._validator.overhead_list(list_of_satellites=self._satellites,
