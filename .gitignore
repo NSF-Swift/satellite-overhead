@@ -4,6 +4,5 @@ __pycache__
 .idea
 .pytest_cache
 .tmp
-cookies.txt
-TLEData
+TLEdata
 venv

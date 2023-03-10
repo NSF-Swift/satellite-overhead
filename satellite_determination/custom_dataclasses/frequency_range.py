@@ -1,7 +1,5 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import List
-import csv
 
 
 class FrequencyRangeJsonKey(Enum):
@@ -11,10 +9,11 @@ class FrequencyRangeJsonKey(Enum):
 
 @dataclass
 class FrequencyRange:
-    frequencies: List[tuple]
+    high_in_megahertz: float
+    low_in_megahertz: float
 
     @classmethod
-    def from_csv(cls, info: dict) -> 'FrequencyList':
+    def from_json(cls, info: dict) -> 'FrequencyRange':
         return cls(
             high_in_megahertz=info[FrequencyRangeJsonKey.high_in_megahertz.name],
             low_in_megahertz=info[FrequencyRangeJsonKey.low_in_megahertz.name]
