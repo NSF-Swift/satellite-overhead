@@ -69,10 +69,12 @@ class SatellitesWithinMainBeamFilter:
         return sorted(satellite_positions, key=lambda x: x.time)
 
     def _is_within_beam_width_altitude(self, satellite_altitude: float, antenna_altitude: float) -> bool:
-        is_above_horizon = satellite_altitude >= 0
-        lowest_main_beam_altitude = antenna_altitude - self._facility.half_beamwidth
-        is_above_main_beam_altitude = satellite_altitude >= lowest_main_beam_altitude
-        return is_above_horizon and is_above_main_beam_altitude
+        # Check if satellite is above horizon
+        if satellite_altitude < 0:
+            return False 
+        else:
+            lowest_main_beam_altitude = antenna_altitude - self._facility.half_beamwidth
+            return satellite_altitude >= lowest_main_beam_altitude
 
     def _is_within_beam_with_azimuth(self, satellite_azimuth: float, antenna_azimuth: float) -> bool:
         positions_to_compare_original = [satellite_azimuth, antenna_azimuth]
