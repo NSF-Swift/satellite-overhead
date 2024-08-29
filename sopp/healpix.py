@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import healpy as hp
-from scipy.interpolate import griddata
+from scipy.interpolate import griddata, LinearNDInterpolator
 
 import matplotlib.pyplot as plt
 from scipy.interpolate import RegularGridInterpolator
@@ -17,12 +17,17 @@ class HealpixLoader:
         Assumes the CSV file has columns 'Azimuth', 'Elevation', and 'Gain_dB'.
         """
         df = pd.read_csv(self.csv_file)
-        elevation = df['alpha'].values #elevation - technically, the zenith angle 
-        azimuth = df['beta'].values #azimuth
-        gain_dB = df['gain'].values
-        return azimuth, elevation, gain_dB
+        if df.shape[1] < 3:
+            index = df['index'].values
+            elevation, azimuth = hp.pix2ang(self.nside, index)
+            gain = df['gain'].values
+        else:
+            elevation = df['alpha'].values #elevation - technically, the zenith angle 
+            azimuth = df['beta'].values #azimuth
+            gain = df['gain'].values
+        return azimuth, elevation, gain
 
-    def create_healpix_object(self, azimuth, elevation, gain_dB):
+    def create_healpix_object(self, azimuth, elevation, gain):#FIXME: PBM HERE, returns zero array
         """
         Create HEALPix object for antenna gain.
         """
@@ -40,9 +45,9 @@ class HealpixLoader:
         # Aggregate gains to HEALPix pixels
         pixel_indices = hp.ang2pix(self.nside, theta, phi)
         
-        for i in range(len(gain_dB)):
-            healpix_gain[pixel_indices[i]] += gain_dB[i]
-            #healpix_gain[pixel_indices[i]] = gain_dB[i]
+        for i in range(len(gain)):
+            healpix_gain[pixel_indices[i]] += gain[i]
+            #healpix_gain[pixel_indices[i]] = gain[i]
             counts[pixel_indices[i]] += 1   ###added for averaging***
         ### this stuff added for averaging
         with np.errstate(divide='ignore', invalid='ignore'):
@@ -51,13 +56,13 @@ class HealpixLoader:
         return healpix_gain
 
     def load_healpix_gain_pattern(self):
-        azimuth, elevation, gain_dB = self.load_antenna_gain_data()
-        healpix_gain = self.create_healpix_object(azimuth, elevation, gain_dB)
+        azimuth, elevation, gain = self.load_antenna_gain_data()
+        healpix_gain = self.create_healpix_object(azimuth, elevation, gain)
         return healpix_gain
 
 
 class HealpixInterLoader(HealpixLoader):
-    def interpolate_data(self, azimuth, elevation, gain_dB, method='linear'):
+    def interpolate_data(self, azimuth, elevation, gain, method='linear'):
         """
         Interpolate antenna gain data to ensure even sampling.
         """
@@ -65,37 +70,41 @@ class HealpixInterLoader(HealpixLoader):
         theta = np.radians(elevation)
         phi = np.radians(azimuth)
 
-        npix_mesh = hp.nside2npix(self.nside)
-        #elevation_mesh = np.zeros(npix_mesh)
-        elevation_mesh = []
-        #azimuth_mesh = np.zeros(npix_mesh)
-        azimuth_mesh = []
+        # npix_mesh = hp.nside2npix(self.nside)
+        # #elevation_mesh = np.zeros(npix_mesh)
+        # elevation_mesh = []
+        # #azimuth_mesh = np.zeros(npix_mesh)
+        # azimuth_mesh = []
 
-        for i in range(npix_mesh):
-            theta_s,phi_s = hp.pix2ang(self.nside, i)
-            elevation_mesh.append(theta_s)
-            azimuth_mesh.append(phi_s)
+        gain_interpolated = LinearNDInterpolator(list(zip(theta,phi)), gain)
 
-        # Define grid for interpolation
-        # azimuth_grid = np.linspace(0, 360, grid_resolution)
-        # elevation_grid = np.linspace(-90, 90, grid_resolution)
-        # azimuth_mesh, elevation_mesh = np.meshgrid(azimuth_grid, elevation_grid)
+        # for i in range(npix_mesh):
+        #     theta_s,phi_s = hp.pix2ang(self.nside, i)
+        #     elevation_mesh.append(theta_s)
+        #     azimuth_mesh.append(phi_s)
 
-        # Interpolate gain values
-        # gain_interpolated = RegularGridInterpolator((phi,theta), gain_dB)
-        grid_points = np.column_stack((azimuth_mesh, elevation_mesh))
+        # # Define grid for interpolation
+        # # azimuth_grid = np.linspace(0, 360, grid_resolution)
+        # # elevation_grid = np.linspace(-90, 90, grid_resolution)
+        # # azimuth_mesh, elevation_mesh = np.meshgrid(azimuth_grid, elevation_grid)
+
+        # # Interpolate gain values
+        # # gain_interpolated = RegularGridInterpolator((phi,theta), gain_dB)
+        # grid_points = np.column_stack((azimuth_mesh, elevation_mesh))
 
 
-        gain_interpolated = griddata((phi,theta), gain_dB, grid_points, method=method, fill_value=0.0)
+        # gain_interpolated = griddata((phi,theta), gain_dB, grid_points, method=method, fill_value=0.0)
 
         # return azimuth_mesh, elevation_mesh, gain_interpolated
-        return gain_interpolated, grid_points
+        return gain_interpolated#, grid_points
 
-    def create_healpix_object(self, azimuth, elevation, gain_dB, method='linear'):
+    def create_healpix_object(self, azimuth, elevation, gain, method='linear'):
         """
         Create HEALPix object for antenna gain with interpolation.
         """
-        gain_interpolated, grid_points = self.interpolate_data(azimuth, elevation, gain_dB, method=method)
+        # gain_interpolated, grid_points = self.interpolate_data(azimuth,
+        # elevation, gain_dB, method=method)
+        gain_interpolated = self.interpolate_data(azimuth, elevation, gain, method=method)
 
         # Convert interpolated azimuth and elevation to spherical coordinates
         # theta_mesh = np.radians(90 - elevation_mesh)
@@ -103,7 +112,11 @@ class HealpixInterLoader(HealpixLoader):
 
         # Initialize HEALPix map
         healpix_gain = np.zeros(hp.nside2npix(self.nside))
-        npix_mesh = hp.nside2npix(self.nside)
+        for i in range(len(healpix_gain)):
+            theta_s,phi_s = hp.pix2ang(self.nside, i)
+            healpix_gain[i] = gain_interpolated(theta_s, phi_s)
+        
+        # npix_mesh = hp.nside2npix(self.nside)
         """
         for i in range(len(healpix_gain)):
             theta_s,phi_s = hp.pix2ang(self.nside, i)
@@ -134,9 +147,9 @@ class HealpixInterLoader(HealpixLoader):
 
 
 class HealpixGainPattern:
-    def __init__(self, healpix_gain: np.ndarray):
+    def __init__(self, healpix_gain: np.ndarray, nside=2048):
         self.healpix_gain = healpix_gain
-        self.nside = 2048
+        self.nside = nside
 
     def get_gain(self, theta: float, phi: float) -> float:
         """
@@ -145,7 +158,7 @@ class HealpixGainPattern:
         npix = hp.nside2npix(self.nside)
         #pixel_index = hp.ang2pix(self.nside, np.radians(90-theta), np.radians(phi))
         pixel_index = hp.ang2pix(self.nside, np.radians(theta), np.radians(phi))
-        return self.healpix_gain[pixel_index]
+        return self.healpix_gain[pixel_index]#FIXME: check with the healpix interpolator
     
 """
 # Example usage IF the data is already in Healpix format
