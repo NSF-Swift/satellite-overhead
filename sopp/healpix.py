@@ -76,7 +76,11 @@ class HealpixInterLoader(HealpixLoader):
         # #azimuth_mesh = np.zeros(npix_mesh)
         # azimuth_mesh = []
 
-        gain_interpolated = LinearNDInterpolator(list(zip(theta,phi)), gain)
+        ind_first_az = np.where(azimuth == 0)[0]
+
+        gain_interpolated = LinearNDInterpolator(list(zip(np.append(theta, theta[ind_first_az]),
+                                                          np.append(phi, phi[ind_first_az]+2*np.pi))), 
+                                                 np.append(gain, gain[ind_first_az]))
 
         # for i in range(npix_mesh):
         #     theta_s,phi_s = hp.pix2ang(self.nside, i)

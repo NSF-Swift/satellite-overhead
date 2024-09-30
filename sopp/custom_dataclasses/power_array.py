@@ -8,7 +8,7 @@ class PowerArray:
     def add_power(self, index, power):
         if 0 <= index < self.length:
             self.array[index] += float(power)
-            print("We got here!! index we're adding the power to is: " + str(index) + " the power is" + str(power))
+            # print("We got here!! index we're adding the power to is: " + str(index) + " the power is" + str(power))
             #print(self.array)
         else:
             raise IndexError("Index out of range")

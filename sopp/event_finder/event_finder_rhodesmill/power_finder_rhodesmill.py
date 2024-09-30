@@ -90,8 +90,8 @@ class PowerFinderRhodesmill(EventFinder):
 
     def _get_satellite_power_windows(self, satellite: Satellite) -> List[PowerWindow]:
         antenna_direction_end_times = (
-            [antenna_direction.time for antenna_direction in self.antenna_direction_path[1:]]
-            + [self.reservation.time.end]
+            [antenna_direction.time for antenna_direction in self.antenna_direction_path[1:]]#FIXME: why [1:]?
+            + [self.reservation.time.end] #FIXME: why adding two times the last time
         )
         satellite_positions = self._get_satellite_positions_within_reservation(satellite)
         antenna_positions = [

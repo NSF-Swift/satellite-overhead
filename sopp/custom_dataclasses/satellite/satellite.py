@@ -45,8 +45,8 @@ class Satellite:
     name: str
     tle_information: Optional[TleInformation] = None
     frequency: List[FrequencyRange] = field(default_factory=list)
-    transmitter: Transmitter = field(default_factory=Transmitter) 
-    antenna: Antenna = field(default_factory=lambda: Antenna(healpix_gain))
+    transmitter: Transmitter = field(default_factory=Transmitter) #FIXME: should also be included into config file
+    antenna: Antenna = field(default_factory=lambda: Antenna(healpix_gain))#FIXME: NOT correct for now, need to specify for each type of sats
 
     def to_rhodesmill(self) -> EarthSatellite:
         line1, line2 = self.tle_information.to_tle_lines()

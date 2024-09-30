@@ -32,11 +32,11 @@ class SatelliteLinkBudgetAngleCalculator:
     def get_link_angles(self):
         results = []
         ground_ab = self.calculate_ab_ground()
-        sat_ab = self.calculate_ab_sat()
+        # sat_ab = self.calculate_ab_sat()
         results.append(ground_ab[0])
         results.append(ground_ab[1])
-        results.append(sat_ab[0])
-        results.append(sat_ab[1])
+        # results.append(sat_ab[0])
+        # results.append(sat_ab[1])#FIXME:
         return results  #results are in alpha, beta for each 
     
     def calculate_ab_ground(self) -> List[float]: #calculates the alpha and beta angles for gain pattern of the ground antenna
