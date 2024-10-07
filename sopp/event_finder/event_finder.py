@@ -9,6 +9,9 @@ from sopp.event_finder.event_finder_rhodesmill.support.satellite_positions_with_
     SatellitePositionsWithRespectToFacilityRetriever
 from sopp.custom_dataclasses.runtime_settings import RuntimeSettings
 
+from sopp.custom_dataclasses.power_window import PowerWindow
+from sopp.custom_dataclasses.power_array import PowerArray
+
 
 class EventFinder(ABC):
     '''
@@ -35,10 +38,20 @@ class EventFinder(ABC):
         self.satellite_positions_with_respect_to_facility_retriever_class = satellite_positions_with_respect_to_facility_retriever_class
         self.runtime_settings = runtime_settings
 
+        #self.power_array = PowerArray(int(self.reservation.time.end.timestamp()-self.reservation.time.begin.timestamp()+1))
+
     @abstractmethod
     def get_satellites_above_horizon(self) -> List[OverheadWindow]:
         pass
 
     @abstractmethod
     def get_satellites_crossing_main_beam(self) -> List[OverheadWindow]:
+        pass
+
+    @abstractmethod
+    def get_satellite_power(self) -> PowerArray:
+        pass
+
+    @abstractmethod
+    def get_satellite_power_array(self) -> PowerArray:
         pass

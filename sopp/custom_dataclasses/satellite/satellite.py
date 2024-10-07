@@ -11,6 +11,13 @@ from sopp.custom_dataclasses.frequency_range.frequency_range import FrequencyRan
 from sopp.custom_dataclasses.satellite.tle_information import TleInformation
 from sopp.utilities import temporary_file
 
+from sopp.custom_dataclasses.satellite.transmitter import Transmitter
+from sopp.custom_dataclasses.antenna import Antenna
+
+from sopp.healpix import HealpixGainPattern
+from sopp.healpix import HealpixLoader
+
+
 '''
 The Satellite data class stores all of the TLE information for each satellite, which is loaded from a TLE file using the class method from_tle_file()
 and can be converted to a Skyfield API object EarthSatellite using the to_rhodesmill() method. It also stores all the frequency information
@@ -28,12 +35,18 @@ for each satellite.
 
 NUMBER_OF_LINES_PER_TLE_OBJECT = 3
 
+satellite_gain = 'gain_test.csv'
+healpix_loader = HealpixLoader(satellite_gain)
+healpix_gain = healpix_loader.load_healpix_gain_pattern()
+healpix_pattern_sat = HealpixGainPattern(healpix_gain)
 
 @dataclass
 class Satellite:
     name: str
     tle_information: Optional[TleInformation] = None
     frequency: List[FrequencyRange] = field(default_factory=list)
+    transmitter: Transmitter = field(default_factory=Transmitter) #FIXME: should also be included into config file
+    antenna: Antenna = field(default_factory=lambda: Antenna(healpix_gain))#FIXME: NOT correct for now, need to specify for each type of sats
 
     def to_rhodesmill(self) -> EarthSatellite:
         line1, line2 = self.tle_information.to_tle_lines()
@@ -53,3 +66,5 @@ class Satellite:
             tle_information=TleInformation.from_tle_lines(line1=lines[name_line_index + 1],
                                                           line2=lines[name_line_index + 2])
         ) for name_line_index in name_line_indices]
+
+

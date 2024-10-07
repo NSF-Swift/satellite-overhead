@@ -22,6 +22,8 @@ from typing import Optional, List, Type, Union, Any, Callable
 from pathlib import Path
 from datetime import datetime, timedelta
 
+from sopp.custom_dataclasses.antenna import Antenna
+
 
 class ConfigurationBuilder:
     def __init__(
@@ -53,12 +55,12 @@ class ConfigurationBuilder:
         longitude: float,
         elevation: float,
         name: str,
-        beamwidth: float,
+        antenna: Antenna,
     ) -> 'ConfigurationBuilder':
         self.facility = Facility(
             Coordinates(latitude=latitude, longitude=longitude),
             elevation=elevation,
-            beamwidth=beamwidth,
+            antenna=antenna,
             name=name,
         )
         return self

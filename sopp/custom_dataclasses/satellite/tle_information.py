@@ -9,6 +9,8 @@ from sgp4.io import verify_checksum
 from sopp.custom_dataclasses.satellite.international_designator import InternationalDesignator
 from sopp.custom_dataclasses.satellite.mean_motion import MeanMotion
 
+from math import radians, sqrt
+
 
 @dataclass
 class TleInformation:
@@ -72,3 +74,22 @@ class TleInformation:
             satellite_number=satrec.satnum,
             classification=satrec.classification
         )
+    
+    def calculate_velocity_vector(self) -> tuple:
+        # Step 1: Compute mean motion (n) in radians per minute
+        mean_motion_rad_per_min = radians(self.mean_motion.value)
+
+        # Step 2: Compute semi-major axis (a) in kilometers
+        mean_motion_rad_per_sec = mean_motion_rad_per_min / 60.0
+        a = (398600.4418 / mean_motion_rad_per_sec**2)**(1/3.0)
+
+        # Step 3: Compute velocity (V) in km/s
+        e = self.eccentricity
+        V = sqrt(398600.4418 / a * (1 + e))
+
+        # Step 4: Compute velocity components
+        V_along_track = V * (1 - e)
+        V_cross_track = V * sqrt(1 - e**2)
+
+        # Return velocity vector as a tuple, in terms of geocentric coordinate system
+        return V_along_track, V_cross_track

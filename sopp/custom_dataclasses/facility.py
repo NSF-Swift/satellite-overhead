@@ -4,6 +4,8 @@ from typing import List, Optional
 
 from sopp.custom_dataclasses.position_time import PositionTime
 
+from sopp.custom_dataclasses.antenna import Antenna
+from sopp.custom_dataclasses.receiver import Receiver
 
 @dataclass
 class Facility:
@@ -20,6 +22,8 @@ class Facility:
     beamwidth: float = 3
     elevation: float = 0
     name: Optional[str] = 'Unnamed Facility'
+    antenna: Antenna = field(default_factory=Antenna)
+    #receiver: Receiver = field(default_factory=Receiver)
 
     @property
     def half_beamwidth(self) -> float:

@@ -1,9 +1,9 @@
-from dataclasses import replace
+from abc import ABC, abstractmethod
 from typing import List, Type
 import multiprocessing
 
-from sopp.custom_dataclasses.overhead_window import OverheadWindow
-from sopp.custom_dataclasses.position import Position
+import numpy as np
+
 from sopp.custom_dataclasses.position_time import PositionTime
 from sopp.custom_dataclasses.reservation import Reservation
 from sopp.custom_dataclasses.time_window import TimeWindow
@@ -22,9 +22,24 @@ from sopp.event_finder.event_finder_rhodesmill.support.satellites_interference_f
 from sopp.event_finder.event_finder import EventFinder
 from sopp.custom_dataclasses.satellite.satellite import Satellite
 from sopp.custom_dataclasses.runtime_settings import RuntimeSettings
+from sopp.custom_dataclasses.power_time import PowerTime
+from sopp.custom_dataclasses.power_window import PowerWindow
+
+from sopp.custom_dataclasses.power_array import PowerArray
+from sopp.custom_dataclasses.overhead_window import OverheadWindow
 
 
-class EventFinderRhodesmill(EventFinder):
+class PowerFinderRhodesmill(EventFinder):
+    '''
+    The PowerFinderRhodesmill is the module that deals with satellite power-related calculations. It has two main functions:
+
+      + get_satellites_above_power_threshold(): Determines the satellites whose power readings exceed a certain threshold during the observation window
+                                        and returns a list of PowerWindows for each event.
+
+      + get_peak_power_satellites(): Finds the satellites with the highest peak power during the observation window and returns a list of PowerWindows
+                                        for each event.
+    '''
+
     def __init__(self,
                  antenna_direction_path: List[PositionTime],
                  list_of_satellites: List[Satellite],
@@ -46,30 +61,37 @@ class EventFinderRhodesmill(EventFinder):
             facility=reservation.facility,
             datetimes=datetimes
         )
-        
+        self.power_array = PowerArray(int(self.reservation.time.end.timestamp()-self.reservation.time.begin.timestamp()+1))
         self._filter_strategy = None
 
-    def get_satellites_above_horizon(self):
+    def get_satellite_power_array(self) -> PowerArray:
         self._filter_strategy = SatellitesAboveHorizonFilter
-        return self._get_satellites_interference()
+        pass
 
-    def get_satellites_crossing_main_beam(self) -> List[OverheadWindow]:
-        self._filter_strategy = SatellitesWithinMainBeamFilter
-        return self._get_satellites_interference()
+    #def get_satellite_power(self) -> List[PowerWindow]:
+    def get_satellite_power(self) -> PowerArray:
+        self._filter_strategy = SatellitesAboveHorizonFilter
+        # return self._get_satellites_interference()
+        self._get_satellites_interference()
+        return self.power_array
 
-    def _get_satellites_interference(self) -> List[OverheadWindow]:
+    def _get_satellites_interference(self) -> List[PowerWindow]:
+        for sat in self.list_of_satellites:
+            self._get_satellite_power_windows(sat)
+        """
         processes = int(self.runtime_settings.concurrency_level) if self.runtime_settings.concurrency_level > 1 else 1
         pool = multiprocessing.Pool(processes=processes)
-        results = pool.map(self._get_satellite_overhead_windows, self.list_of_satellites)
+        results = pool.map(self._get_satellite_power_windows, self.list_of_satellites)
         pool.close()
         pool.join()
 
-        return [overhead_window for result in results for overhead_window in result]
+        return [power_window for result in results for power_window in result]
+        """
 
-    def _get_satellite_overhead_windows(self, satellite: Satellite) -> List[OverheadWindow]:
+    def _get_satellite_power_windows(self, satellite: Satellite) -> List[PowerWindow]:
         antenna_direction_end_times = (
-            [antenna_direction.time for antenna_direction in self.antenna_direction_path[1:]]
-            + [self.reservation.time.end]
+            [antenna_direction.time for antenna_direction in self.antenna_direction_path[1:]]#FIXME: why [1:]?
+            + [self.reservation.time.end] #FIXME: why adding two times the last time
         )
         satellite_positions = self._get_satellite_positions_within_reservation(satellite)
         antenna_positions = [
@@ -90,11 +112,12 @@ class EventFinderRhodesmill(EventFinder):
             facility=self.reservation.facility,
             antenna_positions=antenna_positions,
             cutoff_time=self.reservation.time.end,
+            start_time=self.reservation.time.begin,
             filter_strategy=self._filter_strategy,
             runtime_settings=self.runtime_settings,
-        ).run()
+        ).power_run(satellite, self.power_array)
 
-        return [OverheadWindow(satellite=satellite, positions=positions) for positions in time_windows]
+        return [PowerWindow(satellite=satellite, powertimes=times) for times in time_windows]
 
     def _get_satellite_positions_within_reservation(self, satellite: Satellite) -> List[PositionTime]:
         return self._satellite_positions_retriever.run(satellite)
@@ -109,3 +132,11 @@ class EventFinderRhodesmill(EventFinder):
             for positions in satellite_positions
             if time_window.begin <= positions.time < time_window.end
         ]
+    
+    def get_satellites_above_horizon(self) -> List[OverheadWindow]:
+        self._filter_strategy = SatellitesAboveHorizonFilter
+        pass
+
+    def get_satellites_crossing_main_beam(self) -> List[OverheadWindow]:
+        self._filter_strategy = SatellitesAboveHorizonFilter
+        pass

@@ -2,6 +2,7 @@ from dataclasses import replace
 from typing import List
 from functools import cached_property
 
+from sopp.custom_dataclasses.antenna import Antenna
 from sopp.satellites_loader.satellites_loader import SatellitesLoader
 from sopp.custom_dataclasses.satellite.satellite import Satellite
 from sopp.custom_dataclasses.frequency_range.support.get_frequency_data_from_csv import \
@@ -23,7 +24,7 @@ class SatellitesLoaderFromFiles(SatellitesLoader):
     >>>     print(satellite)
     """
 
-    def __init__(self, tle_file, frequency_file=None):
+    def __init__(self, tle_file, frequency_file=None,):
         self.tle_file = tle_file
         self.frequency_file = frequency_file
 
