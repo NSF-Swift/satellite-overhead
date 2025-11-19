@@ -1,10 +1,10 @@
 from dataclasses import replace
 from pathlib import Path
 
-from sopp.custom_dataclasses.frequency_range.support.get_frequency_data_from_csv import (
+from sopp.io.get_frequency_data_from_csv import (
     GetFrequencyDataFromCsv,
 )
-from sopp.custom_dataclasses.satellite.satellite import Satellite
+from sopp.models.satellite.satellite import Satellite
 from sopp.utilities import get_script_directory
 
 from tests.custom_dataclasses.satellite.utilities import (

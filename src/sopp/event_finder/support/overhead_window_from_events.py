@@ -2,10 +2,10 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 
-from sopp.custom_dataclasses.overhead_window import OverheadWindow
-from sopp.custom_dataclasses.reservation import Reservation
-from sopp.custom_dataclasses.satellite.satellite import Satellite
-from sopp.custom_dataclasses.time_window import TimeWindow
+from sopp.models.overhead_window import OverheadWindow
+from sopp.models.reservation import Reservation
+from sopp.models.satellite.satellite import Satellite
+from sopp.models.time_window import TimeWindow
 
 
 class EventTypesRhodesmill(Enum):

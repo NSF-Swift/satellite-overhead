@@ -4,8 +4,8 @@ from pathlib import Path
 
 from skyfield.sgp4lib import EarthSatellite
 
-from sopp.custom_dataclasses.frequency_range.frequency_range import FrequencyRange
-from sopp.custom_dataclasses.satellite.tle_information import TleInformation
+from sopp.models.frequency_range import FrequencyRange
+from sopp.models.satellite.tle_information import TleInformation
 
 """
 The Satellite data class stores all of the TLE information for each satellite, which is loaded from a TLE file using the class method from_tle_file()

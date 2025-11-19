@@ -1,22 +1,22 @@
 from datetime import datetime, timezone
 
 import pytest
-from sopp.custom_dataclasses.configuration import Configuration
-from sopp.custom_dataclasses.coordinates import Coordinates
-from sopp.custom_dataclasses.facility import Facility
-from sopp.custom_dataclasses.frequency_range.frequency_range import FrequencyRange
-from sopp.custom_dataclasses.overhead_window import OverheadWindow
-from sopp.custom_dataclasses.position import Position
-from sopp.custom_dataclasses.position_time import PositionTime
-from sopp.custom_dataclasses.reservation import Reservation
-from sopp.custom_dataclasses.runtime_settings import RuntimeSettings
-from sopp.custom_dataclasses.satellite.international_designator import (
+from sopp.models.configuration import Configuration
+from sopp.models.coordinates import Coordinates
+from sopp.models.facility import Facility
+from sopp.models.frequency_range import FrequencyRange
+from sopp.models.overhead_window import OverheadWindow
+from sopp.models.position import Position
+from sopp.models.position_time import PositionTime
+from sopp.models.reservation import Reservation
+from sopp.models.runtime_settings import RuntimeSettings
+from sopp.models.satellite.international_designator import (
     InternationalDesignator,
 )
-from sopp.custom_dataclasses.satellite.mean_motion import MeanMotion
-from sopp.custom_dataclasses.satellite.satellite import Satellite
-from sopp.custom_dataclasses.satellite.tle_information import TleInformation
-from sopp.custom_dataclasses.time_window import TimeWindow
+from sopp.models.satellite.mean_motion import MeanMotion
+from sopp.models.satellite.satellite import Satellite
+from sopp.models.satellite.tle_information import TleInformation
+from sopp.models.time_window import TimeWindow
 from sopp.sopp import Sopp
 
 

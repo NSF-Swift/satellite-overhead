@@ -1,8 +1,8 @@
 from datetime import timedelta
 from functools import cached_property
 
-from sopp.custom_dataclasses.configuration import Configuration
-from sopp.custom_dataclasses.overhead_window import OverheadWindow
+from sopp.models.configuration import Configuration
+from sopp.models.overhead_window import OverheadWindow
 from sopp.event_finder.event_finder import EventFinder
 from sopp.event_finder.event_finder_rhodesmill.event_finder_rhodesmill import (
     EventFinderRhodesmill,

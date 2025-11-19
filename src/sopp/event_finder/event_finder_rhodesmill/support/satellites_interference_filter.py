@@ -6,10 +6,10 @@ from functools import cached_property
 from math import isclose
 
 import numpy
-from sopp.custom_dataclasses.facility import Facility
-from sopp.custom_dataclasses.position import Position
-from sopp.custom_dataclasses.position_time import PositionTime
-from sopp.custom_dataclasses.runtime_settings import RuntimeSettings
+from sopp.models.facility import Facility
+from sopp.models.position import Position
+from sopp.models.position_time import PositionTime
+from sopp.models.runtime_settings import RuntimeSettings
 
 DEGREES_IN_A_CIRCLE = 360
 

@@ -1,4 +1,4 @@
-from sopp.custom_dataclasses.satellite.satellite import Satellite
+from sopp.models.satellite.satellite import Satellite
 from sopp.retrievers.retriever_json_file import RetrieverJsonFile
 from sopp.retrievers.satellite_retriever.satellite_retriever import SatelliteRetriever
 

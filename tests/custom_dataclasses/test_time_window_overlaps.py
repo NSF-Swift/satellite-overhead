@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sopp.custom_dataclasses.time_window import TimeWindow
+from sopp.models.time_window import TimeWindow
 
 
 class TestTimeWindowOverlaps:

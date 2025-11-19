@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from functools import cached_property
 from uuid import uuid4
 
-from sopp.custom_dataclasses.reservation import Reservation
+from sopp.models.reservation import Reservation
 
 
 class Tardys4Generator:

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from sopp.custom_dataclasses.coordinates import Coordinates
+from sopp.models.coordinates import Coordinates
 
 
 @dataclass

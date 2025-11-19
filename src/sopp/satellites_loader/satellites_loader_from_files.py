@@ -1,10 +1,10 @@
 from dataclasses import replace
 from functools import cached_property
 
-from sopp.custom_dataclasses.frequency_range.support.get_frequency_data_from_csv import (
+from sopp.io.get_frequency_data_from_csv import (
     GetFrequencyDataFromCsv,
 )
-from sopp.custom_dataclasses.satellite.satellite import Satellite
+from sopp.models.satellite.satellite import Satellite
 from sopp.satellites_loader.satellites_loader import SatellitesLoader
 
 

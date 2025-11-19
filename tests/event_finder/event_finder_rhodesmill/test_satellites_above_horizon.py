@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta, timezone
 
-from sopp.custom_dataclasses.position import Position
-from sopp.custom_dataclasses.position_time import PositionTime
-from sopp.custom_dataclasses.runtime_settings import RuntimeSettings
+from sopp.models.position import Position
+from sopp.models.position_time import PositionTime
+from sopp.models.runtime_settings import RuntimeSettings
 from sopp.event_finder.event_finder_rhodesmill.support.satellites_interference_filter import (
     AntennaPosition,
     SatellitesAboveHorizonFilter,

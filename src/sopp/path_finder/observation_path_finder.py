@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 
-from sopp.custom_dataclasses.facility import Facility
-from sopp.custom_dataclasses.observation_target import ObservationTarget
-from sopp.custom_dataclasses.position_time import PositionTime
-from sopp.custom_dataclasses.time_window import TimeWindow
+from sopp.models.facility import Facility
+from sopp.models.observation_target import ObservationTarget
+from sopp.models.position_time import PositionTime
+from sopp.models.time_window import TimeWindow
 
 
 class ObservationPathFinder(ABC):

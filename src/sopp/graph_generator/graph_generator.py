@@ -4,8 +4,8 @@ from functools import cached_property
 import matplotlib.pyplot as plt
 import numpy as np
 
-from sopp.custom_dataclasses.overhead_window import OverheadWindow
-from sopp.custom_dataclasses.time_window import TimeWindow
+from sopp.models.overhead_window import OverheadWindow
+from sopp.models.time_window import TimeWindow
 
 
 class GraphGenerator:

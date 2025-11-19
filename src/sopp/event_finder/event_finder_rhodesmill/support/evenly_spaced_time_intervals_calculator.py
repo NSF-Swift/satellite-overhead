@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from math import ceil
 
-from sopp.custom_dataclasses.time_window import TimeWindow
+from sopp.models.time_window import TimeWindow
 
 
 class EvenlySpacedTimeIntervalsCalculator:

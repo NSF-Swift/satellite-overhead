@@ -1,10 +1,10 @@
 from dataclasses import dataclass, field
 
-from sopp.custom_dataclasses.observation_target import ObservationTarget
-from sopp.custom_dataclasses.position import Position
-from sopp.custom_dataclasses.position_time import PositionTime
-from sopp.custom_dataclasses.reservation import Reservation
-from sopp.custom_dataclasses.runtime_settings import RuntimeSettings
+from sopp.models.observation_target import ObservationTarget
+from sopp.models.position import Position
+from sopp.models.position_time import PositionTime
+from sopp.models.reservation import Reservation
+from sopp.models.runtime_settings import RuntimeSettings
 
 
 @dataclass

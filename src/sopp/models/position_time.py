@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from sopp.custom_dataclasses.position import Position
+from sopp.models.position import Position
 
 
 @dataclass

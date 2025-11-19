@@ -59,7 +59,7 @@ dependencies = [
 run = "pytest {args:tests}"
 
 [[tool.hatch.envs.test.matrix]]
-python = ["3.9", "3.10", "3.11", "3.12"]
+python = ["3.10", "3.11", "3.12"]
 
 [tool.hatch.envs.ci]
 dev-mode = false

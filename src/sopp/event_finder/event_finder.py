@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 
-from sopp.custom_dataclasses.overhead_window import OverheadWindow
-from sopp.custom_dataclasses.position_time import PositionTime
-from sopp.custom_dataclasses.reservation import Reservation
-from sopp.custom_dataclasses.runtime_settings import RuntimeSettings
-from sopp.custom_dataclasses.satellite.satellite import Satellite
+from sopp.models.overhead_window import OverheadWindow
+from sopp.models.position_time import PositionTime
+from sopp.models.reservation import Reservation
+from sopp.models.runtime_settings import RuntimeSettings
+from sopp.models.satellite.satellite import Satellite
 from sopp.event_finder.event_finder_rhodesmill.support.satellite_positions_with_respect_to_facility_retriever.satellite_positions_with_respect_to_facility_retriever import (
     SatellitePositionsWithRespectToFacilityRetriever,
 )

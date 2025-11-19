@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta, timezone
 
-from sopp.custom_dataclasses.coordinates import Coordinates
-from sopp.custom_dataclasses.facility import Facility
-from sopp.custom_dataclasses.overhead_window import OverheadWindow
-from sopp.custom_dataclasses.position import Position
-from sopp.custom_dataclasses.position_time import PositionTime
+from sopp.models.coordinates import Coordinates
+from sopp.models.facility import Facility
+from sopp.models.overhead_window import OverheadWindow
+from sopp.models.position import Position
+from sopp.models.position_time import PositionTime
 
 ARBITRARY_FACILITY = Facility(coordinates=Coordinates(latitude=0, longitude=0))
 

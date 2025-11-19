@@ -1,8 +1,8 @@
 import re
 from collections.abc import Callable
 
-from sopp.custom_dataclasses.frequency_range.frequency_range import FrequencyRange
-from sopp.custom_dataclasses.satellite.satellite import Satellite
+from sopp.models.frequency_range import FrequencyRange
+from sopp.models.satellite.satellite import Satellite
 
 
 def filter_frequency(

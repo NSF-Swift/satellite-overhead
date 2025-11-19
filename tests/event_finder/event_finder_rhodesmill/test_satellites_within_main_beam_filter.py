@@ -1,7 +1,7 @@
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 
-from sopp.custom_dataclasses.position_time import PositionTime
+from sopp.models.position_time import PositionTime
 from sopp.event_finder.event_finder_rhodesmill.support.satellites_interference_filter import (
     AntennaPosition,
     SatellitesInterferenceFilter,

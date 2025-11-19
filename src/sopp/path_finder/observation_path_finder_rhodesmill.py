@@ -5,11 +5,11 @@ from skyfield.api import load
 from skyfield.starlib import Star
 from skyfield.toposlib import wgs84
 
-from sopp.custom_dataclasses.facility import Facility
-from sopp.custom_dataclasses.observation_target import ObservationTarget
-from sopp.custom_dataclasses.position import Position
-from sopp.custom_dataclasses.position_time import PositionTime
-from sopp.custom_dataclasses.time_window import TimeWindow
+from sopp.models.facility import Facility
+from sopp.models.observation_target import ObservationTarget
+from sopp.models.position import Position
+from sopp.models.position_time import PositionTime
+from sopp.models.time_window import TimeWindow
 from sopp.path_finder.observation_path_finder import ObservationPathFinder
 
 

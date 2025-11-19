@@ -1,12 +1,12 @@
 import os
 
-from sopp.custom_dataclasses.frequency_range.frequency_range import FrequencyRange
-from sopp.custom_dataclasses.satellite.international_designator import (
+from sopp.models.frequency_range import FrequencyRange
+from sopp.models.satellite.international_designator import (
     InternationalDesignator,
 )
-from sopp.custom_dataclasses.satellite.mean_motion import MeanMotion
-from sopp.custom_dataclasses.satellite.satellite import Satellite
-from sopp.custom_dataclasses.satellite.tle_information import TleInformation
+from sopp.models.satellite.mean_motion import MeanMotion
+from sopp.models.satellite.satellite import Satellite
+from sopp.models.satellite.tle_information import TleInformation
 from sopp.satellites_loader.satellites_loader_from_files import (
     SatellitesLoaderFromFiles,
 )

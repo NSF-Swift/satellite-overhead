@@ -2,18 +2,18 @@ from datetime import datetime, timezone
 
 import pytest
 from sopp.builder.configuration_builder import ConfigurationBuilder
-from sopp.custom_dataclasses.configuration import Configuration
-from sopp.custom_dataclasses.configuration_file import ConfigurationFile
-from sopp.custom_dataclasses.coordinates import Coordinates
-from sopp.custom_dataclasses.facility import Facility
-from sopp.custom_dataclasses.frequency_range.frequency_range import FrequencyRange
-from sopp.custom_dataclasses.observation_target import ObservationTarget
-from sopp.custom_dataclasses.position import Position
-from sopp.custom_dataclasses.position_time import PositionTime
-from sopp.custom_dataclasses.reservation import Reservation
-from sopp.custom_dataclasses.runtime_settings import RuntimeSettings
-from sopp.custom_dataclasses.satellite.satellite import Satellite
-from sopp.custom_dataclasses.time_window import TimeWindow
+from sopp.models.configuration import Configuration
+from sopp.models.configuration_file import ConfigurationFile
+from sopp.models.coordinates import Coordinates
+from sopp.models.facility import Facility
+from sopp.models.frequency_range import FrequencyRange
+from sopp.models.observation_target import ObservationTarget
+from sopp.models.position import Position
+from sopp.models.position_time import PositionTime
+from sopp.models.reservation import Reservation
+from sopp.models.runtime_settings import RuntimeSettings
+from sopp.models.satellite.satellite import Satellite
+from sopp.models.time_window import TimeWindow
 from sopp.satellites_filter.filterer import Filterer
 
 

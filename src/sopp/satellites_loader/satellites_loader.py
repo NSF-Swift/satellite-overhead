@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from sopp.custom_dataclasses.satellite.satellite import Satellite
+from sopp.models.satellite.satellite import Satellite
 
 
 class SatellitesLoader(ABC):

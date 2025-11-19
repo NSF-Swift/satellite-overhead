@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta, timezone
 
-from sopp.custom_dataclasses.coordinates import Coordinates
-from sopp.custom_dataclasses.facility import Facility
-from sopp.custom_dataclasses.position import Position
-from sopp.custom_dataclasses.position_time import PositionTime
-from sopp.custom_dataclasses.reservation import Reservation
-from sopp.custom_dataclasses.satellite.satellite import Satellite
-from sopp.custom_dataclasses.time_window import TimeWindow
+from sopp.models.coordinates import Coordinates
+from sopp.models.facility import Facility
+from sopp.models.position import Position
+from sopp.models.position_time import PositionTime
+from sopp.models.reservation import Reservation
+from sopp.models.satellite.satellite import Satellite
+from sopp.models.time_window import TimeWindow
 from sopp.event_finder.event_finder_rhodesmill.event_finder_rhodesmill import (
     EventFinderRhodesmill,
 )

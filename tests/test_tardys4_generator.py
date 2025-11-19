@@ -1,8 +1,8 @@
-from sopp.custom_dataclasses.coordinates import Coordinates
-from sopp.custom_dataclasses.facility import Facility
-from sopp.custom_dataclasses.frequency_range.frequency_range import FrequencyRange
-from sopp.custom_dataclasses.reservation import Reservation
-from sopp.custom_dataclasses.time_window import TimeWindow
+from sopp.models.coordinates import Coordinates
+from sopp.models.facility import Facility
+from sopp.models.frequency_range import FrequencyRange
+from sopp.models.reservation import Reservation
+from sopp.models.time_window import TimeWindow
 from sopp.tardys4_generator import Tardys4Generator
 from sopp.utilities import parse_time_and_convert_to_utc
 

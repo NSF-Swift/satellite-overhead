@@ -4,13 +4,13 @@ from functools import cached_property
 from numpy._typing import NDArray
 from skyfield.api import load, wgs84
 from skyfield.timelib import Time, Timescale
-from sopp.custom_dataclasses.frequency_range.frequency_range import FrequencyRange
-from sopp.custom_dataclasses.satellite.international_designator import (
+from sopp.models.frequency_range import FrequencyRange
+from sopp.models.satellite.international_designator import (
     InternationalDesignator,
 )
-from sopp.custom_dataclasses.satellite.mean_motion import MeanMotion
-from sopp.custom_dataclasses.satellite.satellite import Satellite
-from sopp.custom_dataclasses.satellite.tle_information import TleInformation
+from sopp.models.satellite.mean_motion import MeanMotion
+from sopp.models.satellite.satellite import Satellite
+from sopp.models.satellite.tle_information import TleInformation
 
 
 class TestRhodesmillIntegration:

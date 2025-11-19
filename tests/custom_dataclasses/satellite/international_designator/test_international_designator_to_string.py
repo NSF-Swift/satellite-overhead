@@ -1,4 +1,4 @@
-from sopp.custom_dataclasses.satellite.international_designator import (
+from sopp.models.satellite.international_designator import (
     InternationalDesignator,
 )
 

@@ -1,15 +1,15 @@
 from dataclasses import replace
 from datetime import datetime, timezone
 
-from sopp.custom_dataclasses.coordinates import Coordinates
-from sopp.custom_dataclasses.facility import Facility
-from sopp.custom_dataclasses.position_time import PositionTime
-from sopp.custom_dataclasses.satellite.international_designator import (
+from sopp.models.coordinates import Coordinates
+from sopp.models.facility import Facility
+from sopp.models.position_time import PositionTime
+from sopp.models.satellite.international_designator import (
     InternationalDesignator,
 )
-from sopp.custom_dataclasses.satellite.mean_motion import MeanMotion
-from sopp.custom_dataclasses.satellite.satellite import Satellite
-from sopp.custom_dataclasses.satellite.tle_information import TleInformation
+from sopp.models.satellite.mean_motion import MeanMotion
+from sopp.models.satellite.satellite import Satellite
+from sopp.models.satellite.tle_information import TleInformation
 from sopp.event_finder.event_finder_rhodesmill.support.satellite_positions_with_respect_to_facility_retriever.satellite_positions_with_respect_to_facility_retriever_rhodesmill import (
     SatellitePositionsWithRespectToFacilityRetrieverRhodesmill,
 )

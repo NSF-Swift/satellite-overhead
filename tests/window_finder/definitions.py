@@ -1,5 +1,5 @@
-from sopp.custom_dataclasses.coordinates import Coordinates
-from sopp.custom_dataclasses.facility import Facility
+from sopp.models.coordinates import Coordinates
+from sopp.models.facility import Facility
 
 ARBITRARY_FACILITY = Facility(
     beamwidth=3.0,

@@ -2,8 +2,8 @@ from datetime import datetime, timezone
 
 import numpy as np
 import pytest
-from sopp.custom_dataclasses.position import Position
-from sopp.custom_dataclasses.position_time import PositionTime
+from sopp.models.position import Position
+from sopp.models.position_time import PositionTime
 from sopp.graph_generator.graph_polar import GraphGeneratorPolar
 
 observation_data = [

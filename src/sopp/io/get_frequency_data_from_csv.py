@@ -3,7 +3,7 @@ from collections import defaultdict
 from enum import Enum
 from pathlib import Path
 
-from sopp.custom_dataclasses.frequency_range.frequency_range import FrequencyRange
+from sopp.models.frequency_range import FrequencyRange
 
 
 class FrequencyCsvKeys(Enum):

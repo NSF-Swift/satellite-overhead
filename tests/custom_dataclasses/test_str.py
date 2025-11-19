@@ -1,11 +1,11 @@
-from sopp.custom_dataclasses.configuration import Configuration
-from sopp.custom_dataclasses.coordinates import Coordinates
-from sopp.custom_dataclasses.facility import Facility
-from sopp.custom_dataclasses.frequency_range.frequency_range import FrequencyRange
-from sopp.custom_dataclasses.reservation import Reservation
-from sopp.custom_dataclasses.runtime_settings import RuntimeSettings
-from sopp.custom_dataclasses.satellite.satellite import Satellite
-from sopp.custom_dataclasses.time_window import TimeWindow
+from sopp.models.configuration import Configuration
+from sopp.models.coordinates import Coordinates
+from sopp.models.facility import Facility
+from sopp.models.frequency_range import FrequencyRange
+from sopp.models.reservation import Reservation
+from sopp.models.runtime_settings import RuntimeSettings
+from sopp.models.satellite.satellite import Satellite
+from sopp.models.time_window import TimeWindow
 
 
 class TestCustomDataclassStr:
