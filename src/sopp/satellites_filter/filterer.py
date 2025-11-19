@@ -1,6 +1,7 @@
-from typing import Callable, List, TypeVar, Any, Optional
+from collections.abc import Callable
+from typing import TypeVar
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class Filterer:
@@ -31,12 +32,14 @@ class Filterer:
     """
 
     def __init__(self):
-        self._filters: List[T] = []
+        self._filters: list[T] = []
 
     def add_filter(self, filter_lambda: Callable[[T], bool]):
         if filter_lambda:
             self._filters.append(filter_lambda)
         return self
 
-    def apply_filters(self, elements: List[T]):
-        return [element for element in elements if all(f(element) for f in self._filters)]
+    def apply_filters(self, elements: list[T]):
+        return [
+            element for element in elements if all(f(element) for f in self._filters)
+        ]

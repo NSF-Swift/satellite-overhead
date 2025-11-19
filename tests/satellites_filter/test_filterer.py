@@ -3,29 +3,19 @@ from sopp.satellites_filter.filterer import Filterer
 
 class TestFilterer:
     def test_add_filter(self):
-        filterer = (
-            Filterer()
-            .add_filter(lambda x: x % 2)
-        )
+        filterer = Filterer().add_filter(lambda x: x % 2)
 
         assert len(filterer._filters) == 1
 
     def test_add_none_filter(self):
         values = [1, 2]
-        actual = (
-            Filterer()
-            .add_filter(None)
-            .apply_filters(values)
-        )
+        actual = Filterer().add_filter(None).apply_filters(values)
 
         assert actual == [1, 2]
 
     def test_no_filters(self):
         values = [1, 2]
-        actual = (
-            Filterer()
-            .apply_filters(values)
-        )
+        actual = Filterer().apply_filters(values)
 
         assert actual == [1, 2]
 
@@ -41,7 +31,7 @@ class TestFilterer:
             .apply_filters(values)
         )
 
-        assert actual == [ 42, 44 ]
+        assert actual == [42, 44]
 
     def test_apply_filter(self):
         values = [1, 12, 16, 40, 42, 43, 44, 45, 47, 48, 50]
@@ -53,4 +43,4 @@ class TestFilterer:
             .apply_filters(values)
         )
 
-        assert actual == [ 42, 44 ]
+        assert actual == [42, 44]

@@ -1,12 +1,12 @@
 from dataclasses import dataclass, field
 from datetime import timedelta
 
-'''
+"""
 The RuntimeSettings class stores the run time settings used in EventFinderRhodesMill
   + time_continutity_resolution: The time step resolution used to calculate satellite positions. (Default 1 second)
   + concurrency_level: The number of cores to use for multiprocessing the satellite position calculations. (Default 2)
   + min_altitude: The minimum altitude that a satellite must be to be considered above horizon. (Default 0.0)
-'''
+"""
 
 
 @dataclass
@@ -17,12 +17,14 @@ class RuntimeSettings:
 
     def __post_init__(self):
         if isinstance(self.time_continuity_resolution, int):
-            self.time_continuity_resolution = timedelta(seconds=self.time_continuity_resolution)
+            self.time_continuity_resolution = timedelta(
+                seconds=self.time_continuity_resolution
+            )
 
     def __str__(self):
         return (
-            f'{self.__class__.__name__}:\n'
-            f'  Time Interval:      {self.time_continuity_resolution}\n'
-            f'  Concurrency:        {self.concurrency_level}'
-            f'  Min. Altitude:      {self.min_altitude}'
+            f"{self.__class__.__name__}:\n"
+            f"  Time Interval:      {self.time_continuity_resolution}\n"
+            f"  Concurrency:        {self.concurrency_level}"
+            f"  Min. Altitude:      {self.min_altitude}"
         )

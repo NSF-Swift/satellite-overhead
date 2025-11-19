@@ -1,46 +1,68 @@
 from dataclasses import replace
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from functools import cached_property
-from typing import List
 
-from sopp.custom_dataclasses.position_time import PositionTime
 from sopp.custom_dataclasses.position import Position
-from sopp.custom_dataclasses.time_window import TimeWindow
-from sopp.event_finder.event_finder_rhodesmill.support.satellites_interference_filter import SatellitesWithinMainBeamFilter, \
-    AntennaPosition, SatellitesInterferenceFilter
+from sopp.custom_dataclasses.position_time import PositionTime
+from sopp.event_finder.event_finder_rhodesmill.support.satellites_interference_filter import (
+    AntennaPosition,
+    SatellitesInterferenceFilter,
+    SatellitesWithinMainBeamFilter,
+)
+
 from tests.definitions import SMALL_EPSILON
-from tests.event_finder.event_finder_rhodesmill.definitions import ARBITRARY_ANTENNA_POSITION, ARBITRARY_FACILITY
+from tests.event_finder.event_finder_rhodesmill.definitions import (
+    ARBITRARY_ANTENNA_POSITION,
+    ARBITRARY_FACILITY,
+)
 
 
 class TestSatellitesWithinMainBeamAltitude:
     def test_one_satellite_position_below_beamwidth_altitude(self):
-        self._run_test(altitude=ARBITRARY_ANTENNA_POSITION.position.altitude - self._value_slightly_larger_than_half_beamwidth,
-                       expected_windows=[])
+        self._run_test(
+            altitude=ARBITRARY_ANTENNA_POSITION.position.altitude
+            - self._value_slightly_larger_than_half_beamwidth,
+            expected_windows=[],
+        )
 
     def test_one_satellite_position_above_beamwidth_altitude(self):
-        altitude = ARBITRARY_ANTENNA_POSITION.position.altitude + self._value_slightly_larger_than_half_beamwidth
+        altitude = (
+            ARBITRARY_ANTENNA_POSITION.position.altitude
+            + self._value_slightly_larger_than_half_beamwidth
+        )
 
         self._run_test(
             altitude=altitude,
-            expected_windows=[[
-                PositionTime(
-                    position=Position(altitude=altitude, azimuth=100),
-                    time=ARBITRARY_ANTENNA_POSITION.time
-                )
-            ]]
+            expected_windows=[
+                [
+                    PositionTime(
+                        position=Position(altitude=altitude, azimuth=100),
+                        time=ARBITRARY_ANTENNA_POSITION.time,
+                    )
+                ]
+            ],
         )
 
-    def _run_test(self, altitude: float, expected_windows: List[PositionTime]) -> None:
+    def _run_test(self, altitude: float, expected_windows: list[PositionTime]) -> None:
         satellite_positions = [
-            replace(ARBITRARY_ANTENNA_POSITION,
-                    position=replace(ARBITRARY_ANTENNA_POSITION.position, altitude=altitude))
+            replace(
+                ARBITRARY_ANTENNA_POSITION,
+                position=replace(
+                    ARBITRARY_ANTENNA_POSITION.position, altitude=altitude
+                ),
+            )
         ]
-        slew = SatellitesInterferenceFilter(facility=ARBITRARY_FACILITY,
-                                              antenna_positions=[
-                                                  AntennaPosition(satellite_positions=satellite_positions,
-                                                                  antenna_direction=ARBITRARY_ANTENNA_POSITION)],
-                                              cutoff_time=self._arbitrary_cutoff_time,
-                                              filter_strategy=SatellitesWithinMainBeamFilter)
+        slew = SatellitesInterferenceFilter(
+            facility=ARBITRARY_FACILITY,
+            antenna_positions=[
+                AntennaPosition(
+                    satellite_positions=satellite_positions,
+                    antenna_direction=ARBITRARY_ANTENNA_POSITION,
+                )
+            ],
+            cutoff_time=self._arbitrary_cutoff_time,
+            filter_strategy=SatellitesWithinMainBeamFilter,
+        )
         windows = slew.run()
         assert windows == expected_windows
 

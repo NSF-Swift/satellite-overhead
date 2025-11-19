@@ -1,11 +1,10 @@
-from sopp.custom_dataclasses.facility import Facility
 from sopp.custom_dataclasses.coordinates import Coordinates
-from sopp.custom_dataclasses.time_window import TimeWindow
-from sopp.custom_dataclasses.reservation import Reservation
+from sopp.custom_dataclasses.facility import Facility
 from sopp.custom_dataclasses.frequency_range.frequency_range import FrequencyRange
-from sopp.utilities import parse_time_and_convert_to_utc
-
+from sopp.custom_dataclasses.reservation import Reservation
+from sopp.custom_dataclasses.time_window import TimeWindow
 from sopp.tardys4_generator import Tardys4Generator
+from sopp.utilities import parse_time_and_convert_to_utc
 
 
 class TestTards4Generator:
@@ -16,11 +15,11 @@ class TestTards4Generator:
                 longitude=-121.4695413,
             ),
             elevation=986,
-            name='HCRO',
+            name="HCRO",
         )
 
-        begin = parse_time_and_convert_to_utc('2024-03-14T09:00:00.000000')
-        end = parse_time_and_convert_to_utc('2024-03-14T12:30:00.000000')
+        begin = parse_time_and_convert_to_utc("2024-03-14T09:00:00.000000")
+        end = parse_time_and_convert_to_utc("2024-03-14T12:30:00.000000")
 
         time_window = TimeWindow(
             begin=begin,
@@ -30,7 +29,7 @@ class TestTards4Generator:
         reservation = Reservation(
             facility=facility,
             time=time_window,
-            frequency=FrequencyRange(frequency=1575, bandwidth=20)
+            frequency=FrequencyRange(frequency=1575, bandwidth=20),
         )
 
         generator = Tardys4Generator(
@@ -62,9 +61,9 @@ class TestTards4Generator:
                     "freqStop": 1585000000,
                     "regionSize": 3,
                     "regionX": 90,
-                    "regionY": 45
+                    "regionY": 45,
                 }
-            ]
+            ],
         }
 
         assert actual == expected

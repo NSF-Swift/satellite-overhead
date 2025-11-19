@@ -1,7 +1,7 @@
-from typing import List, Optional
 from functools import cached_property
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
 
 from sopp.custom_dataclasses.position_time import PositionTime
 
@@ -38,14 +38,18 @@ class GraphGeneratorPolar:
     generator.generate_graph()
     """
 
-    def __init__(self, observation_data: List[PositionTime], sat_name: Optional[str] = 'Satellite'):
+    def __init__(
+        self,
+        observation_data: list[PositionTime],
+        sat_name: str | None = "Satellite",
+    ):
         self._observation_data = observation_data
         self._sat_name = sat_name
-        self._label = 'Satellite Alt-Az'
+        self._label = "Satellite Alt-Az"
 
     def generate_graph(self):
         fig = plt.figure(figsize=(8, 8))
-        ax = fig.add_subplot(111, projection='polar')
+        ax = fig.add_subplot(111, projection="polar")
 
         self._annotate_start_end_times(ax)
         self._annotate_max_alt(ax)
@@ -55,7 +59,7 @@ class GraphGeneratorPolar:
 
         # setup the polar graph so North is at the top
         # and that altitude increases from edge of graph to center
-        ax.set_theta_zero_location('N')
+        ax.set_theta_zero_location("N")
         ax.set_theta_direction(-1)
         ax.set_rlabel_position(270)
         ax.set_rlim(bottom=90, top=0)
@@ -71,28 +75,40 @@ class GraphGeneratorPolar:
         annotate_indices = [0, -1]
         for idx in annotate_indices:
             ax.annotate(
-                self._time_values[idx].strftime('%H:%M:%S'),
+                self._time_values[idx].strftime("%H:%M:%S"),
                 (self._azimuth_values[idx], self._altitude_values[idx]),
-                ha='center',
-                va='top',
+                ha="center",
+                va="top",
             )
-            ax.plot(self._azimuth_values[idx], self._altitude_values[idx], marker='+', markersize=10, color='red')
+            ax.plot(
+                self._azimuth_values[idx],
+                self._altitude_values[idx],
+                marker="+",
+                markersize=10,
+                color="red",
+            )
 
     def _annotate_max_alt(self, ax):
         idx = np.argmax(self._altitude_values)
         ax.annotate(
             f'Max Alt: {self._altitude_values[idx]:.2f} at {self._time_values[idx].strftime("%H:%M:%S")}',
             (self._azimuth_values[idx], self._altitude_values[idx]),
-            ha='center',
-            va='top'
+            ha="center",
+            va="top",
         )
-        ax.plot(self._azimuth_values[idx], self._altitude_values[idx], marker='+', markersize=10, color='red')
+        ax.plot(
+            self._azimuth_values[idx],
+            self._altitude_values[idx],
+            marker="+",
+            markersize=10,
+            color="red",
+        )
 
     @cached_property
     def _title(self):
         start_time = self._time_values[0].strftime("%Y-%m-%d %H:%M:%S")
         end_time = self._time_values[-1].strftime("%H:%M:%S UTC")
-        title = f'{self._sat_name} {start_time} - {end_time}'
+        title = f"{self._sat_name} {start_time} - {end_time}"
 
         return title
 

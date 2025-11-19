@@ -1,20 +1,19 @@
-import pytest
-
 from datetime import datetime, timezone
 
+import pytest
 from sopp.builder.configuration_builder import ConfigurationBuilder
 from sopp.custom_dataclasses.configuration import Configuration
 from sopp.custom_dataclasses.configuration_file import ConfigurationFile
-from sopp.custom_dataclasses.reservation import Reservation
+from sopp.custom_dataclasses.coordinates import Coordinates
 from sopp.custom_dataclasses.facility import Facility
 from sopp.custom_dataclasses.frequency_range.frequency_range import FrequencyRange
-from sopp.custom_dataclasses.coordinates import Coordinates
 from sopp.custom_dataclasses.observation_target import ObservationTarget
 from sopp.custom_dataclasses.position import Position
-from sopp.custom_dataclasses.runtime_settings import RuntimeSettings
-from sopp.custom_dataclasses.time_window import TimeWindow
-from sopp.custom_dataclasses.satellite.satellite import Satellite
 from sopp.custom_dataclasses.position_time import PositionTime
+from sopp.custom_dataclasses.reservation import Reservation
+from sopp.custom_dataclasses.runtime_settings import RuntimeSettings
+from sopp.custom_dataclasses.satellite.satellite import Satellite
+from sopp.custom_dataclasses.time_window import TimeWindow
 from sopp.satellites_filter.filterer import Filterer
 
 
@@ -25,14 +24,14 @@ class TestConfigurationBuilder:
             latitude=40,
             longitude=-121,
             elevation=100,
-            name='HCRO',
+            name="HCRO",
             beamwidth=3,
         )
         assert builder.facility == Facility(
             Coordinates(latitude=40, longitude=-121),
             elevation=100,
             beamwidth=3,
-            name='HCRO',
+            name="HCRO",
         )
 
     def test_set_frequency_range(self):
@@ -52,12 +51,12 @@ class TestConfigurationBuilder:
     def test_set_observation_target(self):
         builder = ConfigurationBuilder()
         builder.set_observation_target(
-            declination='1d1m1s',
-            right_ascension='1h1m1s',
+            declination="1d1m1s",
+            right_ascension="1h1m1s",
         )
         assert builder._observation_target == ObservationTarget(
-            declination='1d1m1s',
-            right_ascension='1h1m1s',
+            declination="1d1m1s",
+            right_ascension="1h1m1s",
         )
 
     def test_set_observation_target_static(self):
@@ -77,10 +76,7 @@ class TestConfigurationBuilder:
 
     def test_set_runtime_settings(self):
         builder = ConfigurationBuilder()
-        builder.set_runtime_settings(
-            concurrency_level=1,
-            time_continuity_resolution=1
-        )
+        builder.set_runtime_settings(concurrency_level=1, time_continuity_resolution=1)
 
         assert builder.runtime_settings == RuntimeSettings(
             concurrency_level=1,
@@ -90,8 +86,8 @@ class TestConfigurationBuilder:
     def test_set_time_window_str(self):
         builder = ConfigurationBuilder()
         builder.set_time_window(
-            begin='2023-11-15T08:00:00.0',
-            end='2023-11-15T08:30:00.0',
+            begin="2023-11-15T08:00:00.0",
+            end="2023-11-15T08:30:00.0",
         )
 
         assert builder.time_window == TimeWindow(
@@ -114,33 +110,30 @@ class TestConfigurationBuilder:
     def test_set_satellites(self, monkeypatch):
         mock_satellite_loader(monkeypatch)
         builder = ConfigurationBuilder()
-        builder.set_satellites("/mock/tle", 'mock/frequency')
+        builder.set_satellites("/mock/tle", "mock/frequency")
 
-        assert builder.satellites == [ Satellite(name='TestSatellite') ]
+        assert builder.satellites == [Satellite(name="TestSatellite")]
 
     def test_set_satellites_filter(self, monkeypatch):
         mock_satellite_loader(monkeypatch)
         builder = ConfigurationBuilder()
-        builder.satellites = [ Satellite(name='TestSatellite') ]
-        filterer = (
-            Filterer()
-            .add_filter(lambda sat: 'Test' not in sat.name)
-        )
+        builder.satellites = [Satellite(name="TestSatellite")]
+        filterer = Filterer().add_filter(lambda sat: "Test" not in sat.name)
         builder.set_satellites_filter(filterer)
         builder._filter_satellites()
 
     def test_add_satellites_filter(self, monkeypatch):
         mock_satellite_loader(monkeypatch)
         builder = ConfigurationBuilder()
-        builder.satellites = [ Satellite(name='TestSatellite') ]
-        builder.add_filter(lambda sat: 'Test' not in sat.name)
+        builder.satellites = [Satellite(name="TestSatellite")]
+        builder.add_filter(lambda sat: "Test" not in sat.name)
         builder._filter_satellites()
 
         assert builder.satellites == []
 
     def test_build_antenna_direction_path_target(self):
         builder = ConfigurationBuilder(path_finder_class=StubPathFinder)
-        builder._observation_target = 'mock'
+        builder._observation_target = "mock"
         builder._build_antenna_direction_path()
 
         assert builder._antenna_direction_path == [expected_position_time()]
@@ -149,8 +142,8 @@ class TestConfigurationBuilder:
         builder = ConfigurationBuilder()
         builder._static_observation_target = expected_position_time().position
         builder.set_time_window(
-            begin='2023-11-15T08:00:00.0',
-            end='2023-11-15T08:30:00.0',
+            begin="2023-11-15T08:00:00.0",
+            end="2023-11-15T08:30:00.0",
         )
         builder._build_antenna_direction_path()
 
@@ -176,8 +169,8 @@ class TestConfigurationBuilder:
                 config_file_loader_class=StubConfigFileLoader,
                 path_finder_class=StubPathFinder,
             )
-            .set_from_config_file(config_file='mock/path')
-            .set_satellites(tle_file='./path/satellites.tle')
+            .set_from_config_file(config_file="mock/path")
+            .set_satellites(tle_file="./path/satellites.tle")
             .build()
         )
 
@@ -185,7 +178,7 @@ class TestConfigurationBuilder:
             reservation=expected_reservation(),
             runtime_settings=RuntimeSettings(),
             antenna_direction_path=[expected_position_time()],
-            satellites=[Satellite(name='TestSatellite')]
+            satellites=[Satellite(name="TestSatellite")],
         )
 
     def test_build(self, monkeypatch):
@@ -196,19 +189,13 @@ class TestConfigurationBuilder:
                 latitude=1,
                 longitude=-1,
                 elevation=1,
-                name='HCRO',
+                name="HCRO",
                 beamwidth=3,
             )
             .set_frequency_range(bandwidth=10, frequency=135)
-            .set_time_window(
-                begin='2023-11-15T08:00:00.0',
-                end='2023-11-15T08:30:00.0'
-            )
-            .set_observation_target(
-                declination='1d1m1s',
-                right_ascension='1h1m1s'
-            )
-            .set_satellites(tle_file='./path/satellites.tle')
+            .set_time_window(begin="2023-11-15T08:00:00.0", end="2023-11-15T08:30:00.0")
+            .set_observation_target(declination="1d1m1s", right_ascension="1h1m1s")
+            .set_satellites(tle_file="./path/satellites.tle")
             .build()
         )
 
@@ -216,36 +203,42 @@ class TestConfigurationBuilder:
             reservation=expected_reservation(),
             runtime_settings=RuntimeSettings(),
             antenna_direction_path=[expected_position_time()],
-            satellites=[Satellite(name='TestSatellite')]
+            satellites=[Satellite(name="TestSatellite")],
         )
+
 
 class StubConfigFileLoader:
     def __init__(self, filepath):
         self.configuration = ConfigurationFile(
             reservation=expected_reservation(),
-            observation_target='target',
+            observation_target="target",
         )
+
 
 class StubPathFinder:
     def __init__(self, a, b, c):
         pass
+
     def calculate_path(self):
         return [expected_position_time()]
 
+
 def mock_satellite_loader(monkeypatch):
     def mock(tle_file, frequency_file=None):
-        return [ Satellite(name='TestSatellite') ]
+        return [Satellite(name="TestSatellite")]
 
     monkeypatch.setattr(
-        'sopp.satellites_loader.satellites_loader_from_files.SatellitesLoaderFromFiles.load_satellites',
-        mock
+        "sopp.satellites_loader.satellites_loader_from_files.SatellitesLoaderFromFiles.load_satellites",
+        mock,
     )
+
 
 def expected_position_time():
     return PositionTime(
-        position=Position(altitude=.0, azimuth=.1),
+        position=Position(altitude=0.0, azimuth=0.1),
         time=datetime(2023, 11, 15, 8, 0, tzinfo=timezone.utc),
     )
+
 
 def expected_reservation():
     return Reservation(
@@ -253,7 +246,7 @@ def expected_reservation():
             coordinates=Coordinates(longitude=-1, latitude=1),
             beamwidth=3,
             elevation=1,
-            name='HCRO'
+            name="HCRO",
         ),
         time=TimeWindow(
             begin=datetime(2023, 11, 15, 8, 0, tzinfo=timezone.utc),
@@ -262,5 +255,5 @@ def expected_reservation():
         frequency=FrequencyRange(
             bandwidth=10,
             frequency=135,
-        )
+        ),
     )

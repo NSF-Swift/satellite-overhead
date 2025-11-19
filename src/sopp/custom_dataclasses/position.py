@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -18,6 +17,7 @@ class Position:
       object and the observer in kilometers. If not provided, it is set to
       None.
     """
+
     altitude: float
     azimuth: float
-    distance_km: Optional[float] = None
+    distance_km: float | None = None

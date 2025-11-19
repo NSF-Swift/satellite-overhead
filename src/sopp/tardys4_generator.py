@@ -1,9 +1,8 @@
 import json
 import zlib
-from uuid import uuid4
 from datetime import datetime, timezone
-from typing import Optional, List, Dict
 from functools import cached_property
+from uuid import uuid4
 
 from sopp.custom_dataclasses.reservation import Reservation
 
@@ -26,8 +25,8 @@ class Tardys4Generator:
         reservation: Reservation,
         begin: datetime,
         end: datetime,
-        dpa_id: Optional[str] = None,
-        location_radius: float = 1
+        dpa_id: str | None = None,
+        location_radius: float = 1,
     ):
         self._reservation: Reservation = reservation
         self._begin: datetime = begin
@@ -37,14 +36,14 @@ class Tardys4Generator:
         self._loc_long: float = reservation.facility.coordinates.longitude
         self._elevation: float = reservation.facility.elevation
         self._region_size: int = reservation.facility.beamwidth
-        self._dpa_id: Optional[str] = dpa_id
+        self._dpa_id: str | None = dpa_id
 
     def write_to_file(self, filename: str = "tardys4_reservation.json"):
         with open(filename, "w") as f:
             json.dump(self.tardys4, f)
 
     @cached_property
-    def tardys4(self) -> Dict[str, any]:
+    def tardys4(self) -> dict[str, any]:
         return {
             "transactionId": self._transaction_id,
             "dateTimePublished": self._time,
@@ -54,7 +53,7 @@ class Tardys4Generator:
         }
 
     @property
-    def _scheduled_events(self) -> List[Dict[str, any]]:
+    def _scheduled_events(self) -> list[dict[str, any]]:
         return [
             {
                 "eventId": self._event_id,
