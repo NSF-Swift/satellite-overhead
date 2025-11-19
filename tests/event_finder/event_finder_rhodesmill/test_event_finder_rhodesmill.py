@@ -7,7 +7,7 @@ from sopp.models.position_time import PositionTime
 from sopp.models.reservation import Reservation
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.time_window import TimeWindow
-from sopp.event_finder.event_finder_rhodesmill.event_finder_rhodesmill import (
+from sopp.analysis.event_finders.rhodesmill import (
     EventFinderRhodesmill,
 )
 

@@ -1,6 +1,6 @@
 from sopp.models.frequency_range import FrequencyRange
 from sopp.models.satellite.satellite import Satellite
-from sopp.satellites_filter.filters import filter_frequency
+from sopp.satellite_selection.filters import filter_frequency
 
 
 class TestFrequencyFilter:

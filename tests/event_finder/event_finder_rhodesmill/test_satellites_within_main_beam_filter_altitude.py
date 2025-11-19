@@ -4,7 +4,7 @@ from functools import cached_property
 
 from sopp.models.position import Position
 from sopp.models.position_time import PositionTime
-from sopp.event_finder.event_finder_rhodesmill.support.satellites_interference_filter import (
+from sopp.analysis.event_finders.interference import (
     AntennaPosition,
     SatellitesInterferenceFilter,
     SatellitesWithinMainBeamFilter,

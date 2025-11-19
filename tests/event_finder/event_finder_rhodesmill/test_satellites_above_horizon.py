@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from sopp.models.position import Position
 from sopp.models.position_time import PositionTime
 from sopp.models.runtime_settings import RuntimeSettings
-from sopp.event_finder.event_finder_rhodesmill.support.satellites_interference_filter import (
+from sopp.analysis.event_finders.interference import (
     AntennaPosition,
     SatellitesAboveHorizonFilter,
     SatellitesInterferenceFilter,

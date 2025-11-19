@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 import pytest
-from sopp.builder.configuration_builder import ConfigurationBuilder
+from sopp.config.builder import ConfigurationBuilder
 from sopp.models.configuration import Configuration
 from sopp.models.configuration_file import ConfigurationFile
 from sopp.models.coordinates import Coordinates
@@ -14,7 +14,7 @@ from sopp.models.reservation import Reservation
 from sopp.models.runtime_settings import RuntimeSettings
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.time_window import TimeWindow
-from sopp.satellites_filter.filterer import Filterer
+from sopp.satellite_selection.filterer import Filterer
 
 
 class TestConfigurationBuilder:
@@ -228,7 +228,7 @@ def mock_satellite_loader(monkeypatch):
         return [Satellite(name="TestSatellite")]
 
     monkeypatch.setattr(
-        "sopp.satellites_loader.satellites_loader_from_files.SatellitesLoaderFromFiles.load_satellites",
+        "sopp.io.satellites_loader.SatellitesLoaderFromFiles.load_satellites",
         mock,
     )
 

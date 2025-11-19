@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
-from sopp.config_file_loader.config_file_loader_factory import get_config_file_object
+from sopp.config.factory import get_config_file_object
 from sopp.models.configuration_file import ConfigurationFile
 from sopp.models.coordinates import Coordinates
 from sopp.models.facility import Facility
@@ -13,7 +13,7 @@ from sopp.models.observation_target import ObservationTarget
 from sopp.models.position import Position
 from sopp.models.reservation import Reservation
 from sopp.models.time_window import TimeWindow
-from sopp.utilities import (
+from sopp.utils.helpers import (
     CONFIG_FILE_FILENAME_JSON,
     default_config_filepaths,
     get_script_directory,

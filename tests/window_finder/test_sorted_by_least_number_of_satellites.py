@@ -16,8 +16,8 @@ from sopp.models.satellite.mean_motion import MeanMotion
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.satellite.tle_information import TleInformation
 from sopp.models.time_window import TimeWindow
-from sopp.utilities import get_script_directory
-from sopp.window_finder import SuggestedReservation, WindowFinder
+from sopp.utils.helpers import get_script_directory
+from sopp.analysis.window_finder import SuggestedReservation, WindowFinder
 
 from tests.window_finder.definitions import ARBITRARY_FACILITY
 

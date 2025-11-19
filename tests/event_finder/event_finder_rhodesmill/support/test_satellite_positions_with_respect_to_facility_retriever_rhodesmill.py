@@ -10,7 +10,7 @@ from sopp.models.satellite.international_designator import (
 from sopp.models.satellite.mean_motion import MeanMotion
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.satellite.tle_information import TleInformation
-from sopp.event_finder.event_finder_rhodesmill.support.satellite_positions_with_respect_to_facility_retriever.satellite_positions_with_respect_to_facility_retriever_rhodesmill import (
+from sopp.positioning.rhodesmill import (
     SatellitePositionsWithRespectToFacilityRetrieverRhodesmill,
 )
 

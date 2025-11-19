@@ -5,7 +5,7 @@ from sopp.models.position_time import PositionTime
 from sopp.models.reservation import Reservation
 from sopp.models.runtime_settings import RuntimeSettings
 from sopp.models.satellite.satellite import Satellite
-from sopp.event_finder.event_finder_rhodesmill.support.satellite_positions_with_respect_to_facility_retriever.satellite_positions_with_respect_to_facility_retriever import (
+from sopp.positioning.rhodesmill import (
     SatellitePositionsWithRespectToFacilityRetriever,
 )
 

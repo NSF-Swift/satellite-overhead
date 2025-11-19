@@ -3,8 +3,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from sopp.config_file_loader.support.config_file_loader_base import ConfigFileLoaderBase
-from sopp.config_file_loader.support.config_file_loader_json import ConfigFileLoaderJson
+from sopp.config.base import ConfigFileLoaderBase
+from sopp.config.json_loader import ConfigFileLoaderJson
 from sopp.models.configuration import Configuration
 from sopp.models.coordinates import Coordinates
 from sopp.models.facility import Facility
@@ -16,12 +16,12 @@ from sopp.models.reservation import Reservation
 from sopp.models.runtime_settings import RuntimeSettings
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.time_window import TimeWindow
-from sopp.path_finder.observation_path_finder import ObservationPathFinder
-from sopp.path_finder.observation_path_finder_rhodesmill import (
+from sopp.analysis.path_finders.base import ObservationPathFinder
+from sopp.analysis.path_finders.rhodesmill import (
     ObservationPathFinderRhodesmill,
 )
-from sopp.satellites_filter.filterer import Filterer
-from sopp.satellites_loader.satellites_loader_from_files import (
+from sopp.satellite_selection.filterer import Filterer
+from sopp.io.satellites_loader import (
     SatellitesLoaderFromFiles,
 )
 from sopp.utils.helpers import parse_time_and_convert_to_utc

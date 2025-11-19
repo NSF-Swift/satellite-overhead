@@ -4,7 +4,7 @@ import types
 from pathlib import Path
 
 from skyfield.api import load
-from sopp.utilities import get_script_directory
+from sopp.utils.helpers import get_script_directory
 
 from tests.custom_dataclasses.satellite.utilities import (
     expected_international_space_station_tle_as_satellite_cu,

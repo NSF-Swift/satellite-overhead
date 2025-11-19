@@ -6,17 +6,17 @@ from sopp.models.reservation import Reservation
 from sopp.models.runtime_settings import RuntimeSettings
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.time_window import TimeWindow
-from sopp.event_finder.event_finder import EventFinder
-from sopp.event_finder.event_finder_rhodesmill.support.evenly_spaced_time_intervals_calculator import (
+from sopp.analysis.event_finders.base import EventFinder
+from sopp.utils.time import (
     EvenlySpacedTimeIntervalsCalculator,
 )
-from sopp.event_finder.event_finder_rhodesmill.support.satellite_positions_with_respect_to_facility_retriever.satellite_positions_with_respect_to_facility_retriever import (
+from sopp.positioning.rhodesmill import (
     SatellitePositionsWithRespectToFacilityRetriever,
 )
-from sopp.event_finder.event_finder_rhodesmill.support.satellite_positions_with_respect_to_facility_retriever.satellite_positions_with_respect_to_facility_retriever_rhodesmill import (
+from sopp.positioning.rhodesmill import (
     SatellitePositionsWithRespectToFacilityRetrieverRhodesmill,
 )
-from sopp.event_finder.event_finder_rhodesmill.support.satellites_interference_filter import (
+from sopp.analysis.event_finders.interference import (
     AntennaPosition,
     SatellitesAboveHorizonFilter,
     SatellitesInterferenceFilter,

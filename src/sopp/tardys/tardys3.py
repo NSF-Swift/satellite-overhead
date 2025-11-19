@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 
-from sopp.window_finder import SuggestedReservation
+from sopp.analysis.window_finder import SuggestedReservation
 
 
 class Tardys3Generator:

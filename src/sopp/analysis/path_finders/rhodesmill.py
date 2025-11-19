@@ -10,7 +10,7 @@ from sopp.models.observation_target import ObservationTarget
 from sopp.models.position import Position
 from sopp.models.position_time import PositionTime
 from sopp.models.time_window import TimeWindow
-from sopp.path_finder.observation_path_finder import ObservationPathFinder
+from sopp.analysis.path_finders.base import ObservationPathFinder
 
 
 class ObservationPathFinderRhodesmill(ObservationPathFinder):

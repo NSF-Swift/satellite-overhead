@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from sopp.config_file_loader.support.config_file_loader_base import ConfigFileLoaderBase
-from sopp.config_file_loader.support.config_file_loader_json import ConfigFileLoaderJson
-from sopp.utilities import get_default_config_file_filepath
+from sopp.config.base import ConfigFileLoaderBase
+from sopp.config.json_loader import ConfigFileLoaderJson
+from sopp.utils.helpers import get_default_config_file_filepath
 
 
 def get_config_file_object(

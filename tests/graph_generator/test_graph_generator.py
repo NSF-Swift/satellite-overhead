@@ -6,14 +6,14 @@ from numpy.ma import allequal
 from sopp.models.overhead_window import OverheadWindow
 from sopp.models.position import Position
 from sopp.models.position_time import PositionTime
-from sopp.graph_generator import graph_generator
-from sopp.graph_generator.graph_generator import GraphGenerator
+from sopp.reporting import generator
+from sopp.reporting.generator import GraphGenerator
 
 
 class TestGraphGenerator:
     @pytest.fixture(autouse=True)
     def _set_mock_pyplot(self, mocker):
-        self._mock_pyplot = mocker.patch.object(graph_generator, "plt")
+        self._mock_pyplot = mocker.patch.object(generator, "plt")
 
     def test_generate_graph(self):
         GraphGenerator(

@@ -3,7 +3,7 @@ from sopp.models.coordinates import Coordinates
 from sopp.models.facility import Facility
 from sopp.models.observation_target import ObservationTarget
 from sopp.models.time_window import TimeWindow
-from sopp.utilities import read_datetime_string_as_utc
+from sopp.utils.helpers import read_datetime_string_as_utc
 
 
 class PathFinderBaseTest:

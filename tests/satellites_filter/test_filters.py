@@ -2,7 +2,7 @@ import pytest
 from sopp.models.satellite.mean_motion import MeanMotion
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.satellite.tle_information import TleInformation
-from sopp.satellites_filter.filters import (
+from sopp.satellite_selection.filters import (
     filter_name_contains,
     filter_name_does_not_contain,
     filter_name_is,

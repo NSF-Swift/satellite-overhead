@@ -1,7 +1,7 @@
 import json
 from functools import cached_property
 
-from sopp.config_file_loader.support.config_file_loader_base import ConfigFileLoaderBase
+from sopp.config.base import ConfigFileLoaderBase
 from sopp.models.configuration_file import ConfigurationFile
 from sopp.models.coordinates import Coordinates
 from sopp.models.facility import Facility

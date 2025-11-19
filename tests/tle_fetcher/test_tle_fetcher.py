@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 import requests
-from sopp.tle_fetcher.tle_fetcher_celestrak import TleFetcherCelestrak
-from sopp.tle_fetcher.tle_fetcher_spacetrack import TleFetcherSpacetrack
+from sopp.io.tle_fetcher import TleFetcherCelestrak
+from sopp.io.tle_fetcher import TleFetcherSpacetrack
 
 
 class MockRequestResponse:

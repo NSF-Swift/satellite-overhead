@@ -1,7 +1,7 @@
 from dataclasses import replace
 from datetime import timedelta
 
-from sopp.event_finder.event_finder_rhodesmill.support.satellites_interference_filter import (
+from sopp.analysis.event_finders.interference import (
     AntennaPosition,
     SatellitesInterferenceFilter,
     SatellitesWithinMainBeamFilter,

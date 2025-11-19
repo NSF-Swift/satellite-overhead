@@ -7,7 +7,7 @@ from sopp.models.satellite.international_designator import (
 from sopp.models.satellite.mean_motion import MeanMotion
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.satellite.tle_information import TleInformation
-from sopp.satellites_loader.satellites_loader_from_files import (
+from sopp.io.satellites_loader import (
     SatellitesLoaderFromFiles,
 )
 

@@ -3,8 +3,8 @@ from sopp.models.facility import Facility
 from sopp.models.frequency_range import FrequencyRange
 from sopp.models.reservation import Reservation
 from sopp.models.time_window import TimeWindow
-from sopp.tardys4_generator import Tardys4Generator
-from sopp.utilities import parse_time_and_convert_to_utc
+from sopp.tardys.tardys4 import Tardys4Generator
+from sopp.utils.helpers import parse_time_and_convert_to_utc
 
 
 class TestTards4Generator:

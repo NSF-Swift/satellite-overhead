@@ -3,8 +3,8 @@ from functools import cached_property
 
 from sopp.models.configuration import Configuration
 from sopp.models.overhead_window import OverheadWindow
-from sopp.event_finder.event_finder import EventFinder
-from sopp.event_finder.event_finder_rhodesmill.event_finder_rhodesmill import (
+from sopp.analysis.event_finders.base import EventFinder
+from sopp.analysis.event_finders.rhodesmill import (
     EventFinderRhodesmill,
 )
 

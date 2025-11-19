@@ -2,8 +2,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
-from sopp.config_file_loader.config_file_loader_factory import get_config_file_object
-from sopp.config_file_loader.support.config_file_loader_base import ConfigFileLoaderBase
+from sopp.config.factory import get_config_file_object
+from sopp.config.base import ConfigFileLoaderBase
 from sopp.models.configuration_file import ConfigurationFile
 from sopp.models.coordinates import Coordinates
 from sopp.models.facility import Facility
@@ -14,7 +14,7 @@ from sopp.models.position_time import PositionTime
 from sopp.models.reservation import Reservation
 from sopp.models.runtime_settings import RuntimeSettings
 from sopp.models.time_window import TimeWindow
-from sopp.utilities import get_script_directory
+from sopp.utils.helpers import get_script_directory
 
 
 class TestConfigFileProvidedArgument:

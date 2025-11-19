@@ -4,7 +4,7 @@ from sopp.models.frequency_range import FrequencyRange
 from sopp.io.get_frequency_data_from_csv import (
     GetFrequencyDataFromCsv,
 )
-from sopp.utilities import get_script_directory
+from sopp.utils.helpers import get_script_directory
 
 
 class TestFromCsv:

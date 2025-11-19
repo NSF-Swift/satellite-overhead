@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 import pytest
-from sopp.utilities import parse_time_and_convert_to_utc, read_datetime_string_as_utc
+from sopp.utils.helpers import parse_time_and_convert_to_utc, read_datetime_string_as_utc
 
 
 class TestDatetimeUtilities:
