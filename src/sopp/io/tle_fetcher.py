@@ -1,13 +1,12 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-
 import requests
 
-from sopp.utilities import get_satellites_filepath
+from sopp.utils.helpers import get_satellites_filepath
 
 
 class TleFetcherBase(ABC):
-    def __init__(self, tle_file_path: str = None):
+    def __init__(self, tle_file_path: str | None = None):
         self._tle_file_path = (
             Path(tle_file_path)
             if tle_file_path is not None
@@ -35,3 +34,24 @@ class TleFetcherBase(ABC):
         self._tle_file_path.parent.mkdir(parents=True, exist_ok=True)
         with open(self._tle_file_path, "wb") as f:
             f.write(content)
+
+
+class TleFetcherCelestrak(TleFetcherBase):
+    def _fetch_content(self):
+        url = "https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle"
+        return requests.get(url=url, allow_redirects=True)
+
+
+class TleFetcherSpacetrack(TleFetcherBase):
+    def _fetch_content(self):
+        import os
+        from dotenv import load_dotenv
+
+        load_dotenv()
+        IDENTITY = os.getenv("IDENTITY")
+        PASSWORD = os.getenv("PASSWORD")
+
+        url = "https://www.space-track.org/ajaxauth/login"
+        query = "https://www.space-track.org/basicspacedata/query/class/gp/decay_date/null-val/epoch/%3Enow-30/orderby/norad_cat_id/format/3le"
+        data = {"identity": IDENTITY, "password": PASSWORD, "query": query}
+        return requests.post(url=url, data=data)

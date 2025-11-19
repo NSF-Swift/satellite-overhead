@@ -1,11 +1,17 @@
 from dataclasses import replace
 from functools import cached_property
+from abc import ABC, abstractmethod
 
 from sopp.io.get_frequency_data_from_csv import (
     GetFrequencyDataFromCsv,
 )
 from sopp.models.satellite.satellite import Satellite
-from sopp.satellites_loader.satellites_loader import SatellitesLoader
+
+
+class SatellitesLoader(ABC):
+    @abstractmethod
+    def load_satellites(self) -> list[Satellite]:
+        pass
 
 
 class SatellitesLoaderFromFiles(SatellitesLoader):

@@ -12,7 +12,7 @@ from sopp.models.position_time import PositionTime
 from sopp.models.reservation import Reservation
 from sopp.models.runtime_settings import RuntimeSettings
 from sopp.models.time_window import TimeWindow
-from sopp.utilities import read_datetime_string_as_utc
+from sopp.utils.helpers import read_datetime_string_as_utc
 
 
 class ConfigFileLoaderJson(ConfigFileLoaderBase):

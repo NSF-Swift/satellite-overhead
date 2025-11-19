@@ -24,7 +24,7 @@ from sopp.satellites_filter.filterer import Filterer
 from sopp.satellites_loader.satellites_loader_from_files import (
     SatellitesLoaderFromFiles,
 )
-from sopp.utilities import parse_time_and_convert_to_utc
+from sopp.utils.helpers import parse_time_and_convert_to_utc
 
 
 class ConfigurationBuilder:
