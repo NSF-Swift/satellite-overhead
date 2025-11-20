@@ -2,7 +2,6 @@ from functools import cached_property
 
 import matplotlib.pyplot as plt
 import numpy as np
-
 from sopp.models.position_time import PositionTime
 
 

@@ -1,26 +1,24 @@
 import multiprocessing
 
+from sopp.analysis.event_finders.base import EventFinder
+from sopp.analysis.event_finders.interference import (
+    AntennaPosition,
+    SatellitesAboveHorizonFilter,
+    SatellitesInterferenceFilter,
+    SatellitesWithinMainBeamFilter,
+)
 from sopp.models.overhead_window import OverheadWindow
 from sopp.models.position_time import PositionTime
 from sopp.models.reservation import Reservation
 from sopp.models.runtime_settings import RuntimeSettings
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.time_window import TimeWindow
-from sopp.analysis.event_finders.base import EventFinder
-from sopp.utils.time import (
-    EvenlySpacedTimeIntervalsCalculator,
-)
 from sopp.positioning.rhodesmill import (
     SatellitePositionsWithRespectToFacilityRetriever,
-)
-from sopp.positioning.rhodesmill import (
     SatellitePositionsWithRespectToFacilityRetrieverRhodesmill,
 )
-from sopp.analysis.event_finders.interference import (
-    AntennaPosition,
-    SatellitesAboveHorizonFilter,
-    SatellitesInterferenceFilter,
-    SatellitesWithinMainBeamFilter,
+from sopp.utils.time import (
+    EvenlySpacedTimeIntervalsCalculator,
 )
 
 

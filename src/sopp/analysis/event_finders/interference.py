@@ -6,6 +6,7 @@ from functools import cached_property
 from math import isclose
 
 import numpy
+
 from sopp.models.facility import Facility
 from sopp.models.position import Position
 from sopp.models.position_time import PositionTime

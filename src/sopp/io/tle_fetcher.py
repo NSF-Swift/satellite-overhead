@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
+
 import requests
 
 from sopp.utils.helpers import get_satellites_filepath
@@ -45,6 +46,7 @@ class TleFetcherCelestrak(TleFetcherBase):
 class TleFetcherSpacetrack(TleFetcherBase):
     def _fetch_content(self):
         import os
+
         from dotenv import load_dotenv
 
         load_dotenv()

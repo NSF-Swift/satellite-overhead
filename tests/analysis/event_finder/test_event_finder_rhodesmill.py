@@ -1,5 +1,8 @@
 from datetime import datetime, timedelta, timezone
 
+from sopp.analysis.event_finders.rhodesmill import (
+    EventFinderRhodesmill,
+)
 from sopp.models.coordinates import Coordinates
 from sopp.models.facility import Facility
 from sopp.models.position import Position
@@ -7,14 +10,11 @@ from sopp.models.position_time import PositionTime
 from sopp.models.reservation import Reservation
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.time_window import TimeWindow
-from sopp.analysis.event_finders.rhodesmill import (
-    EventFinderRhodesmill,
-)
 
-from tests.definitions import SMALL_EPSILON
 from tests.analysis.event_finder.definitions import (
     create_overhead_window,
 )
+from tests.definitions import SMALL_EPSILON
 
 ARBITRARY_SATELLITE_ALTITUDE = 0
 ARBITRARY_SATELLITE_AZIMUTH = 0

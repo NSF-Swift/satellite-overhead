@@ -1,9 +1,9 @@
 import pytest
 from path_finder_base_test import PathFinderBaseTest
-from sopp.models.observation_target import ObservationTarget
 from sopp.analysis.path_finders.rhodesmill import (
     ObservationPathFinderRhodesmill,
 )
+from sopp.models.observation_target import ObservationTarget
 
 
 class TestPathFinderRhodesMill(PathFinderBaseTest):

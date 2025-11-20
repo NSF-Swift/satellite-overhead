@@ -1,15 +1,15 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
+from sopp.analysis.event_finders.rhodesmill import (
+    EventFinderRhodesmill,
+)
 from sopp.models.frequency_range import FrequencyRange
 from sopp.models.overhead_window import OverheadWindow
 from sopp.models.position_time import PositionTime
 from sopp.models.reservation import Reservation
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.time_window import TimeWindow
-from sopp.analysis.event_finders.rhodesmill import (
-    EventFinderRhodesmill,
-)
 
 
 @dataclass

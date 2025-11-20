@@ -1,14 +1,14 @@
 import sys
 
-from sopp.sopp import Sopp
-from sopp.io.tle_fetcher import TleFetcherCelestrak
 from sopp.config.builder import ConfigurationBuilder
+from sopp.io.tle_fetcher import TleFetcherCelestrak
+from sopp.satellite_selection.filters import filter_frequency
+from sopp.sopp import Sopp
 from sopp.utils.helpers import (
+    get_default_config_file_filepath,
     get_frequencies_filepath,
     get_satellites_filepath,
-    get_default_config_file_filepath,
 )
-from sopp.satellite_selection.filters import filter_frequency
 
 
 def main():

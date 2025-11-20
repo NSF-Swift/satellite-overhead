@@ -1,5 +1,8 @@
 import os
 
+from sopp.io.satellites_loader import (
+    SatellitesLoaderFromFiles,
+)
 from sopp.models.frequency_range import FrequencyRange
 from sopp.models.satellite.international_designator import (
     InternationalDesignator,
@@ -7,9 +10,6 @@ from sopp.models.satellite.international_designator import (
 from sopp.models.satellite.mean_motion import MeanMotion
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.satellite.tle_information import TleInformation
-from sopp.io.satellites_loader import (
-    SatellitesLoaderFromFiles,
-)
 
 
 class TestSatellitesLoaderFromFiles:

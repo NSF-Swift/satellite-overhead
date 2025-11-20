@@ -2,20 +2,20 @@ from dataclasses import replace
 from datetime import timedelta
 from functools import cached_property
 
-from sopp.models.position_time import PositionTime
 from sopp.analysis.event_finders.interference import (
     AntennaPosition,
     SatellitesInterferenceFilter,
     SatellitesWithinMainBeamFilter,
 )
+from sopp.models.position_time import PositionTime
 
-from tests.definitions import SMALL_EPSILON
 from tests.analysis.event_finder.definitions import (
     ARBITRARY_ANTENNA_POSITION,
     ARBITRARY_FACILITY,
     assert_windows_eq,
     create_expected_windows,
 )
+from tests.definitions import SMALL_EPSILON
 
 
 class TestSatellitesWithinMainBeamOneAntennaPositionMultipleSatellitePositions:

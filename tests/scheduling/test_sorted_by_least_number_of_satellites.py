@@ -3,10 +3,10 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
-from sopp.models.frequency_range import FrequencyRange
 from sopp.io.get_frequency_data_from_csv import (
     GetFrequencyDataFromCsv,
 )
+from sopp.models.frequency_range import FrequencyRange
 from sopp.models.overhead_window import OverheadWindow
 from sopp.models.reservation import Reservation
 from sopp.models.satellite.international_designator import (
@@ -16,8 +16,8 @@ from sopp.models.satellite.mean_motion import MeanMotion
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.satellite.tle_information import TleInformation
 from sopp.models.time_window import TimeWindow
-from sopp.utils.helpers import get_script_directory
 from sopp.scheduling.observation_window_finder import SuggestedReservation, WindowFinder
+from sopp.utils.helpers import get_script_directory
 
 from tests.scheduling.definitions import ARBITRARY_FACILITY
 

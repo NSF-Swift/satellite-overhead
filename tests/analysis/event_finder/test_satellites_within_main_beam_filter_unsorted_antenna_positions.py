@@ -1,12 +1,12 @@
 from datetime import timedelta
 
-from sopp.models.position import Position
-from sopp.models.position_time import PositionTime
 from sopp.analysis.event_finders.interference import (
     AntennaPosition,
     SatellitesInterferenceFilter,
     SatellitesWithinMainBeamFilter,
 )
+from sopp.models.position import Position
+from sopp.models.position_time import PositionTime
 
 from tests.analysis.event_finder.definitions import (
     ARBITRARY_ANTENNA_POSITION,

@@ -1,9 +1,9 @@
 from pathlib import Path
 
-from sopp.models.frequency_range import FrequencyRange
 from sopp.io.get_frequency_data_from_csv import (
     GetFrequencyDataFromCsv,
 )
+from sopp.models.frequency_range import FrequencyRange
 from sopp.utils.helpers import get_script_directory
 
 

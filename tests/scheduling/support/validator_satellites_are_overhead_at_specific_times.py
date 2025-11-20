@@ -1,8 +1,8 @@
+from sopp.analysis.event_finders.validator import Validator
 from sopp.models.overhead_window import OverheadWindow
 from sopp.models.reservation import Reservation
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.time_window import TimeWindow
-from sopp.analysis.event_finders.validator import Validator
 
 
 class ValidatorSatellitesAreOverheadAtSpecificTimes(Validator):

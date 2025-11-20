@@ -5,12 +5,12 @@ from skyfield.api import load
 from skyfield.starlib import Star
 from skyfield.toposlib import wgs84
 
+from sopp.analysis.path_finders.base import ObservationPathFinder
 from sopp.models.facility import Facility
 from sopp.models.observation_target import ObservationTarget
 from sopp.models.position import Position
 from sopp.models.position_time import PositionTime
 from sopp.models.time_window import TimeWindow
-from sopp.analysis.path_finders.base import ObservationPathFinder
 
 
 class ObservationPathFinderRhodesmill(ObservationPathFinder):

@@ -1,6 +1,6 @@
+from abc import ABC, abstractmethod
 from dataclasses import replace
 from functools import cached_property
-from abc import ABC, abstractmethod
 
 from sopp.io.get_frequency_data_from_csv import (
     GetFrequencyDataFromCsv,
