@@ -21,13 +21,10 @@ class TestRhodesmillIntegration:
     _MINUTE_BEFORE_LEAVES = 47
 
     def test_events_found_on_window_that_encompasses_only_leaves(self):
-        assert (
-            self._get_events(
-                minute_begin=self._MINUTE_AFTER_CULMINATES,
-                minute_end=self._MINUTE_BEFORE_LEAVES,
-            ).tolist()
-            == []
-        )
+        assert self._get_events(
+            minute_begin=self._MINUTE_AFTER_CULMINATES,
+            minute_end=self._MINUTE_BEFORE_LEAVES,
+        ).tolist() == [2]
 
     def test_events_found_on_window_that_is_between_enter_and_culminates(self):
         assert (
@@ -39,13 +36,10 @@ class TestRhodesmillIntegration:
         )
 
     def test_events_found_on_window_that_encompasses_only_enters(self):
-        assert (
-            self._get_events(
-                minute_begin=self._MINUTE_BEFORE_ENTERS,
-                minute_end=self._MINUTE_BEFORE_CULMINATES,
-            ).tolist()
-            == []
-        )
+        assert self._get_events(
+            minute_begin=self._MINUTE_BEFORE_ENTERS,
+            minute_end=self._MINUTE_BEFORE_CULMINATES,
+        ).tolist() == [0]
 
     def test_events_found_on_window_that_encompasses_only_culminates(self):
         assert self._get_events(
