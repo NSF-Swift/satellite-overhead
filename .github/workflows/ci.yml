@@ -41,4 +41,4 @@ jobs:
           python -m pip install --upgrade pip
           pip install hatch
       - name: Run tests
-        run: hatch run ci:test
+        run: hatch run ci:run
