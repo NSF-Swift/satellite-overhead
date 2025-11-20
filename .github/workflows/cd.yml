@@ -1,65 +1,39 @@
-name: CD
+name: Publish Release
 
 on:
-  workflow_run:
-    workflows: ['CI']
-    types: ['completed']
-    branches: main
+  push:
+    tags:
+      - 'v*'
 
 jobs:
-  build:
+  build-and-publish:
     runs-on: ubuntu-latest
-    outputs:
-      release_needed: ${{ steps.check_release.outputs.release_needed }}
     permissions:
-      contents: write
-      id-token: write
+      contents: write 
+      id-token: write 
 
     steps:
-      - name: Setup Python 3.10
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-      - name: Checkout Repo
+      - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          fetch-depth: 0
-      - name: Install Build Tools
-        run: |
-          python -m pip install --upgrade pip
-          pip install hatch
-          pip install python-semantic-release
-      - name: semantic-release Bump Version
-        id: release
-        run: |
-          echo "__version__ = '$(semantic-release version --print)'" > ./sopp/__about__.py
-          git add ./sopp/__about__.py
-          semantic-release -v version --push --commit --tag --changelog --vcs-release
+          python-version: '3.11'
+
+      - name: Install Hatch
+        run: pip install hatch
+
+      - name: Build Package
+        run: hatch build
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Check if Release Needed
-        id: check_release
-        run: echo "release_needed=$(test -d dist && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-      - name: Upload build Artifacts
-        if: steps.check_release.outputs.release_needed == 'true'
-        uses: actions/upload-artifact@v3
-        with:
-          name: artifacts
-          path: dist/*
-          if-no-files-found: error
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  publish:
-    needs: build
-    if: needs.build.outputs.release_needed == 'true'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-
-    steps:
-      - uses: actions/download-artifact@v3
-        with:
-          name: artifacts
-          path: dist
-      - name: Publish build artifacts to PyPI
+      - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
