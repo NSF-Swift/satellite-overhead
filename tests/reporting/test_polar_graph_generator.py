@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 
 import numpy as np
 import pytest
+
 from sopp.models.position import Position
 from sopp.models.position_time import PositionTime
 from sopp.reporting.polar_plot import GraphGeneratorPolar

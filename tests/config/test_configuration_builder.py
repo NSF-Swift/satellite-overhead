@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
 import pytest
+
 from sopp.config.builder import ConfigurationBuilder
 from sopp.models.configuration import Configuration
 from sopp.models.configuration_file import ConfigurationFile

@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
 import pytest
+
 from sopp.models.configuration import Configuration
 from sopp.models.coordinates import Coordinates
 from sopp.models.facility import Facility

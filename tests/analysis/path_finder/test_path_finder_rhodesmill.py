@@ -1,5 +1,6 @@
 import pytest
 from path_finder_base_test import PathFinderBaseTest
+
 from sopp.analysis.path_finders.rhodesmill import (
     ObservationPathFinderRhodesmill,
 )

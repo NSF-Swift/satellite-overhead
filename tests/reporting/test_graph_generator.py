@@ -3,6 +3,7 @@ from datetime import datetime
 import pytest
 from numpy import asarray
 from numpy.ma import allequal
+
 from sopp.models.overhead_window import OverheadWindow
 from sopp.models.position import Position
 from sopp.models.position_time import PositionTime

@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
+
 from sopp.config.base import ConfigFileLoaderBase
 from sopp.config.factory import get_config_file_object
 from sopp.models.configuration_file import ConfigurationFile

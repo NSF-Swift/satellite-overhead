@@ -1,4 +1,5 @@
 import pytest
+
 from sopp.models.coordinates import Coordinates
 from sopp.models.facility import Facility
 from sopp.models.observation_target import ObservationTarget

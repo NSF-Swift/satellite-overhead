@@ -2,6 +2,7 @@ from datetime import datetime
 
 from skyfield.api import load
 from skyfield.toposlib import wgs84
+
 from sopp.models.facility import Facility
 from sopp.models.position import Position
 from sopp.models.position_time import PositionTime

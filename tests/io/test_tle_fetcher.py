@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 import requests
+
 from sopp.io.tle_fetcher import TleFetcherCelestrak, TleFetcherSpacetrack
 
 

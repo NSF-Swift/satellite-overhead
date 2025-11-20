@@ -4,6 +4,7 @@ from functools import cached_property
 from numpy._typing import NDArray
 from skyfield.api import load, wgs84
 from skyfield.timelib import Time, Timescale
+
 from sopp.models.frequency_range import FrequencyRange
 from sopp.models.satellite.international_designator import (
     InternationalDesignator,

@@ -3,6 +3,7 @@ from functools import cached_property
 
 import matplotlib.pyplot as plt
 import numpy as np
+
 from sopp.models.overhead_window import OverheadWindow
 from sopp.models.time_window import TimeWindow
 
