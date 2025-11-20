@@ -63,7 +63,19 @@ run = "pytest {args:tests}"
 python = ["3.10", "3.11", "3.12"]
 
 [tool.hatch.envs.ci]
+template = "test"
 dev-mode = false
+
+[tool.hatch.envs.lint]
+detached = true
+dependencies = [
+  "ruff",
+]
+
+[tool.hatch.envs.lint.scripts]
+check = "ruff check ."
+fmt = "ruff format --check --diff ."
+all = ["check", "fmt"]
 
 [tool.ruff]
 target-version = "py310"
