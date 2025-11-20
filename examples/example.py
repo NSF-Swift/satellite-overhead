@@ -1,5 +1,5 @@
-from sopp.builder.configuration_builder import ConfigurationBuilder
-from sopp.satellites_filter.filters import (
+from sopp.config.builder import ConfigurationBuilder
+from sopp.satellite_selection.filters import (
     filter_name_does_not_contain,
     filter_orbit_is,
 )
