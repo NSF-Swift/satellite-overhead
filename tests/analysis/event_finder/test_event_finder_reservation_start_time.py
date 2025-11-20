@@ -12,10 +12,10 @@ from sopp.analysis.event_finders.rhodesmill import (
 )
 
 from tests.definitions import SMALL_EPSILON
-from tests.event_finder.event_finder_rhodesmill.definitions import (
+from tests.analysis.event_finder.definitions import (
     create_overhead_window,
 )
-from tests.event_finder.event_finder_rhodesmill.test_event_finder_rhodesmill import (
+from tests.analysis.event_finder.test_event_finder_rhodesmill import (
     ARBITRARY_SATELLITE_ALTITUDE,
     ARBITRARY_SATELLITE_AZIMUTH,
     SatellitePositionsWithRespectToFacilityRetrieverStub,

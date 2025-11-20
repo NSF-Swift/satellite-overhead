@@ -7,7 +7,7 @@ from sopp.io.get_frequency_data_from_csv import (
 from sopp.models.satellite.satellite import Satellite
 from sopp.utils.helpers import get_script_directory
 
-from tests.custom_dataclasses.satellite.utilities import (
+from tests.models.satellite.utilities import (
     expected_international_space_station_tle_as_satellite_cu,
 )
 

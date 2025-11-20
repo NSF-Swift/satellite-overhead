@@ -7,7 +7,7 @@ from sopp.analysis.event_finders.interference import (
     SatellitesWithinMainBeamFilter,
 )
 
-from tests.event_finder.event_finder_rhodesmill.definitions import (
+from tests.analysis.event_finder.definitions import (
     ARBITRARY_ANTENNA_POSITION,
     ARBITRARY_FACILITY,
     assert_windows_eq,

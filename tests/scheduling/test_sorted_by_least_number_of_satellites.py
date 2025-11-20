@@ -17,9 +17,9 @@ from sopp.models.satellite.satellite import Satellite
 from sopp.models.satellite.tle_information import TleInformation
 from sopp.models.time_window import TimeWindow
 from sopp.utils.helpers import get_script_directory
-from sopp.analysis.window_finder import SuggestedReservation, WindowFinder
+from sopp.scheduling.observation_window_finder import SuggestedReservation, WindowFinder
 
-from tests.window_finder.definitions import ARBITRARY_FACILITY
+from tests.scheduling.definitions import ARBITRARY_FACILITY
 
 _ARBITRARY_FREQUENCY_RANGE = FrequencyRange(frequency=2.0, bandwidth=1.0)
 
