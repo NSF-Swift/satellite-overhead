@@ -66,5 +66,13 @@ python = ["3.10", "3.11", "3.12"]
 dev-mode = false
 
 [tool.ruff]
-target-version = "py311"
-select = ["E", "F", "W", "I"]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
