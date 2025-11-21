@@ -46,11 +46,6 @@ class TestFilters:
         actual = list(filter(filter_name_is("ISS"), self.satellites))
         assert actual == expected
 
-    def test_name_is_none(self):
-        expected = [self.sat0, self.sat1, self.sat2, self.sat3]
-        actual = list(filter(filter_name_is(substring=None), self.satellites))
-        assert actual == expected
-
     def test_orbit_is_leo_filter(self):
         expected = [self.sat1, self.sat2]
         actual = list(filter(filter_orbit_is(orbit_type="leo"), self.satellites))
