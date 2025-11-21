@@ -31,7 +31,7 @@ class EventFinderRhodesmill(EventFinder):
         satellite_positions_with_respect_to_facility_retriever_class: type[
             SatellitePositionsWithRespectToFacilityRetriever
         ] = SatellitePositionsWithRespectToFacilityRetrieverRhodesmill,
-        runtime_settings: RuntimeSettings = RuntimeSettings(),
+        runtime_settings: RuntimeSettings | None = None,
     ):
         super().__init__(
             antenna_direction_path=antenna_direction_path,
@@ -43,7 +43,7 @@ class EventFinderRhodesmill(EventFinder):
 
         datetimes = EvenlySpacedTimeIntervalsCalculator(
             time_window=reservation.time,
-            resolution=runtime_settings.time_continuity_resolution,
+            resolution=self.runtime_settings.time_continuity_resolution,
         ).run()
 
         self._satellite_positions_retriever = (

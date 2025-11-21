@@ -40,11 +40,15 @@ class SatellitesInterferenceFilter:
         antenna_positions: list[AntennaPosition],
         cutoff_time: datetime,
         filter_strategy: SatellitesFilterStrategy,
-        runtime_settings: RuntimeSettings = RuntimeSettings(),
+        runtime_settings: RuntimeSettings | None = None,
     ):
         self._cutoff_time = cutoff_time
         self._facility = facility
         self._antenna_positions = antenna_positions
+
+        if runtime_settings is None:
+            runtime_settings = RuntimeSettings()
+
         self._filter_strategy = filter_strategy(
             facility=facility, runtime_settings=runtime_settings
         )

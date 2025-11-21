@@ -31,7 +31,7 @@ class EventFinder(ABC):
         satellite_positions_with_respect_to_facility_retriever_class: type[
             SatellitePositionsWithRespectToFacilityRetriever
         ],
-        runtime_settings: RuntimeSettings = RuntimeSettings(),
+        runtime_settings: RuntimeSettings | None = None,
     ):
         self.antenna_direction_path = antenna_direction_path
         self.list_of_satellites = list_of_satellites
@@ -39,7 +39,9 @@ class EventFinder(ABC):
         self.satellite_positions_with_respect_to_facility_retriever_class = (
             satellite_positions_with_respect_to_facility_retriever_class
         )
-        self.runtime_settings = runtime_settings
+        self.runtime_settings = (
+            runtime_settings if runtime_settings is not None else RuntimeSettings()
+        )
 
     @abstractmethod
     def get_satellites_above_horizon(self) -> list[OverheadWindow]:
