@@ -47,10 +47,7 @@ class TestCustomDataclassStr:
 
     def test_reservation(self):
         expected = (
-            f"Reservation:\n"
-            f"{self.facility}\n"
-            f"{self.time_window}\n"
-            f"{self.frequency_range}"
+            f"Reservation:\n{self.facility}\n{self.time_window}\n{self.frequency_range}"
         )
         assert str(self.reservation) == expected
 

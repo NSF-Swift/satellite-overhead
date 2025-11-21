@@ -91,7 +91,7 @@ class GraphGeneratorPolar:
     def _annotate_max_alt(self, ax):
         idx = np.argmax(self._altitude_values)
         ax.annotate(
-            f'Max Alt: {self._altitude_values[idx]:.2f} at {self._time_values[idx].strftime("%H:%M:%S")}',
+            f"Max Alt: {self._altitude_values[idx]:.2f} at {self._time_values[idx].strftime('%H:%M:%S')}",
             (self._azimuth_values[idx], self._altitude_values[idx]),
             ha="center",
             va="top",
