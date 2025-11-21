@@ -4,7 +4,7 @@ dynamic = ["version"]
 dependencies = [
     "sgp4~=2.21",
     "skyfield~=1.47",
-    "requests~=2.31.0",
+    "requests~=2.32.4",
     "python-dateutil~=2.8.2",
     "python-dotenv~=0.21.0",
 ]
@@ -16,34 +16,76 @@ keywords = ["satellites", "astronomy"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+[project.optional-dependencies]
+cli = [
+    "matplotlib~=3.7.1",
 ]
 
 [project.urls]
 Repository = "https://github.com/NSF-Swift/satellite-overhead"
 "Bug Tracker" = "https://github.com/NSF-Swift/satellite-overhead/issues"
 
+[project.scripts]
+cli = "sopp.cli:main"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build]
-only-include = [
-  "sopp",
-]
+path = "src"
 exclude = [
-  "sopp/graph_generator",
+  "src/sopp.reporting",
 ]
 
 [tool.hatch.version]
-path = "sopp/__about__.py"
+path = "src/sopp/__about__.py"
 
-[tool.semantic_release]
-match = "main"
-build_command = "hatch build"
-version_variable = "sopp/__about__.py:__version__"
+[tool.hatch.envs.default]
+python = "3.11"
 
-[tool.semantic_release.changelog]
-template_dir = "templates"
-changelog_file = "CHANGELOG.md"
+[tool.hatch.envs.test]
+features = ["cli"]
+dependencies = [
+  "pytest~=7.2.0",
+  "pytest-mock~=3.11.1",
+]
+
+[tool.hatch.envs.test.scripts]
+run = "pytest {args:tests}"
+
+[[tool.hatch.envs.test.matrix]]
+python = ["3.10", "3.11", "3.12"]
+
+[tool.hatch.envs.ci]
+template = "test"
+dev-mode = false
+
+[tool.hatch.envs.lint]
+detached = true
+dependencies = [
+  "ruff",
+]
+
+[tool.hatch.envs.lint.scripts]
+check = "ruff check . --ignore E501"
+fmt = "ruff format --check --diff ."
+all = ["check", "fmt"]
+
+[tool.ruff]
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"

@@ -6,11 +6,28 @@ on:
   pull_request:
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Hatch
+        run: pip install hatch
+
+      - name: Run Linting & Formatting Checks
+        run: hatch run lint:all
+
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.10', '3.11', '3.12']
 
     steps:
       - name: Checkout Repo
@@ -24,4 +41,4 @@ jobs:
           python -m pip install --upgrade pip
           pip install hatch
       - name: Run tests
-        run: hatch run ci:test
+        run: hatch run ci:run

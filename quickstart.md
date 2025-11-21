@@ -39,7 +39,7 @@ The observation characteristics must be provided to the `ConfigurationBuilder` c
 
 An example using `ConfigurationBuilder`:
 ```python
-from sopp.builder.configuration_builder import ConfigurationBuilder
+from sopp.config.builder import ConfigurationBuilder
 
 configuration = (
     ConfigurationBuilder()
@@ -282,7 +282,7 @@ The list of satellites can be filtered by using a `Filterer` object, adding filt
 If `None` is passed to any of the filters, no filtering for that specific filter will be applied.
 Alternatively to passing a `Filterer` object to the `ConfigurationBuilder` via `set_satellites_filter`, filters can simply be added with `add_filter(filter_name_contains('STARLINK'))`.
 
-The provided filters accessible from `sopp.satellites_filter.filters` include:
+The provided filters accessible from `sopp.satellite_selection.filters` include:
 
 #### `filter_frequency()`:
 
@@ -342,8 +342,8 @@ The filter checks if the satellite's orbits per day is >= 0.85 and < 1.5
 For example, to find all Satellites that are not Starlink, but are in LEO and that have overlapping downlink transmission frequency:
 
 ```python
-from sopp.satellites_filter.filterer import Filterer
-from sopp.satellites_filter.filters import (
+from sopp.satellite_selection.filterer import Filterer
+from sopp.satellite_selection.filters import (
     filter_name_does_not_contain,
     filter_orbit_is,
     filter_frequency,
@@ -373,7 +373,7 @@ filterer = (
 A TleFetcher class exists that will automatically fetch the latest TLEs from Celestrak or SpaceTrack:
 
 ```python
-from sopp.tle_fetcher.tle_fetcher_celestrak import TleFetcherCelestrak
+from sopp.io.tle_fetcher import TleFetcherCelestrak
 
 fetcher = TleFetcherCelestrak(tle_file_path='path/to/save/satellites.tle')
 fetcher.fetch_tles()
@@ -382,7 +382,7 @@ fetcher.fetch_tles()
 SpaceTrack is called identically, however you must set the environment variable `IDENTITY` with your username and `PASSWORD` with your password:
 
 ```python
-from sopp.tle_fetcher.tle_fetcher_spacetrack import TleFetcherSpacetrack
+from sopp.io.tle_fetcher import TleFetcherSpacetrack
 
 fetcher = TleFetcherSpacetrack(tle_file_path='path/to/save/satellites.tle')
 fetcher.fetch_tles()
@@ -413,8 +413,8 @@ custom_path = [
 
 ```python
 from sopp.sopp import Sopp
-from sopp.builder.configuration_builder import ConfigurationBuilder
-from sopp.satellites_filter.filters import (
+from sopp.config.builder import ConfigurationBuilder
+from sopp.satellite_selection.filters import (
     filter_name_does_not_contain,
     filter_orbit_is,
 )
