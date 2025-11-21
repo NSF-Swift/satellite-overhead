@@ -1,10 +1,10 @@
 import json
 import os
+from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from io import TextIOWrapper
 from pathlib import Path
-from typing import ContextManager
 from uuid import uuid4
 
 from dateutil import parser
@@ -16,7 +16,7 @@ def read_json_file(filepath: Path) -> dict:
 
 
 @contextmanager
-def temporary_file(filepath: Path | None = None) -> ContextManager[TextIOWrapper]:
+def temporary_file(filepath: Path | None = None) -> Iterator[TextIOWrapper]:
     filepath = Path(filepath or f"{uuid4().hex}.tmp")
     with open(filepath, "w") as f:
         yield f
@@ -37,7 +37,7 @@ def read_datetime_string_as_utc(string_value: str) -> datetime:
         time = parser.parse(string_value)
         return convert_datetime_to_utc(time)
     except ValueError:
-        raise ValueError(f"Unable to parse datetime string: {string_value}")
+        raise ValueError(f"Unable to parse datetime string: {string_value}") from None
 
 
 def parse_time_and_convert_to_utc(time: str | datetime) -> datetime:

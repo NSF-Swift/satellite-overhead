@@ -25,7 +25,7 @@ def main():
     config_file = get_default_config_file_filepath()
 
     builder = ConfigurationBuilder().set_from_config_file(
-        config_file="supplements/config.json"
+        config_file=config_file,
     )
 
     configuration = (

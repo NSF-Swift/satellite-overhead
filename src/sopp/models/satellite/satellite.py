@@ -16,7 +16,6 @@ for each satellite.
   + tle_information:    stores TLE information. TleInformation is another custom object to store TLE data and can be found in
                         ROOT/sopp/custom_dataclasses/satellite/tle_information.py
   + frequency:          list of type FrequencyRange. FrequencyRange is a custom dataclass that stores a center frequency and bandwidth.
-  
 
   + to_rhodesmill():    class method to convert a Satellite object into a Rhodemill-Skyfield EarthSatellite object for use with the Skyfield API
   + from_tle_file():    class method to load Satellite from provided TLE file. Returns a list of type Satellite.
