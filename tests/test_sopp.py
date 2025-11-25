@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 
 import pytest
 
+from sopp.analysis.event_finders.base import EventFinder
 from sopp.models.configuration import Configuration
 from sopp.models.coordinates import Coordinates
 from sopp.models.facility import Facility
@@ -39,15 +40,11 @@ def assert_overhead_windows_eq(
 
 class TestSopp:
     def test_get_satellites_above_horizon(self, monkeypatch):
-        sopp = sopp_instance(
-            arbitrary_config(), monkeypatch, event_finder_class=StubEventFinder
-        )
+        sopp = sopp_instance(arbitrary_config(), monkeypatch, StubEventFinder())
         assert overhead_windows() == sopp.get_satellites_above_horizon()
 
     def test_get_satellites_crossing_main_beam(self, monkeypatch):
-        sopp = sopp_instance(
-            arbitrary_config(), monkeypatch, event_finder_class=StubEventFinder
-        )
+        sopp = sopp_instance(arbitrary_config(), monkeypatch, StubEventFinder())
         assert overhead_windows() == sopp.get_satellites_crossing_main_beam()
 
     def test_arbitray_inputs_match_expected_output(self, monkeypatch):
@@ -473,10 +470,8 @@ class TestSopp:
         )
 
 
-class StubEventFinder:
-    def __init__(
-        self, list_of_satellites, reservation, antenna_direction_path, runtime_settings
-    ):
+class StubEventFinder(EventFinder):
+    def __init__(self, *args, **kwargs):
         pass
 
     def get_satellites_above_horizon(self):
@@ -486,16 +481,16 @@ class StubEventFinder:
         return overhead_windows()
 
 
-def sopp_instance(config, monkeypatch, event_finder_class=None):
+def sopp_instance(config, monkeypatch, event_finder=None):
     def mock_validate_configuration(self):
         return
 
     monkeypatch.setattr(Sopp, "_validate_configuration", mock_validate_configuration)
 
-    if event_finder_class:
-        return Sopp(configuration=config, event_finder_class=event_finder_class)
+    if event_finder:
+        return Sopp(configuration=config, event_finder=event_finder)
     else:
-        return Sopp(configuration=config)
+        return Sopp(config)
 
 
 def arbitrary_config():

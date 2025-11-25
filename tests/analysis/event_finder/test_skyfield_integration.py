@@ -14,7 +14,7 @@ from sopp.models.satellite.satellite import Satellite
 from sopp.models.satellite.tle_information import TleInformation
 
 
-class TestRhodesmillIntegration:
+class TestSkyfieldIntegration:
     _MINUTE_BEFORE_ENTERS = 34
     _MINUTES_AFTER_ENTERS = _MINUTE_BEFORE_ENTERS + 1
     _MINUTE_BEFORE_CULMINATES = 40
@@ -67,22 +67,22 @@ class TestRhodesmillIntegration:
         ).tolist() == [0, 1, 2]
 
     def _get_events(self, minute_begin: int, minute_end: int) -> NDArray[int]:
-        time_begin = self._datetime_to_rhodesmill_time(minute=minute_begin)
-        time_end = self._datetime_to_rhodesmill_time(minute=minute_end)
+        time_begin = self._datetime_to_skyfield_time(minute=minute_begin)
+        time_end = self._datetime_to_skyfield_time(minute=minute_end)
         coordinates = wgs84.latlon(40.8178049, -121.4695413)
-        rhodesmill_earthsat = self._satellite.to_rhodesmill()
-        event_times, events = rhodesmill_earthsat.find_events(
+        sky_sat = self._satellite.to_skyfield()
+        event_times, events = sky_sat.find_events(
             topos=coordinates, t0=time_begin, t1=time_end, altitude_degrees=0
         )
         return events
 
-    def _datetime_to_rhodesmill_time(self, minute: int) -> Time:
-        return self._rhodesmill_timescale.from_datetime(
+    def _datetime_to_skyfield_time(self, minute: int) -> Time:
+        return self._skyfield_timescale.from_datetime(
             datetime(2023, 3, 30, 12, minute, tzinfo=timezone.utc)
         )
 
     @cached_property
-    def _rhodesmill_timescale(self) -> Timescale:
+    def _skyfield_timescale(self) -> Timescale:
         return load.timescale()
 
     @property
