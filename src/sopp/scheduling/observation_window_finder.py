@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
-from sopp.analysis.event_finders.rhodesmill import (
-    EventFinderRhodesmill,
+from sopp.analysis.event_finders.skyfield import (
+    EventFinderSkyfield,
 )
 from sopp.models.frequency_range import FrequencyRange
 from sopp.models.overhead_window import OverheadWindow
@@ -116,7 +116,7 @@ class WindowFinder:
         ]
 
     def _satellites_overhead(self, reservation: Reservation) -> list[OverheadWindow]:
-        return EventFinderRhodesmill(
+        return EventFinderSkyfield(
             list_of_satellites=self._satellites,
             reservation=reservation,
             antenna_direction_path=[

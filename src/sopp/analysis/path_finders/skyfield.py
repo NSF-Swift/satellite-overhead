@@ -6,20 +6,16 @@ from skyfield.starlib import Star
 from skyfield.toposlib import wgs84
 
 from sopp.analysis.path_finders.base import ObservationPathFinder
-from sopp.models.facility import Facility
-from sopp.models.observation_target import ObservationTarget
-from sopp.models.position import Position
-from sopp.models.position_time import PositionTime
-from sopp.models.time_window import TimeWindow
+from sopp.models import Facility, ObservationTarget, Position, PositionTime, TimeWindow
 
 
-class ObservationPathFinderRhodesmill(ObservationPathFinder):
+class ObservationPathFinderSkyfield(ObservationPathFinder):
     def __init__(
         self,
         facility: Facility,
         observation_target: ObservationTarget,
         time_window: TimeWindow,
-    ) -> list[PositionTime]:
+    ):
         self._facility = facility
         self._observation_target = observation_target
         self._time_window = time_window
@@ -37,10 +33,10 @@ class ObservationPathFinderRhodesmill(ObservationPathFinder):
         earth = eph["earth"]
 
         target_coordinates = Star(
-            ra_hours=ObservationPathFinderRhodesmill.right_ascension_to_rhodesmill(
+            ra_hours=ObservationPathFinderSkyfield.right_ascension_to_skyfield(
                 self._observation_target
             ),
-            dec_degrees=ObservationPathFinderRhodesmill.declination_to_rhodesmill(
+            dec_degrees=ObservationPathFinderSkyfield.declination_to_skyfield(
                 self._observation_target
             ),
         )
@@ -68,23 +64,23 @@ class ObservationPathFinderRhodesmill(ObservationPathFinder):
         return observation_path
 
     @staticmethod
-    def _parse_coordinate(coordinate_str: str) -> tuple[float, float, float]:
+    def _parse_coordinate(coordinate_str: str) -> tuple[float, ...]:
         parts = [float(part) for part in re.split("[hdms]", coordinate_str) if part]
 
         return tuple(parts)
 
     @staticmethod
-    def right_ascension_to_rhodesmill(
+    def right_ascension_to_skyfield(
         observation_target: ObservationTarget,
-    ) -> tuple[float, float, float]:
-        return ObservationPathFinderRhodesmill._parse_coordinate(
+    ) -> tuple[float, ...]:
+        return ObservationPathFinderSkyfield._parse_coordinate(
             observation_target.right_ascension
         )
 
     @staticmethod
-    def declination_to_rhodesmill(
+    def declination_to_skyfield(
         observation_target: ObservationTarget,
-    ) -> tuple[float, float, float]:
-        return ObservationPathFinderRhodesmill._parse_coordinate(
+    ) -> tuple[float, ...]:
+        return ObservationPathFinderSkyfield._parse_coordinate(
             observation_target.declination
         )
