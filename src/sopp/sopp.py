@@ -2,21 +2,22 @@ from datetime import timedelta
 from functools import cached_property
 
 from sopp.analysis.event_finders.base import EventFinder
-from sopp.analysis.event_finders.rhodesmill import (
-    EventFinderRhodesmill,
+from sopp.analysis.event_finders.skyfield import (
+    EventFinderSkyfield,
 )
-from sopp.models.configuration import Configuration
-from sopp.models.overhead_window import OverheadWindow
+from sopp.ephemeris.skyfield import SkyfieldEphemerisCalculator
+from sopp.models import Configuration, OverheadWindow
+from sopp.utils.time import EvenlySpacedTimeIntervalsCalculator
 
 
 class Sopp:
     def __init__(
         self,
         configuration: Configuration,
-        event_finder_class: type[EventFinder] = EventFinderRhodesmill,
+        event_finder: EventFinder | None = None,
     ):
         self._configuration = configuration
-        self._event_finder_class = event_finder_class
+        self._injected_event_finder = event_finder
 
     def get_satellites_above_horizon(self) -> list[OverheadWindow]:
         return self._event_finder.get_satellites_above_horizon()
@@ -26,11 +27,25 @@ class Sopp:
 
     @cached_property
     def _event_finder(self) -> EventFinder:
+        if self._injected_event_finder:
+            return self._injected_event_finder
+
         self._validate_configuration()
-        return self._event_finder_class(
+
+        datetimes = EvenlySpacedTimeIntervalsCalculator(
+            time_window=self._configuration.reservation.time,
+            resolution=self._configuration.runtime_settings.time_continuity_resolution,
+        ).run()
+
+        ephemeris_calculator = SkyfieldEphemerisCalculator(
+            facility=self._configuration.reservation.facility, datetimes=datetimes
+        )
+
+        return EventFinderSkyfield(
             list_of_satellites=self._configuration.satellites,
             reservation=self._configuration.reservation,
             antenna_direction_path=self._configuration.antenna_direction_path,
+            ephemeris_calculator=ephemeris_calculator,
             runtime_settings=self._configuration.runtime_settings,
         )
 

@@ -4,25 +4,27 @@ from pathlib import Path
 from typing import Any
 
 from sopp.analysis.path_finders.base import ObservationPathFinder
-from sopp.analysis.path_finders.rhodesmill import (
-    ObservationPathFinderRhodesmill,
+from sopp.analysis.path_finders.skyfield import (
+    ObservationPathFinderSkyfield,
 )
 from sopp.config.base import ConfigFileLoaderBase
 from sopp.config.json_loader import ConfigFileLoaderJson
 from sopp.io.satellites_loader import (
     SatellitesLoaderFromFiles,
 )
-from sopp.models.configuration import Configuration
-from sopp.models.coordinates import Coordinates
-from sopp.models.facility import Facility
-from sopp.models.frequency_range import FrequencyRange
-from sopp.models.observation_target import ObservationTarget
-from sopp.models.position import Position
-from sopp.models.position_time import PositionTime
-from sopp.models.reservation import Reservation
-from sopp.models.runtime_settings import RuntimeSettings
-from sopp.models.satellite.satellite import Satellite
-from sopp.models.time_window import TimeWindow
+from sopp.models import (
+    Configuration,
+    Coordinates,
+    Facility,
+    FrequencyRange,
+    ObservationTarget,
+    Position,
+    PositionTime,
+    Reservation,
+    RuntimeSettings,
+    Satellite,
+    TimeWindow,
+)
 from sopp.satellite_selection.filterer import Filterer
 from sopp.utils.helpers import parse_time_and_convert_to_utc
 
@@ -30,9 +32,7 @@ from sopp.utils.helpers import parse_time_and_convert_to_utc
 class ConfigurationBuilder:
     def __init__(
         self,
-        path_finder_class: type[
-            ObservationPathFinder
-        ] = ObservationPathFinderRhodesmill,
+        path_finder_class: type[ObservationPathFinder] = ObservationPathFinderSkyfield,
         config_file_loader_class: type[ConfigFileLoaderBase] = ConfigFileLoaderJson,
     ):
         self.facility: Facility | None = None
