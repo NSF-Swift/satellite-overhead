@@ -37,9 +37,6 @@ class SkyfieldEphemerisCalculator(EphemerisCalculator):
         """
         Calculates Rise/Set/Culminate events.
         """
-        if self._grid_timescale is None or len(self._grid_timescale) == 0:
-            return []
-
         t0 = SKYFIELD_TIMESCALE.from_datetime(start_time)
         t1 = SKYFIELD_TIMESCALE.from_datetime(end_time)
 
@@ -87,28 +84,19 @@ class SkyfieldEphemerisCalculator(EphemerisCalculator):
         start_idx = bisect.bisect_left(self._datetimes, start)
         end_idx = bisect.bisect_right(self._datetimes, end)
 
-        # If the window happens entirely between two grid points, return nothing.
-        if start_idx >= end_idx:
+        if start_idx >= end_idx or self._grid_timescale is None:
             return []
-
-        ## Slice the pre-calculated vectors
-        # ts_slice = self._grid_timescale[start_idx:end_idx]
-        # dt_slice = self._datetimes[start_idx:end_idx]
 
         if start_idx == 0 and end_idx == len(self._datetimes):
             ts_obj = self._grid_timescale
             dt_subset = self._datetimes
         else:
-            # Partial window: Slicing is efficient here because re-calculating
-            # Earth physics for a small window (e.g. 10 mins) is cheap.
             ts_obj = self._grid_timescale[start_idx:end_idx]
             dt_subset = self._datetimes[start_idx:end_idx]
 
         sat_skyfield = satellite.to_skyfield()
         difference = sat_skyfield - self._facility_latlon
 
-        # topocentric = difference.at(ts_slice)
-        # topocentric = difference.at(self._grid_timescale)
         topocentric = difference.at(ts_obj)
         alt, az, dist = topocentric.altaz()
 
@@ -121,8 +109,6 @@ class SkyfieldEphemerisCalculator(EphemerisCalculator):
                 alt.degrees,
                 az.degrees,
                 dist.km,
-                # dt_slice,
-                # self._datetimes,
                 dt_subset,
                 strict=False,
             )
