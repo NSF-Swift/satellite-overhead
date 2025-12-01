@@ -7,56 +7,63 @@ from sopp.analysis.event_finders.interference import (
     SatellitesInterferenceFilter,
     SatellitesWithinMainBeamFilter,
 )
-from sopp.models.overhead_window import OverheadWindow
-from sopp.models.position_time import PositionTime
-from sopp.models.reservation import Reservation
-from sopp.models.runtime_settings import RuntimeSettings
-from sopp.models.satellite.satellite import Satellite
-from sopp.models.time_window import TimeWindow
-from sopp.positioning.rhodesmill import (
-    SatellitePositionsWithRespectToFacilityRetriever,
-    SatellitePositionsWithRespectToFacilityRetrieverRhodesmill,
-)
-from sopp.utils.time import (
-    EvenlySpacedTimeIntervalsCalculator,
+from sopp.ephemeris.base import EphemerisCalculator
+from sopp.models import (
+    OverheadWindow,
+    PositionTime,
+    Reservation,
+    RuntimeSettings,
+    Satellite,
+    TimeWindow,
 )
 
 
-class EventFinderRhodesmill(EventFinder):
+class EventFinderSkyfield(EventFinder):
     def __init__(
         self,
         antenna_direction_path: list[PositionTime],
         list_of_satellites: list[Satellite],
         reservation: Reservation,
-        satellite_positions_with_respect_to_facility_retriever_class: type[
-            SatellitePositionsWithRespectToFacilityRetriever
-        ] = SatellitePositionsWithRespectToFacilityRetrieverRhodesmill,
+        ephemeris_calculator: EphemerisCalculator,
         runtime_settings: RuntimeSettings | None = None,
     ):
         super().__init__(
             antenna_direction_path=antenna_direction_path,
             list_of_satellites=list_of_satellites,
             reservation=reservation,
-            satellite_positions_with_respect_to_facility_retriever_class=satellite_positions_with_respect_to_facility_retriever_class,
             runtime_settings=runtime_settings,
         )
 
-        datetimes = EvenlySpacedTimeIntervalsCalculator(
-            time_window=reservation.time,
-            resolution=self.runtime_settings.time_continuity_resolution,
-        ).run()
-
-        self._satellite_positions_retriever = (
-            satellite_positions_with_respect_to_facility_retriever_class(
-                facility=reservation.facility, datetimes=datetimes
-            )
-        )
-
+        self.ephemeris_calculator = ephemeris_calculator
         self._filter_strategy = None
 
-    def get_satellites_above_horizon(self):
-        self._filter_strategy = SatellitesAboveHorizonFilter
-        return self._get_satellites_interference()
+    def _get_rise_set_windows(self, satellite: Satellite) -> list[TimeWindow]:
+        time_windows = self.ephemeris_calculator.find_events(
+            satellite,
+            self.runtime_settings.min_altitude,
+            self.reservation.time.begin,
+            self.reservation.time.end,
+        )
+
+        return time_windows
+
+    def get_satellites_above_horizon(self) -> list[OverheadWindow]:
+        overhead_windows = []
+        for satellite in self.list_of_satellites:
+            time_windows = self._get_rise_set_windows(satellite)
+
+            satellite_overhead_windows = []
+            for tw in time_windows:
+                positions = self.ephemeris_calculator.get_positions_window(
+                    satellite, tw.begin, tw.end
+                )
+                satellite_overhead_windows.append(
+                    OverheadWindow(satellite=satellite, positions=positions),
+                )
+
+            overhead_windows.extend(satellite_overhead_windows)
+
+        return overhead_windows
 
     def get_satellites_crossing_main_beam(self) -> list[OverheadWindow]:
         self._filter_strategy = SatellitesWithinMainBeamFilter
@@ -119,7 +126,11 @@ class EventFinderRhodesmill(EventFinder):
     def _get_satellite_positions_within_reservation(
         self, satellite: Satellite
     ) -> list[PositionTime]:
-        return self._satellite_positions_retriever.run(satellite)
+        return self.ephemeris_calculator.get_positions_window(
+            satellite=satellite,
+            start=self.reservation.time.begin,
+            end=self.reservation.time.end,
+        )
 
     @staticmethod
     def _filter_satellite_positions_within_time_window(

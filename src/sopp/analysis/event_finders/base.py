@@ -1,12 +1,11 @@
 from abc import ABC, abstractmethod
 
-from sopp.models.overhead_window import OverheadWindow
-from sopp.models.position_time import PositionTime
-from sopp.models.reservation import Reservation
-from sopp.models.runtime_settings import RuntimeSettings
-from sopp.models.satellite.satellite import Satellite
-from sopp.positioning.rhodesmill import (
-    SatellitePositionsWithRespectToFacilityRetriever,
+from sopp.models import (
+    OverheadWindow,
+    PositionTime,
+    Reservation,
+    RuntimeSettings,
+    Satellite,
 )
 
 
@@ -28,17 +27,11 @@ class EventFinder(ABC):
         antenna_direction_path: list[PositionTime],
         list_of_satellites: list[Satellite],
         reservation: Reservation,
-        satellite_positions_with_respect_to_facility_retriever_class: type[
-            SatellitePositionsWithRespectToFacilityRetriever
-        ],
         runtime_settings: RuntimeSettings | None = None,
     ):
         self.antenna_direction_path = antenna_direction_path
         self.list_of_satellites = list_of_satellites
         self.reservation = reservation
-        self.satellite_positions_with_respect_to_facility_retriever_class = (
-            satellite_positions_with_respect_to_facility_retriever_class
-        )
         self.runtime_settings = (
             runtime_settings if runtime_settings is not None else RuntimeSettings()
         )
