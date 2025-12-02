@@ -20,10 +20,7 @@ class SkyfieldEphemerisCalculator(EphemerisCalculator):
 
         # This creates the vector of time objects once.
         # This is an expensive operation in Skyfield, so we cache it.
-        if self._datetimes:
-            self._grid_timescale = SKYFIELD_TIMESCALE.from_datetimes(self._datetimes)
-        else:
-            self._grid_timescale = None
+        self._grid_timescale = SKYFIELD_TIMESCALE.from_datetimes(self._datetimes)
 
         self._facility_latlon = self._calculate_facility_latlon()
 
@@ -84,20 +81,18 @@ class SkyfieldEphemerisCalculator(EphemerisCalculator):
         start_idx = bisect.bisect_left(self._datetimes, start)
         end_idx = bisect.bisect_right(self._datetimes, end)
 
-        if start_idx >= end_idx or self._grid_timescale is None:
+        if start_idx >= end_idx:
             return []
 
-        if start_idx == 0 and end_idx == len(self._datetimes):
-            ts_obj = self._grid_timescale
-            dt_subset = self._datetimes
-        else:
-            ts_obj = self._grid_timescale[start_idx:end_idx]
-            dt_subset = self._datetimes[start_idx:end_idx]
+        ts_slice = self._grid_timescale[start_idx:end_idx]
+        dt_slice = self._datetimes[start_idx:end_idx]
+
+        self._inject_earth_physics(ts_slice, start_idx, end_idx)
 
         sat_skyfield = satellite.to_skyfield()
         difference = sat_skyfield - self._facility_latlon
 
-        topocentric = difference.at(ts_obj)
+        topocentric = difference.at(ts_slice)
         alt, az, dist = topocentric.altaz()
 
         return [
@@ -109,7 +104,7 @@ class SkyfieldEphemerisCalculator(EphemerisCalculator):
                 alt.degrees,
                 az.degrees,
                 dist.km,
-                dt_subset,
+                dt_slice,
                 strict=False,
             )
         ]
@@ -120,15 +115,14 @@ class SkyfieldEphemerisCalculator(EphemerisCalculator):
         """
 
         idx = bisect.bisect_left(self._datetimes, time)
-
         target_t = None
 
         # Check if the index is valid and the time matches exactly
         if idx < len(self._datetimes) and self._datetimes[idx] == time:
-            # Cache Hit: Extract the scalar Time object from our vector
             target_t = self._grid_timescale[idx]
+            self._inject_earth_physics(target_t, idx)
         else:
-            # Cache Miss: The requested time is not in our grid.
+            # The requested time is not in our grid.
             target_t = SKYFIELD_TIMESCALE.from_datetime(time)
 
         sat_skyfield = satellite.to_skyfield()
@@ -141,6 +135,28 @@ class SkyfieldEphemerisCalculator(EphemerisCalculator):
             Position(altitude=alt.degrees, azimuth=az.degrees, distance_km=dist.km),
             time=time,
         )
+
+    def _inject_earth_physics(self, target_time_obj, start_idx, end_idx=None):
+        """
+        Injects the Earth Rotation Matrix (M) from the
+        Master Grid to a slice/scalar time object to avoid recalculation.
+        """
+        # Ensure we have the matrix
+        if "M" not in self._grid_timescale.__dict__:
+            _ = self._grid_timescale.M
+
+        # Slice the matrix
+        parent_M = self._grid_timescale.M  # Shape (3, 3, N)
+
+        if end_idx is not None:
+            # Vector Slice
+            sliced_M = parent_M[:, :, start_idx:end_idx]
+        else:
+            # Scalar Index
+            sliced_M = parent_M[:, :, start_idx]
+
+        # Inject
+        target_time_obj.__dict__["M"] = sliced_M
 
     def _calculate_facility_latlon(self):
         return wgs84.latlon(
