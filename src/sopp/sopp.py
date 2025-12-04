@@ -6,8 +6,8 @@ from sopp.analysis.event_finders.skyfield import (
     EventFinderSkyfield,
 )
 from sopp.ephemeris.skyfield import SkyfieldEphemerisCalculator
-from sopp.models import Configuration, OverheadWindow
-from sopp.utils.time import EvenlySpacedTimeIntervalsCalculator
+from sopp.models import Configuration, SatelliteTrajectory
+from sopp.utils.time import generate_time_grid
 
 
 class Sopp:
@@ -19,10 +19,10 @@ class Sopp:
         self._configuration = configuration
         self._injected_event_finder = event_finder
 
-    def get_satellites_above_horizon(self) -> list[OverheadWindow]:
+    def get_satellites_above_horizon(self) -> list[SatelliteTrajectory]:
         return self._event_finder.get_satellites_above_horizon()
 
-    def get_satellites_crossing_main_beam(self) -> list[OverheadWindow]:
+    def get_satellites_crossing_main_beam(self) -> list[SatelliteTrajectory]:
         return self._event_finder.get_satellites_crossing_main_beam()
 
     @cached_property
@@ -32,10 +32,11 @@ class Sopp:
 
         self._validate_configuration()
 
-        datetimes = EvenlySpacedTimeIntervalsCalculator(
-            time_window=self._configuration.reservation.time,
-            resolution=self._configuration.runtime_settings.time_continuity_resolution,
-        ).run()
+        datetimes = generate_time_grid(
+            start=self._configuration.reservation.time.begin,
+            end=self._configuration.reservation.time.end,
+            resolution_seconds=self._configuration.runtime_settings.time_resolution_seconds,
+        )
 
         ephemeris_calculator = SkyfieldEphemerisCalculator(
             facility=self._configuration.reservation.facility, datetimes=datetimes
@@ -62,9 +63,9 @@ class Sopp:
 
     def _validate_runtime_settings(self):
         runtime_settings = self._configuration.runtime_settings
-        if runtime_settings.time_continuity_resolution < timedelta(seconds=1):
+        if runtime_settings.time_resolution_seconds <= 0.0:
             raise ValueError(
-                f"time_continuity_resolution must be at least 1 second, provided: {runtime_settings.time_continuity_resolution}"
+                f"time_resolution_seconds must be at least 1 second, provided: {runtime_settings.time_resolution_seconds}"
             )
         if runtime_settings.concurrency_level < 1:
             raise ValueError(

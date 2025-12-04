@@ -1,19 +1,22 @@
+import numpy as np
 from datetime import datetime, timedelta
 from math import ceil
 
-from sopp.models.time_window import TimeWindow
 
+def generate_time_grid(
+    start: datetime, end: datetime, resolution_seconds: float = 1.0
+) -> np.ndarray:
+    """
+    Generates a NumPy array containing Python datetime objects.
+    """
+    duration = (end - start).total_seconds()
 
-class EvenlySpacedTimeIntervalsCalculator:
-    def __init__(
-        self, time_window: TimeWindow, resolution: timedelta = timedelta(seconds=1)
-    ):
-        self._resolution = resolution
-        self._time_window = time_window
+    if duration <= 0:
+        return np.array([start], dtype=object)
 
-    def run(self) -> list[datetime]:
-        timespan = self._time_window.end - self._time_window.begin
-        return [
-            self._time_window.begin + self._resolution * i
-            for i in range(ceil(timespan / self._resolution))
-        ]
+    steps = int(ceil(duration / resolution_seconds))
+    offsets = np.arange(steps) * resolution_seconds
+
+    dt_list = [start + timedelta(seconds=x.item()) for x in offsets]
+
+    return np.array(dt_list, dtype=object)

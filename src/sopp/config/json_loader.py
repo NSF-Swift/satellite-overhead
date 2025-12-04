@@ -68,7 +68,7 @@ class ConfigFileLoaderJson(ConfigFileLoaderBase):
 
         return (
             RuntimeSettings(
-                time_continuity_resolution=configuration["time_continuity_resolution"],
+                time_resolution_seconds=configuration["time_resolution_seconds"],
                 concurrency_level=configuration["concurrency_level"],
             )
             if configuration

@@ -127,13 +127,13 @@ class ConfigurationBuilder:
 
     def set_runtime_settings(
         self,
-        time_continuity_resolution: int | None = 1,
-        concurrency_level: int | None = 1,
-        min_altitude: float | None = 0.0,
+        time_resolution_seconds: float = 1,
+        concurrency_level: int = 1,
+        min_altitude: float = 0.0,
     ) -> "ConfigurationBuilder":
         self.runtime_settings = RuntimeSettings(
             concurrency_level=concurrency_level,
-            time_continuity_resolution=time_continuity_resolution,
+            time_resolution_seconds=time_resolution_seconds,
             min_altitude=min_altitude,
         )
         return self
