@@ -2,33 +2,34 @@ import pytest
 from datetime import datetime, timedelta, timezone
 from dataclasses import replace
 
-from sopp.models.coordinates import Coordinates
-from sopp.models.facility import Facility
+from sopp.ephemeris.skyfield import SkyfieldEphemerisCalculator
 from sopp.models.satellite.international_designator import InternationalDesignator
 from sopp.models.satellite.mean_motion import MeanMotion
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.satellite.tle_information import TleInformation
-from sopp.ephemeris.skyfield import SkyfieldEphemerisCalculator
+from sopp.models import Facility, TimeWindow, Coordinates
 
 
-def test_altitude_can_be_negative(calculator_empty, arbitrary_satellite, sample_time):
+def test_altitude_can_be_negative(
+    calculator_with_grid, arbitrary_satellite, sample_time
+):
     """
     Verifies that we can calculate a position for a satellite below the horizon.
     """
-    # Uses ad-hoc lookup (get_position_at) since calculator is empty
-    position = calculator_empty.get_position_at(arbitrary_satellite, sample_time)
-    assert position.position.altitude < 0
+    # Uses ad-hoc lookup (calculate_position) since calculator is empty
+    position = calculator_with_grid.calculate_position(arbitrary_satellite, sample_time)
+    assert position.altitude < 0
 
 
 def test_azimuth_can_be_greater_than_180(
-    calculator_empty, arbitrary_satellite, sample_time
+    calculator_with_grid, arbitrary_satellite, sample_time
 ):
     """
     Verifies azimuth ranges are standard (0-360).
     """
-    position = calculator_empty.get_position_at(arbitrary_satellite, sample_time)
+    position = calculator_with_grid.calculate_position(arbitrary_satellite, sample_time)
     # Based on the TLE/Time, this specific sat has Az > 180
-    assert position.position.azimuth > 180
+    assert position.azimuth > 180
 
 
 def test_altitude_decreases_as_facility_elevation_increases(
@@ -39,18 +40,18 @@ def test_altitude_decreases_as_facility_elevation_increases(
     """
     # 1. Facility at Sea Level
     facility_sea_level = Facility(Coordinates(latitude=0, longitude=-24.66605))
-    calc_sea = SkyfieldEphemerisCalculator(facility_sea_level, [])
-    pos_sea = calc_sea.get_position_at(arbitrary_satellite, sample_time)
+    calc_sea = SkyfieldEphemerisCalculator(facility_sea_level, [sample_time])
+    pos_sea = calc_sea.calculate_position(arbitrary_satellite, sample_time)
 
     # 2. Facility at 1000m
     facility_high = replace(facility_sea_level, elevation=1000)
-    calc_high = SkyfieldEphemerisCalculator(facility_high, [])
-    pos_high = calc_high.get_position_at(arbitrary_satellite, sample_time)
+    calc_high = SkyfieldEphemerisCalculator(facility_high, [sample_time])
+    pos_high = calc_high.calculate_position(arbitrary_satellite, sample_time)
 
-    assert pos_high.position.altitude < pos_sea.position.altitude
+    assert pos_high.altitude < pos_sea.altitude
 
 
-def test_get_position_at_uses_cache_if_available(
+def test_calculate_position_uses_cache_if_available(
     calculator_with_grid, arbitrary_satellite, time_grid
 ):
     """
@@ -58,13 +59,12 @@ def test_get_position_at_uses_cache_if_available(
     (and implicitly assumes it uses the fast cache path).
     """
     target_time = time_grid[2]  # The middle point
-    pos = calculator_with_grid.get_position_at(arbitrary_satellite, target_time)
+    pos = calculator_with_grid.calculate_position(arbitrary_satellite, target_time)
 
-    assert pos.time == target_time
-    assert isinstance(pos.position.altitude, float)
+    assert isinstance(pos.altitude, float)
 
 
-def test_get_position_at_falls_back_if_missing_from_grid(
+def test_calculate_position_falls_back_if_missing_from_grid(
     calculator_with_grid, arbitrary_satellite, sample_time
 ):
     """
@@ -74,13 +74,12 @@ def test_get_position_at_falls_back_if_missing_from_grid(
     # 30 seconds after the first grid point
     off_grid_time = sample_time + timedelta(seconds=30)
 
-    pos = calculator_with_grid.get_position_at(arbitrary_satellite, off_grid_time)
+    pos = calculator_with_grid.calculate_position(arbitrary_satellite, off_grid_time)
 
-    assert pos.time == off_grid_time
-    assert isinstance(pos.position.altitude, float)
+    assert isinstance(pos.altitude, float)
 
 
-def test_get_positions_within_window_slices_correctly(
+def test_calculate_trajectory_slices_correctly(
     calculator_with_grid, arbitrary_satellite, time_grid
 ):
     """
@@ -96,17 +95,17 @@ def test_get_positions_within_window_slices_correctly(
     # Note: Depending on specific bisect_right logic, check if end is inclusive or exclusive
     # Standard python slice [1:3] includes indices 1 and 2.
 
-    results = calculator_with_grid.get_positions_window(
+    results = calculator_with_grid.calculate_trajectory(
         arbitrary_satellite, start_window, end_window
     )
 
     assert len(results) == 3
-    assert results[0].time == time_grid[1]
-    assert results[1].time == time_grid[2]
+    assert results.times[0] == time_grid[1]
+    assert results.times[1] == time_grid[2]
     # Ensure T3 is NOT included if using standard slicing (or adjust assert if you made it inclusive)
 
 
-def test_get_positions_within_window_returns_empty_if_no_overlap(
+def test_calculate_trajectory_returns_empty_if_no_overlap(
     calculator_with_grid, arbitrary_satellite, sample_time
 ):
     """
@@ -117,25 +116,115 @@ def test_get_positions_within_window_returns_empty_if_no_overlap(
     t_start = sample_time + timedelta(seconds=15)
     t_end = sample_time + timedelta(seconds=45)
 
-    results = calculator_with_grid.get_positions_window(
+    results = calculator_with_grid.calculate_trajectory(
         arbitrary_satellite, t_start, t_end
     )
 
-    assert results == []
+    assert len(results.times) == 0
 
 
-def test_find_events_with_grid(calculator_with_grid, arbitrary_satellite, sample_time):
+def test_calculate_visibility_windows_with_grid(
+    calculator_with_grid, arbitrary_satellite, sample_time
+):
     """
-    Verifies find_events works when grid is present.
+    Verifies calculate_visibility_windows works when grid is present.
     """
     # We don't expect actual events in this 5 minute window for this sat,
     # but we check the types are valid.
     t_start = sample_time + timedelta(seconds=15)
     t_end = sample_time + timedelta(seconds=45)
 
-    windows = calculator_with_grid.find_events(arbitrary_satellite, 0.0, t_start, t_end)
+    windows = calculator_with_grid.calculate_visibility_windows(
+        arbitrary_satellite, 0.0, t_start, t_end
+    )
 
     assert isinstance(windows, list)
+
+
+def test_calculate_trajectories_handles_multiple_windows(
+    calculator_with_grid, arbitrary_satellite, time_grid
+):
+    """
+    Verifies that the batch engine correctly processes multiple disjoint windows
+    and returns a list of separate trajectories.
+    """
+    # Grid: [T0, T1, T2, T3, T4]
+
+    # Window A: T0 -> T1 (indices 0, 1)
+    win_a = TimeWindow(time_grid[0], time_grid[1])
+
+    # Window B: T3 -> T4 (indices 3, 4) - skipping T2 to ensure 'gaps' work
+    win_b = TimeWindow(time_grid[3], time_grid[4])
+
+    results = calculator_with_grid.calculate_trajectories(
+        arbitrary_satellite, [win_a, win_b]
+    )
+
+    assert len(results) == 2
+
+    # Check Window A
+    traj_a = results[0]
+    assert (
+        len(traj_a) == 2
+    )  # T0, T1 (depending on bisect logic, might be 1 if exclusive)
+    assert len(traj_a) == 2
+    assert traj_a.times[0] == time_grid[0]
+    assert traj_a.times[1] == time_grid[1]
+
+    # Check Window B
+    traj_b = results[1]
+    assert len(traj_b) == 2
+    assert traj_b.times[0] == time_grid[3]
+    assert traj_b.times[1] == time_grid[4]
+
+    # Check that the GAP (T2) did not leak into results
+    all_times = list(traj_a.times) + list(traj_b.times)
+    assert time_grid[2] not in all_times
+
+
+def test_trajectory_data_alignment(
+    calculator_with_grid, arbitrary_satellite, time_grid
+):
+    """
+    Verifies that the vector arrays in the trajectory are all the same length.
+    """
+    win = TimeWindow(time_grid[0], time_grid[-1])
+    traj = calculator_with_grid.calculate_trajectory(
+        arbitrary_satellite, win.begin, win.end
+    )
+
+    n = len(traj.times)
+    assert len(traj.azimuth) == n
+    assert len(traj.altitude) == n
+    assert len(traj.distance_km) == n
+    assert n > 0
+
+
+def test_scalar_and_vector_methods_are_consistent(
+    calculator_with_grid, arbitrary_satellite, time_grid
+):
+    """
+    Verifies that getting a single point via calculate_position returns
+    the same values as extracting that point from a trajectory.
+    """
+    target_time = time_grid[2]
+
+    # 1. Scalar Method
+    pos_scalar = calculator_with_grid.calculate_position(
+        arbitrary_satellite, target_time
+    )
+
+    # 2. Vector Method
+    # Create a tiny window around the target time to capture it in a trajectory
+    traj = calculator_with_grid.calculate_trajectory(
+        arbitrary_satellite, target_time, target_time
+    )
+
+    assert len(traj) >= 1
+
+    # Compare
+    assert pos_scalar.azimuth == pytest.approx(traj.azimuth[0])
+    assert pos_scalar.altitude == pytest.approx(traj.altitude[0])
 
 
 @pytest.fixture

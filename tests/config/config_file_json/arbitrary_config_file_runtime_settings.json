@@ -15,7 +15,7 @@
     "bandwidth": 10
   },
   "runtimeSettings": {
-      "time_continuity_resolution": 5,
+      "time_resolution_seconds": 5,
       "concurrency_level": 6
   },
   "observationTarget": {

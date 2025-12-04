@@ -8,7 +8,7 @@ from sopp.io.get_frequency_data_from_csv import (
     GetFrequencyDataFromCsv,
 )
 from sopp.models.frequency_range import FrequencyRange
-from sopp.models.overhead_window import OverheadWindow
+from sopp.models.satellite_trajectory import SatelliteTrajectory
 from sopp.models.reservation import Reservation
 from sopp.models.satellite.international_designator import (
     InternationalDesignator,
@@ -54,7 +54,7 @@ class TestSortedByLeastNumberOfSatellites:
         assert suggestions == self._expected_suggestions_search
 
     @property
-    def _overhead_windows(self) -> list[OverheadWindow]:
+    def _overhead_windows(self) -> list[SatelliteTrajectory]:
         return (
             self._two_overhead_windows_on_ideal_reservation
             + self._one_overhead_window_on_second_closest_reservation
@@ -97,7 +97,7 @@ class TestSortedByLeastNumberOfSatellites:
                 ),
                 ideal_reservation=self._ideal_reservation,
                 overhead_satellites=[
-                    OverheadWindow(
+                    SatelliteTrajectory(
                         satellite=Satellite(
                             name="FAKE ISS (ZARYA)",
                             tle_information=TleInformation(
@@ -156,7 +156,7 @@ class TestSortedByLeastNumberOfSatellites:
                 ),
                 ideal_reservation=self._ideal_reservation,
                 overhead_satellites=[
-                    OverheadWindow(
+                    SatelliteTrajectory(
                         satellite=Satellite(
                             name="FAKE ISS (ZARYA)",
                             tle_information=TleInformation(
@@ -242,16 +242,16 @@ class TestSortedByLeastNumberOfSatellites:
         )
 
     @property
-    def _two_overhead_windows_on_ideal_reservation(self) -> list[OverheadWindow]:
+    def _two_overhead_windows_on_ideal_reservation(self) -> list[SatelliteTrajectory]:
         return [
-            OverheadWindow(
+            SatelliteTrajectory(
                 satellite=Satellite(frequency=_ARBITRARY_FREQUENCY_RANGE, name="name1"),
                 overhead_time=TimeWindow(
                     begin=datetime(year=2022, month=11, day=20),
                     end=datetime(year=2022, month=11, day=20, hour=1),
                 ),
             ),
-            OverheadWindow(
+            SatelliteTrajectory(
                 satellite=Satellite(frequency=_ARBITRARY_FREQUENCY_RANGE, name="name2"),
                 overhead_time=TimeWindow(
                     begin=datetime(year=2022, month=11, day=20),
@@ -263,9 +263,9 @@ class TestSortedByLeastNumberOfSatellites:
     @property
     def _one_overhead_window_on_second_closest_reservation(
         self,
-    ) -> list[OverheadWindow]:
+    ) -> list[SatelliteTrajectory]:
         return [
-            OverheadWindow(
+            SatelliteTrajectory(
                 satellite=Satellite(frequency=_ARBITRARY_FREQUENCY_RANGE, name="name3"),
                 overhead_time=TimeWindow(
                     begin=datetime(year=2022, month=11, day=21),

@@ -7,7 +7,7 @@ from sopp.models.configuration import Configuration
 from sopp.models.coordinates import Coordinates
 from sopp.models.facility import Facility
 from sopp.models.frequency_range import FrequencyRange
-from sopp.models.overhead_window import OverheadWindow
+from sopp.models.satellite_trajectory import SatelliteTrajectory
 from sopp.models.position import Position
 from sopp.models.position_time import PositionTime
 from sopp.models.reservation import Reservation
@@ -23,7 +23,7 @@ from sopp.sopp import Sopp
 
 
 def assert_overhead_windows_eq(
-    actual: OverheadWindow, expected: OverheadWindow
+    actual: SatelliteTrajectory, expected: SatelliteTrajectory
 ) -> None:
     assert actual.satellite == expected.satellite
     for actual_position, expected_position in zip(
@@ -67,7 +67,7 @@ class TestSopp:
         actual_interference_windows = sopp.get_satellites_crossing_main_beam()
 
         expected_satellites_above_horizon = [
-            OverheadWindow(
+            SatelliteTrajectory(
                 satellite=self._satellite_in_mainbeam,
                 positions=[
                     PositionTime(
@@ -96,7 +96,7 @@ class TestSopp:
                     ),
                 ],
             ),
-            OverheadWindow(
+            SatelliteTrajectory(
                 satellite=self._satellite_inside_frequency_range_and_above_horizon_and_outside_mainbeam,
                 positions=[
                     PositionTime(
@@ -110,7 +110,7 @@ class TestSopp:
         ]
 
         expected_interference_windows = [
-            OverheadWindow(
+            SatelliteTrajectory(
                 satellite=self._satellite_in_mainbeam,
                 positions=[
                     PositionTime(
@@ -166,7 +166,7 @@ class TestSopp:
         sopp._validate_runtime_settings()
 
     def test_validate_runtime_settings_time_resolution(self):
-        runtime_settings = RuntimeSettings(time_continuity_resolution=-1)
+        runtime_settings = RuntimeSettings(time_resolution_seconds=-1)
         configuration = Configuration(
             satellites=["test"],
             antenna_direction_path=[],
@@ -511,7 +511,7 @@ def arbitrary_config():
 
 def overhead_windows():
     return [
-        OverheadWindow(
+        SatelliteTrajectory(
             satellite=Satellite(name="TestSatellite"),
             positions=[
                 PositionTime(
@@ -540,7 +540,7 @@ def overhead_windows():
                 ),
             ],
         ),
-        OverheadWindow(
+        SatelliteTrajectory(
             satellite=Satellite(name="TestSatellite2"),
             positions=[
                 PositionTime(

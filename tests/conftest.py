@@ -23,10 +23,12 @@ class EphemerisCalculatorStub(EphemerisCalculator):
     Simulates a satellite that is always visible and at (0,0) coordinates.
     """
 
-    def find_events(self, satellite, min_altitude, start_time, end_time):
+    def calculate_visibility_windows(
+        self, satellite, min_altitude, start_time, end_time
+    ):
         return [TimeWindow(start_time, end_time)]
 
-    def get_positions_window(self, satellite, start, end):
+    def calculate_trajectory(self, satellite, start, end):
         # Generate 1-second positions for the whole window
         positions = []
         current = start
@@ -38,7 +40,7 @@ class EphemerisCalculatorStub(EphemerisCalculator):
             current += timedelta(seconds=1)
         return positions
 
-    def get_position_at(self, satellite, time):
+    def calculate_position(self, satellite, time):
         return PositionTime(
             Position(
                 altitude=ARBITRARY_ALTITUDE,

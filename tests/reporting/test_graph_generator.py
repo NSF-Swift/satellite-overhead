@@ -4,7 +4,7 @@ import pytest
 from numpy import asarray
 from numpy.ma import allequal
 
-from sopp.models.overhead_window import OverheadWindow
+from sopp.models.satellite_trajectory import SatelliteTrajectory
 from sopp.models.position import Position
 from sopp.models.position_time import PositionTime
 from sopp.reporting import generator
@@ -29,9 +29,9 @@ class TestGraphGenerator:
         self._mock_pyplot.show.assert_called()
 
     @property
-    def _arbitrary_overhead_window_two(self) -> list[OverheadWindow]:
+    def _arbitrary_overhead_window_two(self) -> list[SatelliteTrajectory]:
         return [
-            OverheadWindow(
+            SatelliteTrajectory(
                 satellite=None,
                 positions=[
                     PositionTime(
@@ -47,9 +47,9 @@ class TestGraphGenerator:
         ]
 
     @property
-    def _arbitrary_overhead_window(self) -> list[OverheadWindow]:
+    def _arbitrary_overhead_window(self) -> list[SatelliteTrajectory]:
         return [
-            OverheadWindow(
+            SatelliteTrajectory(
                 satellite=None,
                 positions=[
                     PositionTime(

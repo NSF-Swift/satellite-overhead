@@ -73,7 +73,7 @@ class TestConfigFileProvidedArgument:
         config = self._get_config_file_object(
             config_filename="config_file_json/arbitrary_config_file_runtime_settings.json"
         )
-        expected = RuntimeSettings(time_continuity_resolution=5, concurrency_level=6)
+        expected = RuntimeSettings(time_resolution_seconds=5, concurrency_level=6)
         actual = config.configuration.runtime_settings
         assert expected == actual
 

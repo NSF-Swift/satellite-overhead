@@ -77,11 +77,11 @@ class TestConfigurationBuilder:
 
     def test_set_runtime_settings(self):
         builder = ConfigurationBuilder()
-        builder.set_runtime_settings(concurrency_level=1, time_continuity_resolution=1)
+        builder.set_runtime_settings(concurrency_level=1, time_resolution_seconds=1)
 
         assert builder.runtime_settings == RuntimeSettings(
             concurrency_level=1,
-            time_continuity_resolution=1,
+            time_resolution_seconds=1,
         )
 
     def test_set_time_window_str(self):

@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 from sopp.models.coordinates import Coordinates
 from sopp.models.facility import Facility
-from sopp.models.overhead_window import OverheadWindow
+from sopp.models.satellite_trajectory import SatelliteTrajectory
 from sopp.models.position import Position
 from sopp.models.position_time import PositionTime
 
@@ -26,7 +26,7 @@ def create_overhead_window(satellite, altitude, azimuth, start_time, num_positio
         for i in range(num_positions)
     ]
 
-    return OverheadWindow(satellite=satellite, positions=positions)
+    return SatelliteTrajectory(satellite=satellite, positions=positions)
 
 
 def create_expected_windows(expected_positions):
