@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from functools import cached_property
 
 from sopp.models.coordinates import Coordinates
 
@@ -20,9 +21,9 @@ class Facility:
     elevation: float = 0
     name: str | None = "Unnamed Facility"
 
-    @property
-    def half_beamwidth(self) -> float:
-        return self.beamwidth / 2
+    @cached_property
+    def beam_radius(self) -> float:
+        return self.beamwidth / 2.0
 
     def __str__(self):
         return (
