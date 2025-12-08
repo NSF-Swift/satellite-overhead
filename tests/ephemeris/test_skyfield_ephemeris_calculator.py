@@ -1,4 +1,5 @@
 import pytest
+import numpy as np
 from datetime import datetime, timedelta, timezone
 from dataclasses import replace
 
@@ -10,13 +11,29 @@ from sopp.models.satellite.tle_information import TleInformation
 from sopp.models import Facility, TimeWindow, Coordinates
 
 
+def test_init_accepts_numpy_array(facility_at_zero, time_grid):
+    """
+    Verifies that the calculator correctly handles NumPy arrays in __init__,
+    converting/storing them correctly.
+    """
+    # Case 1: Standard List (Already covered by fixture, but explicit here)
+    calc_list = SkyfieldEphemerisCalculator(facility_at_zero, time_grid)
+    assert len(calc_list._datetimes) == 5
+
+    # Case 2: NumPy Array
+    np_grid = np.array(time_grid)
+    calc_np = SkyfieldEphemerisCalculator(facility_at_zero, np_grid)
+    assert len(calc_np._datetimes) == 5
+    # Ensure it didn't crash and physics are cached
+    assert "M" in calc_np._grid_timescale.__dict__
+
+
 def test_altitude_can_be_negative(
     calculator_with_grid, arbitrary_satellite, sample_time
 ):
     """
     Verifies that we can calculate a position for a satellite below the horizon.
     """
-    # Uses ad-hoc lookup (calculate_position) since calculator is empty
     position = calculator_with_grid.calculate_position(arbitrary_satellite, sample_time)
     assert position.altitude < 0
 
@@ -86,23 +103,23 @@ def test_calculate_trajectory_slices_correctly(
     Verifies the bisect logic returns exactly the subset of grid points within the window.
     """
     # Grid: [T0, T1, T2, T3, T4]
-    # Window: T1 -> T3 (Inclusive start, Exclusive end usually, depending on bisect usage)
-    # Our bisect implementation usually slices [Start:End]
 
     start_window = time_grid[1]
     end_window = time_grid[3]  # Should include T1, T2
-
-    # Note: Depending on specific bisect_right logic, check if end is inclusive or exclusive
-    # Standard python slice [1:3] includes indices 1 and 2.
 
     results = calculator_with_grid.calculate_trajectory(
         arbitrary_satellite, start_window, end_window
     )
 
+    # Should contain T1 and T2 (Inclusive-Exclusive behavior depending on implementation,
+    # but based on previous tests we established len=3 means Inclusive T3?)
+    # Re-verifying logic:
+    # If calculate_trajectory uses generate_time_grid or slicing:
+    # If the grid exists, we slice. [1:4] -> 1, 2, 3.
     assert len(results) == 3
     assert results.times[0] == time_grid[1]
     assert results.times[1] == time_grid[2]
-    # Ensure T3 is NOT included if using standard slicing (or adjust assert if you made it inclusive)
+    assert results.times[2] == time_grid[3]
 
 
 def test_calculate_trajectory_returns_empty_if_no_overlap(
@@ -123,14 +140,27 @@ def test_calculate_trajectory_returns_empty_if_no_overlap(
     assert len(results.times) == 0
 
 
+def test_calculate_trajectories_with_out_of_bounds_window(
+    calculator_with_grid, arbitrary_satellite, sample_time
+):
+    """
+    Verifies that the batch method handles windows completely outside the grid range
+    gracefully (returning empty trajectories) rather than crashing.
+    """
+    # Window way in the future
+    future = sample_time + timedelta(days=100)
+    win = TimeWindow(future, future + timedelta(seconds=1))
+
+    results = calculator_with_grid.calculate_trajectories(arbitrary_satellite, [win])
+    assert len(results) == 0
+
+
 def test_calculate_visibility_windows_with_grid(
     calculator_with_grid, arbitrary_satellite, sample_time
 ):
     """
     Verifies calculate_visibility_windows works when grid is present.
     """
-    # We don't expect actual events in this 5 minute window for this sat,
-    # but we check the types are valid.
     t_start = sample_time + timedelta(seconds=15)
     t_end = sample_time + timedelta(seconds=45)
 
@@ -150,10 +180,10 @@ def test_calculate_trajectories_handles_multiple_windows(
     """
     # Grid: [T0, T1, T2, T3, T4]
 
-    # Window A: T0 -> T1 (indices 0, 1)
+    # Window A: T0 -> T1
     win_a = TimeWindow(time_grid[0], time_grid[1])
 
-    # Window B: T3 -> T4 (indices 3, 4) - skipping T2 to ensure 'gaps' work
+    # Window B: T3 -> T4 (skipping T2 to ensure 'gaps' work)
     win_b = TimeWindow(time_grid[3], time_grid[4])
 
     results = calculator_with_grid.calculate_trajectories(
@@ -164,9 +194,6 @@ def test_calculate_trajectories_handles_multiple_windows(
 
     # Check Window A
     traj_a = results[0]
-    assert (
-        len(traj_a) == 2
-    )  # T0, T1 (depending on bisect logic, might be 1 if exclusive)
     assert len(traj_a) == 2
     assert traj_a.times[0] == time_grid[0]
     assert traj_a.times[1] == time_grid[1]
@@ -178,7 +205,8 @@ def test_calculate_trajectories_handles_multiple_windows(
     assert traj_b.times[1] == time_grid[4]
 
     # Check that the GAP (T2) did not leak into results
-    all_times = list(traj_a.times) + list(traj_b.times)
+    # Checking times directly using numpy isin or set intersection
+    all_times = np.concatenate([traj_a.times, traj_b.times])
     assert time_grid[2] not in all_times
 
 
@@ -215,7 +243,6 @@ def test_scalar_and_vector_methods_are_consistent(
     )
 
     # 2. Vector Method
-    # Create a tiny window around the target time to capture it in a trajectory
     traj = calculator_with_grid.calculate_trajectory(
         arbitrary_satellite, target_time, target_time
     )
@@ -229,9 +256,7 @@ def test_scalar_and_vector_methods_are_consistent(
 
 @pytest.fixture
 def arbitrary_satellite() -> Satellite:
-    """
-    COSMOS 1932 DEB
-    """
+    """COSMOS 1932 DEB"""
     return Satellite(
         name="ARBITRARY SATELLITE",
         tle_information=TleInformation(
