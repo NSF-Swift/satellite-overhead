@@ -3,7 +3,7 @@ name = "sopp"
 dynamic = ["version"]
 dependencies = [
     "sgp4~=2.21",
-    "skyfield~=1.47",
+    "skyfield>=1.53",
     "requests~=2.32.4",
     "python-dateutil~=2.8.2",
     "python-dotenv~=0.21.0",
@@ -45,6 +45,9 @@ exclude = [
 
 [tool.hatch.version]
 path = "src/sopp/__about__.py"
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.hatch.envs.default]
 python = "3.11"
