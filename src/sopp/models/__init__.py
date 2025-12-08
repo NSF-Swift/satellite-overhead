@@ -1,23 +1,21 @@
-from .position import Position
-from .position_time import PositionTime
-from .overhead_window import OverheadWindow
-from .time_window import TimeWindow
-from .reservation import Reservation
-from .facility import Facility
-from .runtime_settings import RuntimeSettings
-from .configuration_file import ConfigurationFile
+from .antenna_trajectory import AntennaTrajectory
 from .configuration import Configuration
+from .configuration_file import ConfigurationFile
 from .coordinates import Coordinates
+from .facility import Facility
 from .frequency_range import FrequencyRange
 from .observation_target import ObservationTarget
-
-
+from .position import Position
+from .position_time import PositionTime
+from .reservation import Reservation
+from .runtime_settings import RuntimeSettings
 from .satellite.satellite import Satellite
+from .satellite_trajectory import SatelliteTrajectory
+from .time_window import TimeWindow
 
 __all__ = [
     "Position",
     "PositionTime",
-    "OverheadWindow",
     "TimeWindow",
     "Reservation",
     "Facility",
@@ -28,4 +26,7 @@ __all__ = [
     "Coordinates",
     "FrequencyRange",
     "ObservationTarget",
+    "SatelliteTrajectory",
+    "AntennaTrajectory",
+    "InternationalDesignator",
 ]
