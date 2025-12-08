@@ -132,30 +132,30 @@ class TestConfigurationBuilder:
 
         assert builder.satellites == []
 
-    def test_build_antenna_direction_path_target(self):
+    def test_build_antenna_trajectory_target(self):
         builder = ConfigurationBuilder(path_finder_class=StubPathFinder)
         builder._observation_target = "mock"
-        builder._build_antenna_direction_path()
+        builder._build_antenna_trajectory()
 
-        assert builder._antenna_direction_path == [expected_position_time()]
+        assert builder._antenna_trajectory == [expected_position_time()]
 
-    def test_build_antenna_direction_path_static(self):
+    def test_build_antenna_trajectory_static(self):
         builder = ConfigurationBuilder()
         builder._static_observation_target = expected_position_time().position
         builder.set_time_window(
             begin="2023-11-15T08:00:00.0",
             end="2023-11-15T08:30:00.0",
         )
-        builder._build_antenna_direction_path()
+        builder._build_antenna_trajectory()
 
-        assert builder._antenna_direction_path == [expected_position_time()]
+        assert builder._antenna_trajectory == [expected_position_time()]
 
-    def test_build_antenna_direction_path_custom(self):
+    def test_build_antenna_trajectory_custom(self):
         builder = ConfigurationBuilder()
         builder._custom_observation_path = [expected_position_time()]
-        builder._build_antenna_direction_path()
+        builder._build_antenna_trajectory()
 
-        assert builder._antenna_direction_path == [expected_position_time()]
+        assert builder._antenna_trajectory == [expected_position_time()]
 
     def test_build_error(self):
         builder = ConfigurationBuilder()
@@ -178,7 +178,7 @@ class TestConfigurationBuilder:
         assert configuration == Configuration(
             reservation=expected_reservation(),
             runtime_settings=RuntimeSettings(),
-            antenna_direction_path=[expected_position_time()],
+            antenna_trajectory=[expected_position_time()],
             satellites=[Satellite(name="TestSatellite")],
         )
 
@@ -203,7 +203,7 @@ class TestConfigurationBuilder:
         assert configuration == Configuration(
             reservation=expected_reservation(),
             runtime_settings=RuntimeSettings(),
-            antenna_direction_path=[expected_position_time()],
+            antenna_trajectory=[expected_position_time()],
             satellites=[Satellite(name="TestSatellite")],
         )
 

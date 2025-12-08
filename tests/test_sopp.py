@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from sopp.analysis.event_finders.base import EventFinder
+from sopp.event_finders.base import EventFinder
 from sopp.models.configuration import Configuration
 from sopp.models.coordinates import Coordinates
 from sopp.models.facility import Facility
@@ -58,7 +58,7 @@ class TestSopp:
         configuration = Configuration(
             reservation=self._arbitrary_reservation,
             satellites=self._satellites,
-            antenna_direction_path=antenna_positions,
+            antenna_trajectory=antenna_positions,
         )
 
         sopp = sopp_instance(configuration, monkeypatch)
@@ -147,7 +147,7 @@ class TestSopp:
 
     def test_validate_empty_satellites_list(self):
         configuration = Configuration(
-            satellites=[], antenna_direction_path=[], reservation="mock"
+            satellites=[], antenna_trajectory=[], reservation="mock"
         )
         sopp = Sopp(configuration)
 
@@ -157,7 +157,7 @@ class TestSopp:
     def test_validate_runtime_settings(self):
         configuration = Configuration(
             satellites=["test"],
-            antenna_direction_path=[],
+            antenna_trajectory=[],
             reservation="mock",
             runtime_settings=RuntimeSettings(),
         )
@@ -169,7 +169,7 @@ class TestSopp:
         runtime_settings = RuntimeSettings(time_resolution_seconds=-1)
         configuration = Configuration(
             satellites=["test"],
-            antenna_direction_path=[],
+            antenna_trajectory=[],
             reservation="mock",
             runtime_settings=runtime_settings,
         )
@@ -182,7 +182,7 @@ class TestSopp:
         runtime_settings = RuntimeSettings(concurrency_level=0)
         configuration = Configuration(
             satellites=["test"],
-            antenna_direction_path=[],
+            antenna_trajectory=[],
             reservation="mock",
             runtime_settings=runtime_settings,
         )
@@ -195,7 +195,7 @@ class TestSopp:
         runtime_settings = RuntimeSettings(min_altitude=-1)
         configuration = Configuration(
             satellites=["test"],
-            antenna_direction_path=[],
+            antenna_trajectory=[],
             reservation="mock",
             runtime_settings=runtime_settings,
         )
@@ -207,7 +207,7 @@ class TestSopp:
     def test_validate_reservation(self):
         reservation = self._arbitrary_reservation
         configuration = Configuration(
-            satellites=["test"], antenna_direction_path=[], reservation=reservation
+            satellites=["test"], antenna_trajectory=[], reservation=reservation
         )
         sopp = Sopp(configuration)
 
@@ -217,7 +217,7 @@ class TestSopp:
         reservation = self._arbitrary_reservation
         reservation.time.begin = reservation.time.end
         configuration = Configuration(
-            satellites=["test"], antenna_direction_path=[], reservation=reservation
+            satellites=["test"], antenna_trajectory=[], reservation=reservation
         )
         sopp = Sopp(configuration)
 
@@ -228,38 +228,38 @@ class TestSopp:
         reservation = self._arbitrary_reservation
         reservation.facility.beamwidth = 0
         configuration = Configuration(
-            satellites=["test"], antenna_direction_path=[], reservation=reservation
+            satellites=["test"], antenna_trajectory=[], reservation=reservation
         )
         sopp = Sopp(configuration)
 
         with pytest.raises(ValueError) as _:
             sopp._validate_reservation()
 
-    def test_validate_antenna_direction_path(self):
+    def test_validate_antenna_trajectory(self):
         sopp = Sopp(configuration=arbitrary_config())
 
-        sopp._validate_antenna_direction_path()
+        sopp._validate_antenna_trajectory()
 
-    def test_validate_empty_antenna_direction_path(self):
-        antenna_direction_path = []
+    def test_validate_empty_antenna_trajectory(self):
+        antenna_trajectory = []
         configuration = Configuration(
             satellites=["test"],
-            antenna_direction_path=antenna_direction_path,
+            antenna_trajectory=antenna_trajectory,
             reservation="test",
         )
         sopp = Sopp(configuration)
 
         with pytest.raises(ValueError) as _:
-            sopp._validate_antenna_direction_path()
+            sopp._validate_antenna_trajectory()
 
-    def test_validate_antenna_direction_path_increasing_times(self):
+    def test_validate_antenna_trajectory_increasing_times(self):
         config = arbitrary_config()
-        config.antenna_direction_path.append(config.antenna_direction_path[0])
+        config.antenna_trajectory.append(config.antenna_trajectory[0])
 
         sopp = Sopp(config)
 
         with pytest.raises(ValueError) as _:
-            sopp._validate_antenna_direction_path()
+            sopp._validate_antenna_trajectory()
 
     @property
     def _arbitrary_reservation(self) -> Reservation:
@@ -496,7 +496,7 @@ def sopp_instance(config, monkeypatch, event_finder=None):
 def arbitrary_config():
     configuration = Configuration(
         satellites="holder",
-        antenna_direction_path=[
+        antenna_trajectory=[
             PositionTime(
                 position=Position(
                     altitude=0.011527751634842421, azimuth=31.169677715036304

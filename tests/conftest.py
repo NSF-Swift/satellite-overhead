@@ -1,53 +1,67 @@
-# tests/conftest.py
 import pytest
+import numpy as np
 from datetime import datetime, timedelta, timezone
-from sopp.models.coordinates import Coordinates
-from sopp.models.facility import Facility
-from sopp.models.position import Position
-from sopp.models.position_time import PositionTime
-from sopp.models.reservation import Reservation
-from sopp.models.satellite.satellite import Satellite
-from sopp.models.time_window import TimeWindow
-from sopp.models.runtime_settings import RuntimeSettings
+
+from sopp.models import (
+    Coordinates,
+    Facility,
+    Position,
+    Reservation,
+    Satellite,
+    TimeWindow,
+    RuntimeSettings,
+    SatelliteTrajectory,
+    antenna_trajectory,
+)
 from sopp.ephemeris.base import EphemerisCalculator
-from sopp.analysis.event_finders.skyfield import EventFinderSkyfield
+from sopp.event_finders.skyfield import EventFinderSkyfield
+from sopp.utils.time import generate_time_grid
 
 # Constants
 ARBITRARY_ALTITUDE = 0
 ARBITRARY_AZIMUTH = 0
 
 
-# --- STUB ---
 class EphemerisCalculatorStub(EphemerisCalculator):
     """
-    Simulates a satellite that is always visible and at (0,0) coordinates.
+    Simulates a satellite that is always visible and always located at
+    (ARBITRARY_AZIMUTH, ARBITRARY_ALTITUDE).
     """
 
     def calculate_visibility_windows(
         self, satellite, min_altitude, start_time, end_time
-    ):
+    ) -> list[TimeWindow]:
+        # Always visible for the entire duration requested
         return [TimeWindow(start_time, end_time)]
 
-    def calculate_trajectory(self, satellite, start, end):
-        # Generate 1-second positions for the whole window
-        positions = []
-        current = start
-        perfect_pos = Position(
-            altitude=ARBITRARY_ALTITUDE, azimuth=ARBITRARY_AZIMUTH, distance_km=500.0
-        )
-        while current <= end:
-            positions.append(PositionTime(perfect_pos, current))
-            current += timedelta(seconds=1)
-        return positions
+    def calculate_trajectories(self, satellite, windows) -> list[SatelliteTrajectory]:
+        # Simple implementation: just loop and call the single method
+        return [self.calculate_trajectory(satellite, w.begin, w.end) for w in windows]
 
-    def calculate_position(self, satellite, time):
-        return PositionTime(
-            Position(
-                altitude=ARBITRARY_ALTITUDE,
-                azimuth=ARBITRARY_AZIMUTH,
-                distance_km=500.0,
-            ),
-            time=time,
+    def calculate_trajectory(self, satellite, start, end) -> SatelliteTrajectory:
+        # 1. Generate grid (1 second resolution for tests)
+        times = generate_time_grid(start, end, resolution_seconds=1.0)
+        n = len(times)
+
+        # 2. Create Constant Arrays (Always at the arbitrary position)
+        azimuth = np.full(n, ARBITRARY_AZIMUTH, dtype=float)
+        altitude = np.full(n, ARBITRARY_ALTITUDE, dtype=float)
+        distance = np.full(n, 500.0, dtype=float)
+
+        return SatelliteTrajectory(
+            satellite=satellite,
+            times=times,
+            azimuth=azimuth,
+            altitude=altitude,
+            distance_km=distance,
+        )
+
+    def calculate_position(self, satellite, time) -> Position:
+        # Scalar return Position
+        return Position(
+            altitude=ARBITRARY_ALTITUDE,
+            azimuth=ARBITRARY_AZIMUTH,
+            distance_km=500.0,
         )
 
 
@@ -112,11 +126,11 @@ def make_event_finder(ephemeris_stub):
     Factory to assemble the EventFinder with specific reservation/satellites/antenna.
     """
 
-    def _make(reservation, satellites, antenna_path):
+    def _make(reservation, satellites, antenna_trajectory=None):
         return EventFinderSkyfield(
             list_of_satellites=satellites,
             reservation=reservation,
-            antenna_direction_path=antenna_path,
+            antenna_trajectory=antenna_trajectory,
             ephemeris_calculator=ephemeris_stub,
             runtime_settings=RuntimeSettings(),
         )
