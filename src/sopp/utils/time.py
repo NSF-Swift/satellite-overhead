@@ -1,6 +1,6 @@
-import numpy as np
 from datetime import datetime, timedelta
-from math import ceil
+
+import numpy as np
 
 
 def generate_time_grid(
@@ -14,7 +14,7 @@ def generate_time_grid(
     if duration <= 0:
         return np.array([start], dtype=object)
 
-    steps = int(ceil(duration / resolution_seconds))
+    steps = int(duration / resolution_seconds) + 1
     offsets = np.arange(steps) * resolution_seconds
 
     dt_list = [start + timedelta(seconds=x.item()) for x in offsets]
