@@ -1,14 +1,15 @@
-import pytest
-import numpy as np
-from datetime import datetime, timedelta, timezone
 from dataclasses import replace
+from datetime import datetime, timedelta, timezone
+
+import numpy as np
+import pytest
 
 from sopp.ephemeris.skyfield import SkyfieldEphemerisCalculator
+from sopp.models import Coordinates, Facility, TimeWindow
 from sopp.models.satellite.international_designator import InternationalDesignator
 from sopp.models.satellite.mean_motion import MeanMotion
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.satellite.tle_information import TleInformation
-from sopp.models import Facility, TimeWindow, Coordinates
 
 
 def test_init_accepts_numpy_array(facility_at_zero, time_grid):

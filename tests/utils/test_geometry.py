@@ -1,4 +1,5 @@
 import numpy as np
+
 from sopp.utils.geometry import calculate_angular_separation_sq
 
 

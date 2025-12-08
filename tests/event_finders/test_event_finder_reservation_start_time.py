@@ -1,9 +1,9 @@
-import numpy as np
 from datetime import timedelta
+
+import numpy as np
 
 from sopp.models.antenna_trajectory import AntennaTrajectory
 from sopp.utils.time import generate_time_grid
-
 from tests.conftest import ARBITRARY_ALTITUDE, ARBITRARY_AZIMUTH
 
 

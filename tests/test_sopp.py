@@ -7,7 +7,6 @@ from sopp.models.configuration import Configuration
 from sopp.models.coordinates import Coordinates
 from sopp.models.facility import Facility
 from sopp.models.frequency_range import FrequencyRange
-from sopp.models.satellite_trajectory import SatelliteTrajectory
 from sopp.models.position import Position
 from sopp.models.position_time import PositionTime
 from sopp.models.reservation import Reservation
@@ -18,6 +17,7 @@ from sopp.models.satellite.international_designator import (
 from sopp.models.satellite.mean_motion import MeanMotion
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.satellite.tle_information import TleInformation
+from sopp.models.satellite_trajectory import SatelliteTrajectory
 from sopp.models.time_window import TimeWindow
 from sopp.sopp import Sopp
 

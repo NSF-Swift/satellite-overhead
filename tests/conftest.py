@@ -1,20 +1,20 @@
-import pytest
-import numpy as np
 from datetime import datetime, timedelta, timezone
 
+import numpy as np
+import pytest
+
+from sopp.ephemeris.base import EphemerisCalculator
+from sopp.event_finders.skyfield import EventFinderSkyfield
 from sopp.models import (
     Coordinates,
     Facility,
     Position,
     Reservation,
-    Satellite,
-    TimeWindow,
     RuntimeSettings,
+    Satellite,
     SatelliteTrajectory,
-    antenna_trajectory,
+    TimeWindow,
 )
-from sopp.ephemeris.base import EphemerisCalculator
-from sopp.event_finders.skyfield import EventFinderSkyfield
 from sopp.utils.time import generate_time_grid
 
 # Constants

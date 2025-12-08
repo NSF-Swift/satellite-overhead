@@ -1,6 +1,8 @@
-import pytest
-import numpy as np
 from datetime import datetime, timedelta, timezone
+
+import numpy as np
+import pytest
+
 from sopp.utils.time import generate_time_grid
 
 

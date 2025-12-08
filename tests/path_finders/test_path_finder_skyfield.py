@@ -1,10 +1,10 @@
 import pytest
 from path_finder_base_test import PathFinderBaseTest
 
+from sopp.models.observation_target import ObservationTarget
 from sopp.path_finders.skyfield import (
     ObservationPathFinderSkyfield,
 )
-from sopp.models.observation_target import ObservationTarget
 
 
 class TestPathFinderSkyfield(PathFinderBaseTest):
