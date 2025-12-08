@@ -1,9 +1,6 @@
 from abc import ABC, abstractmethod
 
-from sopp.models.facility import Facility
-from sopp.models.observation_target import ObservationTarget
-from sopp.models.position_time import PositionTime
-from sopp.models.time_window import TimeWindow
+from sopp.models import AntennaTrajectory, Facility, ObservationTarget, TimeWindow
 
 
 class ObservationPathFinder(ABC):
@@ -24,5 +21,5 @@ class ObservationPathFinder(ABC):
         self._time_window = time_window
 
     @abstractmethod
-    def calculate_path(self) -> list[PositionTime]:
+    def calculate_path(self, resolution_seconds: float = 1.0) -> AntennaTrajectory:
         pass
