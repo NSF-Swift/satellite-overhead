@@ -1,17 +1,16 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 
-from sopp.models import Satellite, PositionTime, TimeWindow
+from sopp.models import Position, Satellite, SatelliteTrajectory, TimeWindow
 
 
 class EphemerisCalculator(ABC):
     """
     Abstract contract for the physics engine.
-    Calculates orbital mechanics, coordinates, and events.
     """
 
     @abstractmethod
-    def find_events(
+    def calculate_visibility_windows(
         self,
         satellite: Satellite,
         min_altitude: float,
@@ -19,22 +18,33 @@ class EphemerisCalculator(ABC):
         end_time: datetime,
     ) -> list[TimeWindow]:
         """
-        Returns TimeWindows for Rise/Set events.
+        Calculates TimeWindows for Rise/Set events (where alt > min_alt).
         """
         pass
 
-    @abstractmethod
-    def get_position_at(self, satellite: Satellite, time: datetime) -> PositionTime:
-        """
-        Returns the position of the satellite relative to the facility at a specific instant.
-        """
         pass
 
     @abstractmethod
-    def get_positions_window(
+    def calculate_trajectory(
         self, satellite: Satellite, start: datetime, end: datetime
-    ) -> list[PositionTime]:
+    ) -> SatelliteTrajectory:
         """
-        Returns positions for all intervaled time points within the time window.
+        Calculates the continuous path for a single time window (Vector).
+        """
+        pass
+
+    @abstractmethod
+    def calculate_trajectories(
+        self, satellite: Satellite, windows: list[TimeWindow]
+    ) -> list[SatelliteTrajectory]:
+        """
+        Calculates paths for multiple disjoint windows in one batch operation.
+        """
+        pass
+
+    @abstractmethod
+    def calculate_position(self, satellite: Satellite, time: datetime) -> Position:
+        """
+        Calculates the position for a specific instant (Scalar).
         """
         pass
