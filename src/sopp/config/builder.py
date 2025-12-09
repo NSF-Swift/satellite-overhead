@@ -3,30 +3,31 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from sopp.analysis.path_finders.base import ObservationPathFinder
-from sopp.analysis.path_finders.skyfield import (
-    ObservationPathFinderSkyfield,
-)
+import numpy as np
+
 from sopp.config.base import ConfigFileLoaderBase
 from sopp.config.json_loader import ConfigFileLoaderJson
 from sopp.io.satellites_loader import (
     SatellitesLoaderFromFiles,
 )
-from sopp.models import (
-    Configuration,
-    Coordinates,
-    Facility,
-    FrequencyRange,
-    ObservationTarget,
-    Position,
-    PositionTime,
-    Reservation,
-    RuntimeSettings,
-    Satellite,
-    TimeWindow,
+from sopp.models.antenna_trajectory import AntennaTrajectory
+from sopp.models.configuration import Configuration
+from sopp.models.coordinates import Coordinates
+from sopp.models.facility import Facility
+from sopp.models.frequency_range import FrequencyRange
+from sopp.models.observation_target import ObservationTarget
+from sopp.models.position import Position
+from sopp.models.reservation import Reservation
+from sopp.models.runtime_settings import RuntimeSettings
+from sopp.models.satellite.satellite import Satellite
+from sopp.models.time_window import TimeWindow
+from sopp.path_finders.base import ObservationPathFinder
+from sopp.path_finders.skyfield import (
+    ObservationPathFinderSkyfield,
 )
 from sopp.satellite_selection.filterer import Filterer
 from sopp.utils.helpers import parse_time_and_convert_to_utc
+from sopp.utils.time import generate_time_grid
 
 
 class ConfigurationBuilder:
@@ -45,10 +46,10 @@ class ConfigurationBuilder:
         self._filterer: Filterer = Filterer()
 
         self._observation_target: ObservationTarget | None = None
-        self._static_observation_target: Position | None = None
-        self._custom_observation_path: list[PositionTime] | None = None
+        self._static_pointing: Position | None = None
+        self._custom_antenna_trajectory: AntennaTrajectory | None = None
 
-        self.antenna_direction_path: list[PositionTime] | None = None
+        self.antenna_trajectory: AntennaTrajectory | None = None
         self.satellites: list[Satellite] | None = None
         self.reservation: Reservation | None = None
         self.runtime_settings: RuntimeSettings = RuntimeSettings()
@@ -93,14 +94,17 @@ class ConfigurationBuilder:
         right_ascension: str | None = None,
         altitude: float | None = None,
         azimuth: float | None = None,
-        custom_path: list[PositionTime] | None = None,
+        custom_antenna_trajectory: AntennaTrajectory | None = None,
     ) -> "ConfigurationBuilder":
-        if custom_path:
-            self._custom_observation_path = custom_path
+        # Option 1: Pre-calculated Trajectory
+        if custom_antenna_trajectory:
+            self._custom_antenna_trajectory = custom_antenna_trajectory
+
+        # Option 2: Static Pointing (Alt/Az)
         elif altitude is not None and azimuth is not None:
-            self._static_observation_target = Position(
-                altitude=altitude, azimuth=azimuth
-            )
+            self._static_pointing = Position(altitude=altitude, azimuth=azimuth)
+
+        # Option 3: Track Celestial Object (RA/Dec)
         elif declination is not None and right_ascension is not None:
             self._observation_target = ObservationTarget(
                 declination=declination,
@@ -108,11 +112,8 @@ class ConfigurationBuilder:
             )
         else:
             raise ValueError(
-                "Specify at least one way to set the observation target. "
-                "Valid combinations are: "
-                "1. right_ascension and declination, "
-                "2. altitude and azimuth, or "
-                "3. custom_path."
+                "Invalid observation target configuration. Provide one of: "
+                "(custom_antenna_trajectory), (altitude, azimuth), or (ra, dec)."
             )
         return self
 
@@ -147,10 +148,10 @@ class ConfigurationBuilder:
         self.time_window = config.reservation.time
         self.runtime_settings = config.runtime_settings
 
-        if config.antenna_position_times:
+        if config.antenna_trajectory:
             self._custom_observation_path = config.antenna_position_times
         elif config.static_antenna_position:
-            self._static_observation_target = config.static_antenna_position
+            self._static_pointing = config.static_antenna_position
         else:
             self._observation_target = config.observation_target
         return self
@@ -163,58 +164,69 @@ class ConfigurationBuilder:
         self._filterer.add_filter(filter_fn)
         return self
 
-    def _filter_satellites(self):
-        self.satellites = self._filterer.apply_filters(self.satellites)
+    def _build_antenna_trajectory(self) -> AntennaTrajectory:
+        if not self.time_window:
+            raise ValueError("Time window must be set before building trajectory.")
 
-    def _build_reservation(self):
-        self.reservation = Reservation(
-            facility=self.facility,
-            time=self.time_window,
-            frequency=self.frequency_range,
+        res_seconds = self.runtime_settings.time_resolution_seconds
+
+        if self._custom_antenna_trajectory:
+            return self._custom_antenna_trajectory
+
+        if self._observation_target and self.facility:
+            path_finder = self._path_finder_class(
+                self.facility, self._observation_target, self.time_window
+            )
+            return path_finder.calculate_path(resolution_seconds=res_seconds)
+
+        static_az = 0.0
+        static_alt = 90.0
+
+        if self._static_pointing:
+            static_az = self._static_pointing.azimuth
+            static_alt = self._static_pointing.altitude
+
+        times = generate_time_grid(
+            self.time_window.begin,
+            self.time_window.end,
+            resolution_seconds=res_seconds,
+        )
+        n = len(times)
+
+        return AntennaTrajectory(
+            times=times,
+            azimuth=np.full(n, static_az),
+            altitude=np.full(n, static_alt),
         )
 
-    def _build_antenna_direction_path(self) -> "ConfigurationBuilder":
-        if self._custom_observation_path:
-            self._antenna_direction_path = self._custom_observation_path
-        elif self._static_observation_target:
-            self._antenna_direction_path = [
-                PositionTime(
-                    position=self._static_observation_target,
-                    time=self.time_window.begin,
-                )
-            ]
-        elif self._observation_target:
-            self._antenna_direction_path = self._path_finder_class(
-                self.facility, self._observation_target, self.time_window
-            ).calculate_path()
-        else:
-            self._antenna_direction_path = [
-                PositionTime(
-                    position=Position(altitude=90, azimuth=0),
-                    time=self.reservation.time.begin,
-                ),
-            ]
+    def build(self) -> Configuration:
+        facility = self.facility
+        time_window = self.time_window
+        frequency = self.frequency_range
+        satellites = self.satellites
 
-    def build(self) -> "Configuration":
-        if not (
-            all(
-                [self.facility, self.time_window, self.frequency_range, self.satellites]
-            )
-        ):
-            raise ValueError(
-                "Incomplete configuration. Ensure that the following are called: "
-                "set_facility, set_time_window, set_frequency_range, "
-                "set_satellites, or set_from_config_file."
-            )
+        if facility is None:
+            raise ValueError("Configuration invalid: Facility is not set.")
+        if time_window is None:
+            raise ValueError("Configuration invalid: Time Window is not set.")
+        if frequency is None:
+            raise ValueError("Configuration invalid: Frequency Range is not set.")
+        if satellites is None:
+            raise ValueError("Configuration invalid: Satellites are not loaded.")
 
-        self._filter_satellites()
-        self._build_reservation()
-        self._build_antenna_direction_path()
+        filtered_satellites = self._filterer.apply_filters(satellites)
 
-        configuration = Configuration(
-            reservation=self.reservation,
-            satellites=self.satellites,
-            antenna_direction_path=self._antenna_direction_path,
+        reservation = Reservation(
+            facility=facility,
+            time=time_window,
+            frequency=frequency,
+        )
+
+        trajectory = self._build_antenna_trajectory()
+
+        return Configuration(
+            reservation=reservation,
+            satellites=filtered_satellites,
+            antenna_trajectory=trajectory,
             runtime_settings=self.runtime_settings,
         )
-        return configuration
