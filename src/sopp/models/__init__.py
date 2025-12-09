@@ -28,5 +28,4 @@ __all__ = [
     "ObservationTarget",
     "SatelliteTrajectory",
     "AntennaTrajectory",
-    "InternationalDesignator",
 ]

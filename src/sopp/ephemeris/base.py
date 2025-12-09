@@ -1,7 +1,10 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 
-from sopp.models import Position, Satellite, SatelliteTrajectory, TimeWindow
+from sopp.models.position import Position
+from sopp.models.satellite.satellite import Satellite
+from sopp.models.satellite_trajectory import SatelliteTrajectory
+from sopp.models.time_window import TimeWindow
 
 
 class EphemerisCalculator(ABC):
