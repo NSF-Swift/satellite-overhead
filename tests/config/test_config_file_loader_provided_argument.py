@@ -5,13 +5,13 @@ import pytest
 
 from sopp.config.base import ConfigFileLoaderBase
 from sopp.config.factory import get_config_file_object
+from sopp.models.antenna_trajectory import AntennaTrajectory
 from sopp.models.configuration_file import ConfigurationFile
 from sopp.models.coordinates import Coordinates
 from sopp.models.facility import Facility
 from sopp.models.frequency_range import FrequencyRange
 from sopp.models.observation_target import ObservationTarget
 from sopp.models.position import Position
-from sopp.models.position_time import PositionTime
 from sopp.models.reservation import Reservation
 from sopp.models.runtime_settings import RuntimeSettings
 from sopp.models.time_window import TimeWindow
@@ -43,7 +43,7 @@ class TestConfigFileProvidedArgument:
                 ),
                 frequency=FrequencyRange(frequency=135, bandwidth=10),
             ),
-            antenna_position_times=None,
+            antenna_trajectory=None,
             observation_target=ObservationTarget(
                 declination="-38d6m50.8s", right_ascension="4h42m"
             ),
@@ -54,20 +54,22 @@ class TestConfigFileProvidedArgument:
         config = self._get_config_file_object(
             config_filename="config_file_json/arbitrary_config_file_with_antenna_position_times.json"
         )
-        assert config.configuration.antenna_position_times == [
-            PositionTime(
-                position=Position(altitude=0.0, azimuth=0.1),
-                time=datetime(
-                    year=2023, month=3, day=30, hour=10, minute=1, tzinfo=timezone.utc
-                ),
-            ),
-            PositionTime(
-                position=Position(altitude=0.1, azimuth=0.2),
-                time=datetime(
-                    year=2023, month=3, day=30, hour=10, minute=2, tzinfo=timezone.utc
-                ),
-            ),
-        ]
+        traj = config.configuration.antenna_trajectory
+
+        assert isinstance(traj, AntennaTrajectory)
+        assert len(traj) == 2
+
+        assert traj.altitude[0] == 0.0
+        assert traj.azimuth[0] == 0.1
+        assert traj.times[0] == datetime(
+            year=2023, month=3, day=30, hour=10, minute=1, tzinfo=timezone.utc
+        )
+
+        assert traj.altitude[1] == 0.1
+        assert traj.azimuth[1] == 0.2
+        assert traj.times[1] == datetime(
+            year=2023, month=3, day=30, hour=10, minute=2, tzinfo=timezone.utc
+        )
 
     def test_json_runtime_settings(self):
         config = self._get_config_file_object(
@@ -102,7 +104,7 @@ class TestConfigFileProvidedArgument:
     def test_error_is_returned_if_partial_observation_target(
         self, config_partial_observation_target
     ):
-        with pytest.raises(KeyError):
+        with pytest.raises(ValueError):
             _ = config_partial_observation_target.configuration
 
     @pytest.fixture(
@@ -137,7 +139,7 @@ class TestConfigFileProvidedArgument:
     def test_error_is_returned_if_partial_static_antenna_position(
         self, config_partial_static_antenna_position
     ):
-        with pytest.raises(KeyError):
+        with pytest.raises(ValueError):
             _ = config_partial_static_antenna_position.configuration
 
     @staticmethod
