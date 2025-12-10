@@ -32,7 +32,7 @@ def run_benchmark(
     start_time_str = "2025-11-24T00:00:00.000000"
     start_time = read_datetime_string_as_utc(start_time_str)
 
-    print(f"\n[2/4] Configuring Simulation...")
+    print("\n[2/4] Configuring Simulation...")
     print(f"      Start Time: {start_time}")
     print(f"      Duration:   {duration_hours} hours")
 
