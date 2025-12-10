@@ -64,7 +64,7 @@ configuration = (
     )
     .set_runtime_settings(
         concurrency_level=8,
-        time_continuity_resolution=1,
+        time_resolution_seconds=1,
         min_altitude=5.0,
     )
     # Alternatively set all of the above settings from a config file
@@ -182,15 +182,15 @@ configuration.add_filter(filter_frequency(FrequencyRange(10, 10)))
 #### `set_runtime_settings()`
 
 The `set_runtime_settings()` method:
-- Specifies the time resolution for calculating satellite positions in seconds via the `time_continuity_resolution` parameter.
+- Specifies the time resolution for calculating satellite positions in seconds via the `time_resolution_seconds` parameter.
 - Specifies the `concurrency_level` parameter determines the number of parallel jobs during satellite position calculation, optimizing runtime speeds. This value should be not exceed the number of cores on the machine.
 - The `min_altitude` specifies the minimum altitude a satellite must be to be considered above the horizon. Useful for locations with obstructed horizons.
-- Runtime settings are optional, the defaults are: concurrency_level = 1, time_continuity_resolution = 1 and min_altitude = 0.0.
+- Runtime settings are optional, the defaults are: concurrency_level = 1, time_resolution_seconds = 1 and min_altitude = 0.0.
 
 ```python
 configuration.set_runtime_settings(
     concurrency_level=8,
-    time_continuity_resolution=1,
+    time_resolution_seconds=1,
     min_altitude=0.0,
 )
 ```
@@ -240,7 +240,7 @@ The JSON config file follows the following format:
   },
   "runtimeSettings": {
       "concurrency_level": 4,
-      "time_continuity_resolution": 1,
+      "time_resolution_seconds": 1,
       "min_altitude": 0.0
   }
 }
@@ -267,10 +267,10 @@ Finally, obtain the position data of interfering satellites, run either:
 interference_events = sopp.get_satellites_crossing_main_beam()
 ```
 
-The data is returned as a list of `OverheadWindow`, which is defined as:
+The data is returned as a list of `SatelliteTrajectory`, which is defined as:
 
 ```python
-class OverheadWindow:
+class SatelliteTrajectory:
     satellite: Satellite
     positions: List[PositionTime]
 ```
@@ -444,7 +444,7 @@ def main():
         )
         .set_runtime_settings(
             concurrency_level=8,
-            time_continuity_resolution=1
+            time_resolution_seconds=1
         )
         # Alternatively set all of the above settings from a config file
         #.set_from_config_file(config_file='./supplements/config.json')

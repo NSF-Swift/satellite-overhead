@@ -88,7 +88,7 @@ The following is an example of a config file:
       },
       "runtimeSettings": {
           "concurrency_level": 4,
-          "time_continuity_resolution": 1,
+          "time_resolution_seconds": 1,
           "min_altitude": 5.0
       }
     }
@@ -116,7 +116,7 @@ The following is an example of a config file:
 
 + The `runtimeSettings` object sets various runtime settings it includes:
     + "concurrency_level" specifies the number of parallel jobs to run during satellite position computation, which can significantly improve performance.
-    + "time_continuity_resolution" sets the sampling rate for satellite position calculations in seconds. For example, a value of 1 indicates that satellite positions are calculated every second.
+    + "time_resolution_seconds" sets the sampling rate for satellite position calculations in seconds. For example, a value of 1 indicates that satellite positions are calculated every second.
     + "min_altitude" sets the minimum altitude in degrees for the satellites to be considered above the horizon. Useful for locations with obstructed horizons. 
 
 ###### Static Antenna Position
