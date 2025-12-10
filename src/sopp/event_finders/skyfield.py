@@ -1,143 +1,114 @@
-import multiprocessing
+import numpy as np
 
-from sopp.analysis.event_finders.base import EventFinder
-from sopp.analysis.event_finders.interference import (
-    AntennaPosition,
-    SatellitesAboveHorizonFilter,
-    SatellitesInterferenceFilter,
-    SatellitesWithinMainBeamFilter,
-)
 from sopp.ephemeris.base import EphemerisCalculator
-from sopp.models import (
-    OverheadWindow,
-    PositionTime,
-    Reservation,
-    RuntimeSettings,
-    Satellite,
-    TimeWindow,
-)
+from sopp.event_finders.base import EventFinder
+from sopp.models.antenna_trajectory import AntennaTrajectory
+from sopp.models.reservation import Reservation
+from sopp.models.runtime_settings import RuntimeSettings
+from sopp.models.satellite.satellite import Satellite
+from sopp.models.satellite_trajectory import SatelliteTrajectory
+from sopp.utils.geometry import calculate_angular_separation_sq
 
 
 class EventFinderSkyfield(EventFinder):
     def __init__(
         self,
-        antenna_direction_path: list[PositionTime],
+        antenna_trajectory: AntennaTrajectory,
         list_of_satellites: list[Satellite],
         reservation: Reservation,
         ephemeris_calculator: EphemerisCalculator,
         runtime_settings: RuntimeSettings | None = None,
     ):
         super().__init__(
-            antenna_direction_path=antenna_direction_path,
+            antenna_trajectory=antenna_trajectory,
             list_of_satellites=list_of_satellites,
             reservation=reservation,
             runtime_settings=runtime_settings,
         )
-
         self.ephemeris_calculator = ephemeris_calculator
-        self._filter_strategy = None
 
-    def _get_rise_set_windows(self, satellite: Satellite) -> list[TimeWindow]:
-        time_windows = self.ephemeris_calculator.find_events(
-            satellite,
-            self.runtime_settings.min_altitude,
-            self.reservation.time.begin,
-            self.reservation.time.end,
-        )
+    def get_satellites_above_horizon(self) -> list[SatelliteTrajectory]:
+        trajectories = []
 
-        return time_windows
-
-    def get_satellites_above_horizon(self) -> list[OverheadWindow]:
-        overhead_windows = []
         for satellite in self.list_of_satellites:
-            time_windows = self._get_rise_set_windows(satellite)
-
-            satellite_overhead_windows = []
-            for tw in time_windows:
-                positions = self.ephemeris_calculator.get_positions_window(
-                    satellite, tw.begin, tw.end
-                )
-                satellite_overhead_windows.append(
-                    OverheadWindow(satellite=satellite, positions=positions),
-                )
-
-            overhead_windows.extend(satellite_overhead_windows)
-
-        return overhead_windows
-
-    def get_satellites_crossing_main_beam(self) -> list[OverheadWindow]:
-        self._filter_strategy = SatellitesWithinMainBeamFilter
-        return self._get_satellites_interference()
-
-    def _get_satellites_interference(self) -> list[OverheadWindow]:
-        processes = (
-            int(self.runtime_settings.concurrency_level)
-            if self.runtime_settings.concurrency_level > 1
-            else 1
-        )
-        pool = multiprocessing.Pool(processes=processes)
-        results = pool.map(
-            self._get_satellite_overhead_windows, self.list_of_satellites
-        )
-        pool.close()
-        pool.join()
-
-        return [overhead_window for result in results for overhead_window in result]
-
-    def _get_satellite_overhead_windows(
-        self, satellite: Satellite
-    ) -> list[OverheadWindow]:
-        antenna_direction_end_times = [
-            antenna_direction.time
-            for antenna_direction in self.antenna_direction_path[1:]
-        ] + [self.reservation.time.end]
-        satellite_positions = self._get_satellite_positions_within_reservation(
-            satellite
-        )
-        antenna_positions = [
-            AntennaPosition(
-                satellite_positions=self._filter_satellite_positions_within_time_window(
-                    satellite_positions,
-                    time_window=TimeWindow(
-                        begin=max(self.reservation.time.begin, antenna_direction.time),
-                        end=end_time,
-                    ),
-                ),
-                antenna_direction=antenna_direction,
+            time_windows = self.ephemeris_calculator.calculate_visibility_windows(
+                satellite,
+                self.runtime_settings.min_altitude,
+                self.reservation.time.begin,
+                self.reservation.time.end,
             )
-            for antenna_direction, end_time in zip(
-                self.antenna_direction_path, antenna_direction_end_times, strict=False
+
+            if not time_windows:
+                continue
+
+            satellite_trajectories = self.ephemeris_calculator.calculate_trajectories(
+                satellite, time_windows
             )
-            if end_time > self.reservation.time.begin
-        ]
-        time_windows = SatellitesInterferenceFilter(
-            facility=self.reservation.facility,
-            antenna_positions=antenna_positions,
-            cutoff_time=self.reservation.time.end,
-            filter_strategy=self._filter_strategy,
-            runtime_settings=self.runtime_settings,
-        ).run()
 
-        return [
-            OverheadWindow(satellite=satellite, positions=positions)
-            for positions in time_windows
-        ]
+            trajectories.extend(satellite_trajectories)
 
-    def _get_satellite_positions_within_reservation(
-        self, satellite: Satellite
-    ) -> list[PositionTime]:
-        return self.ephemeris_calculator.get_positions_window(
-            satellite=satellite,
-            start=self.reservation.time.begin,
-            end=self.reservation.time.end,
-        )
+        return trajectories
 
-    @staticmethod
-    def _filter_satellite_positions_within_time_window(
-        satellite_positions: list[PositionTime], time_window: TimeWindow
-    ) -> list[PositionTime]:
-        return [
-            positions
-            for positions in satellite_positions
-            if time_window.begin <= positions.time < time_window.end
-        ]
+    def get_satellites_crossing_main_beam(self) -> list[SatelliteTrajectory]:
+        beam_radius_sq = self.reservation.facility.beam_radius**2
+
+        interfering_trajectories = []
+
+        for satellite in self.list_of_satellites:
+            # Get visibility windows
+            windows = self.ephemeris_calculator.calculate_visibility_windows(
+                satellite,
+                self.runtime_settings.min_altitude,
+                self.reservation.time.begin,
+                self.reservation.time.end,
+            )
+            if not windows:
+                continue
+
+            # Get satellite path
+            sat_trajectories = self.ephemeris_calculator.calculate_trajectories(
+                satellite, windows
+            )
+
+            for sat_traj in sat_trajectories:
+                # Interpolate Antenna position to match Satellite times
+                ant_az, ant_alt = self.antenna_trajectory.get_state_at(sat_traj.times)
+
+                sep_sq = calculate_angular_separation_sq(
+                    az1=sat_traj.azimuth,
+                    alt1=sat_traj.altitude,
+                    az2=ant_az,
+                    alt2=ant_alt,
+                )
+
+                # Check if separation < radius
+                mask = sep_sq <= beam_radius_sq
+
+                if np.any(mask):
+                    # Extract the interfering path segment
+                    interfering_trajectories.append(
+                        SatelliteTrajectory(
+                            satellite=satellite,
+                            times=sat_traj.times[mask],
+                            azimuth=sat_traj.azimuth[mask],
+                            altitude=sat_traj.altitude[mask],
+                            distance_km=sat_traj.distance_km[mask],
+                        )
+                    )
+
+        return interfering_trajectories
+
+    # def _get_satellites_interference(self) -> list[SatelliteTrajectory]:
+    #    processes = (
+    #        int(self.runtime_settings.concurrency_level)
+    #        if self.runtime_settings.concurrency_level > 1
+    #        else 1
+    #    )
+    #    pool = multiprocessing.Pool(processes=processes)
+    #    results = pool.map(
+    #        self._get_satellite_overhead_windows, self.list_of_satellites
+    #    )
+    #    pool.close()
+    #    pool.join()
+
+    #    return [overhead_window for result in results for overhead_window in result]
