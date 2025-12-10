@@ -1,7 +1,6 @@
 from collections.abc import Callable
-from typing import TypeVar
 
-T = TypeVar("T")
+from sopp.models.satellite.satellite import Satellite
 
 
 class Filterer:
@@ -25,21 +24,21 @@ class Filterer:
         Applies the stored filters to the provided list of elements.
 
         Parameters:
-        - elements (List[T]): The list of elements to be filtered.
+        - elements (list[T]): The list of elements to be filtered.
 
         Returns:
         - List[T]: A new list containing only the elements that pass all applied filters.
     """
 
     def __init__(self):
-        self._filters: list[T] = []
+        self._filters: list[Callable[[Satellite], bool]] = []
 
-    def add_filter(self, filter_lambda: Callable[[T], bool]):
+    def add_filter(self, filter_lambda: Callable[[Satellite], bool]):
         if filter_lambda:
             self._filters.append(filter_lambda)
         return self
 
-    def apply_filters(self, elements: list[T]):
+    def apply_filters(self, elements: list[Satellite]):
         return [
             element for element in elements if all(f(element) for f in self._filters)
         ]

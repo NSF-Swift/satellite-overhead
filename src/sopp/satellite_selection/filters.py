@@ -50,9 +50,10 @@ def filter_name_regex(regex: str) -> Callable[[Satellite], bool]:
     - A lambda function that takes a Satellite object and returns True if the name
       matches the specified regex, False otherwise.
     """
+    pattern = re.compile(regex)
 
     def filter_function(satellite: Satellite) -> bool:
-        return not regex or bool(re.search(regex, satellite.name))
+        return not regex or bool(pattern.search(satellite.name))
 
     return filter_function
 

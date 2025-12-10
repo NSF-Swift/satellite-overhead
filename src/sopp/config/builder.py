@@ -149,18 +149,18 @@ class ConfigurationBuilder:
         self.runtime_settings = config.runtime_settings
 
         if config.antenna_trajectory:
-            self._custom_observation_path = config.antenna_position_times
+            self._custom_observation_path = config.antenna_trajectory
         elif config.static_antenna_position:
             self._static_pointing = config.static_antenna_position
         else:
             self._observation_target = config.observation_target
         return self
 
-    def set_satellites_filter(self, filterer: type[Filterer]) -> "ConfigurationBuilder":
+    def set_satellites_filter(self, filterer: Filterer) -> "ConfigurationBuilder":
         self._filterer = filterer
         return self
 
-    def add_filter(self, filter_fn: Callable[[Satellite, Any], bool]):
+    def add_filter(self, filter_fn: Callable[[Satellite], bool]):
         self._filterer.add_filter(filter_fn)
         return self
 
