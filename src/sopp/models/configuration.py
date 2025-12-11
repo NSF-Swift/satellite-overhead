@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from sopp.models.antenna_trajectory import AntennaTrajectory
+from sopp.models.antenna_config import AntennaConfig
 from sopp.models.reservation import Reservation
 from sopp.models.runtime_settings import RuntimeSettings
 from sopp.models.satellite.satellite import Satellite
@@ -10,7 +10,7 @@ from sopp.models.satellite.satellite import Satellite
 class Configuration:
     reservation: Reservation
     satellites: list[Satellite]
-    antenna_trajectory: AntennaTrajectory
+    antenna_config: AntennaConfig
     runtime_settings: RuntimeSettings = field(default_factory=RuntimeSettings)
 
     def __post_init__(self):
@@ -21,7 +21,6 @@ class Configuration:
         self._validate_satellites()
         self._validate_reservation()
         self._validate_settings()
-        self._validate_trajectory()
 
     def _validate_satellites(self):
         if not self.satellites:
@@ -45,14 +44,6 @@ class Configuration:
             raise ValueError("Concurrency level must be at least 1.")
         if self.runtime_settings.min_altitude < 0:
             raise ValueError("Minimum altitude must be non-negative.")
-
-    def _validate_trajectory(self):
-        if not self.antenna_trajectory or len(self.antenna_trajectory) == 0:
-            raise ValueError("Antenna trajectory is empty.")
-
-        if len(self.antenna_trajectory) > 1:
-            if self.antenna_trajectory.times[-1] <= self.antenna_trajectory.times[0]:
-                raise ValueError("Antenna trajectory times are not increasing.")
 
     def __str__(self):
         return (
