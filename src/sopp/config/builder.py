@@ -2,7 +2,7 @@ from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
 
-from sopp.config.base import ConfigFileLoaderBase
+from sopp.config.loader_base import ConfigFileLoaderBase
 from sopp.config.json_loader import ConfigFileLoaderJson
 from sopp.io.satellites_loader import (
     SatellitesLoaderFromFiles,
