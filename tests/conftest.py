@@ -4,7 +4,6 @@ import numpy as np
 import pytest
 
 from sopp.ephemeris.base import EphemerisCalculator
-from sopp.event_finders.skyfield import EventFinderSkyfield
 from sopp.models import (
     Configuration,
     Coordinates,
@@ -16,6 +15,7 @@ from sopp.models import (
     SatelliteTrajectory,
     TimeWindow,
 )
+from sopp.models.antenna_config import CustomTrajectoryConfig
 from sopp.models.antenna_trajectory import AntennaTrajectory
 from sopp.models.satellite import InternationalDesignator, MeanMotion, TleInformation
 from sopp.utils.time import generate_time_grid
@@ -81,11 +81,6 @@ def facility():
     return Facility(coordinates=Coordinates(latitude=0, longitude=0))
 
 
-# @pytest.fixture
-# def satellite():
-#    return Satellite(name="arbitrary")
-
-
 @pytest.fixture
 def ephemeris_stub():
     return EphemerisCalculatorStub()
@@ -98,7 +93,6 @@ def start_time():
 
 @pytest.fixture
 def time_window_duration():
-    # Default duration, tests can override if they construct their own
     return timedelta(seconds=5)
 
 
@@ -123,12 +117,13 @@ def reservation(start_time, time_window_duration):
 def configuration(
     antenna_trajectory,
     reservation,
+    satellite,
 ):
     runtime_settings = RuntimeSettings()
 
     return Configuration(
         satellites=[satellite],
-        antenna_trajectory=antenna_trajectory,
+        antenna_config=CustomTrajectoryConfig(antenna_trajectory),
         reservation=reservation,
         runtime_settings=runtime_settings,
     )
@@ -172,23 +167,5 @@ def make_reservation(facility):
             begin=start_time, end=start_time + timedelta(seconds=duration_seconds)
         )
         return Reservation(facility=facility, time=window)
-
-    return _make
-
-
-@pytest.fixture
-def make_event_finder(ephemeris_stub):
-    """
-    Factory to assemble the EventFinder with specific reservation/satellites/antenna.
-    """
-
-    def _make(reservation, satellites, antenna_trajectory=None):
-        return EventFinderSkyfield(
-            list_of_satellites=satellites,
-            reservation=reservation,
-            antenna_trajectory=antenna_trajectory,
-            ephemeris_calculator=ephemeris_stub,
-            runtime_settings=RuntimeSettings(),
-        )
 
     return _make

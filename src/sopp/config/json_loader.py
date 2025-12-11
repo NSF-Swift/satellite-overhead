@@ -4,57 +4,27 @@ from pathlib import Path
 
 import numpy as np
 
-from sopp.config.base import ConfigFileLoaderBase
+from sopp.config.loader_base import ConfigFileLoaderBase
+from sopp.models.antenna_config import (
+    AntennaConfig,
+    CelestialTrackingConfig,
+    CustomTrajectoryConfig,
+    StaticPointingConfig,
+)
 from sopp.models.antenna_trajectory import AntennaTrajectory
-from sopp.models.configuration_file import ConfigurationFile
 from sopp.models.coordinates import Coordinates
 from sopp.models.facility import Facility
 from sopp.models.frequency_range import FrequencyRange
 from sopp.models.observation_target import ObservationTarget
 from sopp.models.position import Position
-from sopp.models.reservation import Reservation
 from sopp.models.runtime_settings import RuntimeSettings
 from sopp.models.time_window import TimeWindow
 from sopp.utils.helpers import read_datetime_string_as_utc
 
 
 class ConfigFileLoaderJson(ConfigFileLoaderBase):
-    @cached_property
-    def configuration(self) -> ConfigurationFile:
-        return ConfigurationFile(
-            reservation=self._reservation,
-            runtime_settings=self._runtime_settings,
-            antenna_trajectory=self._antenna_trajectory,
-            observation_target=self._observation_target,
-            static_antenna_position=self._static_antenna_position,
-        )
-
-    def _get_required_section(self, key: str) -> dict:
-        data = self._config_object.get(key)
-        if data is None:
-            raise ValueError(
-                f"Invalid Configuration: Missing required section '{key}' in {self._filepath}"
-            )
-        return data
-
-    def _get_required_field(self, data: dict, key: str, section_name: str):
-        val = data.get(key)
-        if val is None:
-            raise ValueError(
-                f"Invalid Configuration: Missing field '{key}' in section '{section_name}'"
-            )
-        return val
-
-    @cached_property
-    def _reservation(self) -> Reservation:
-        return Reservation(
-            facility=self._facility,
-            time=self._reservation_window,
-            frequency=self._frequency_range,
-        )
-
-    @cached_property
-    def _facility(self) -> Facility:
+    @property
+    def facility(self) -> Facility:
         conf = self._get_required_section("facility")
 
         lat = self._get_required_field(conf, "latitude", "facility")
@@ -68,8 +38,8 @@ class ConfigFileLoaderJson(ConfigFileLoaderBase):
             beamwidth=conf.get("beamwidth", 3.0),
         )
 
-    @cached_property
-    def _reservation_window(self) -> TimeWindow:
+    @property
+    def time_window(self) -> TimeWindow:
         conf = self._get_required_section("reservationWindow")
 
         start_str = self._get_required_field(conf, "startTimeUtc", "reservationWindow")
@@ -83,8 +53,8 @@ class ConfigFileLoaderJson(ConfigFileLoaderBase):
 
         return TimeWindow(begin=start, end=end)
 
-    @cached_property
-    def _frequency_range(self) -> FrequencyRange:
+    @property
+    def frequency_range(self) -> FrequencyRange:
         conf = self._get_required_section("frequencyRange")
 
         freq = self._get_required_field(conf, "frequency", "frequencyRange")
@@ -92,8 +62,8 @@ class ConfigFileLoaderJson(ConfigFileLoaderBase):
 
         return FrequencyRange(frequency=freq, bandwidth=bw)
 
-    @cached_property
-    def _runtime_settings(self) -> RuntimeSettings:
+    @property
+    def runtime_settings(self) -> RuntimeSettings:
         conf = self._config_object.get("runtimeSettings", {})
 
         return RuntimeSettings(
@@ -102,8 +72,24 @@ class ConfigFileLoaderJson(ConfigFileLoaderBase):
             min_altitude=float(conf.get("min_altitude", 0.0)),
         )
 
+    @property
+    def antenna_config(self) -> AntennaConfig:
+        if self._custom_antenna_trajectory:
+            return CustomTrajectoryConfig(trajectory=self._custom_antenna_trajectory)
+
+        if self._static_antenna_position:
+            return StaticPointingConfig(position=self._static_antenna_position)
+
+        if self._observation_target:
+            return CelestialTrackingConfig(target=self._observation_target)
+
+        raise ValueError(
+            f"Invalid Config: {self._filepath} must contain one of: "
+            "'antennaPositionTimes', 'staticAntennaPosition', or 'observationTarget'"
+        )
+
     @cached_property
-    def _antenna_trajectory(self) -> AntennaTrajectory | None:
+    def _custom_antenna_trajectory(self) -> AntennaTrajectory | None:
         data_list = self._config_object.get("antennaPositionTimes")
 
         if not data_list:
@@ -167,6 +153,22 @@ class ConfigFileLoaderJson(ConfigFileLoaderBase):
                 return json.load(f)
             except json.JSONDecodeError as e:
                 raise ValueError(f"Invalid JSON in configuration file: {e}") from e
+
+    def _get_required_section(self, key: str) -> dict:
+        data = self._config_object.get(key)
+        if data is None:
+            raise ValueError(
+                f"Invalid Configuration: Missing required section '{key}' in {self._filepath}"
+            )
+        return data
+
+    def _get_required_field(self, data: dict, key: str, section_name: str):
+        val = data.get(key)
+        if val is None:
+            raise ValueError(
+                f"Invalid Configuration: Missing field '{key}' in section '{section_name}'"
+            )
+        return val
 
     @classmethod
     def filename_extension(cls) -> str:

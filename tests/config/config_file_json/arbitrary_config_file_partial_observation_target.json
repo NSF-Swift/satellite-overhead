@@ -16,9 +16,5 @@
   },
   "observationTarget": {
     "declination": "-38d6m50.8s"
-  },
-  "staticAntennaPosition": {
-    "altitude": 0.2,
-    "azimuth": 0.3
   }
 }

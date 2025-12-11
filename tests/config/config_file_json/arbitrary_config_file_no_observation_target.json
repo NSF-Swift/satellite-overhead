@@ -13,9 +13,5 @@
   "frequencyRange": {
     "frequency": 135,
     "bandwidth": 10
-  },
-    "staticAntennaPosition": {
-    "altitude": 0.2,
-    "azimuth": 0.3
   }
 }
