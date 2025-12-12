@@ -1,5 +1,6 @@
 import pytest
 
+from sopp.models.antenna_config import CustomTrajectoryConfig
 from sopp.models.configuration import Configuration
 from sopp.models.coordinates import Coordinates
 from sopp.models.facility import Facility
@@ -91,5 +92,8 @@ def reservation(facility, time_window, frequency_range):
 @pytest.fixture
 def configuration(reservation, antenna_trajectory, runtime_settings):
     return Configuration(
-        reservation, [Satellite(name="Test")], antenna_trajectory, runtime_settings
+        reservation,
+        [Satellite(name="Test")],
+        CustomTrajectoryConfig(antenna_trajectory),
+        runtime_settings,
     )
