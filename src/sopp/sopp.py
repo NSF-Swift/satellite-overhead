@@ -1,48 +1,108 @@
+import numpy as np
 from functools import cached_property
+from typing import Type
 
+from sopp.ephemeris.base import EphemerisCalculator
 from sopp.ephemeris.skyfield import SkyfieldEphemerisCalculator
-from sopp.event_finders.base import EventFinder
-from sopp.event_finders.skyfield import (
-    EventFinderSkyfield,
+from sopp.models.configuration import Configuration
+from sopp.models.satellite_trajectory import SatelliteTrajectory
+from sopp.models.antenna_trajectory import AntennaTrajectory
+from sopp.models.antenna_config import (
+    StaticPointingConfig,
+    CustomTrajectoryConfig,
+    CelestialTrackingConfig,
 )
-from sopp.models import Configuration, SatelliteTrajectory
+from sopp.path_finders.base import ObservationPathFinder
+from sopp.path_finders.skyfield import ObservationPathFinderSkyfield
 from sopp.utils.time import generate_time_grid
+from sopp.analysis.interference import (
+    find_satellites_above_horizon,
+    find_satellites_crossing_main_beam,
+)
 
 
 class Sopp:
+    """
+    The main entry point for the SOPP simulation engine.
+    """
+
     def __init__(
         self,
         configuration: Configuration,
-        event_finder: EventFinder | None = None,
+        ephemeris_calculator_class: Type[
+            EphemerisCalculator
+        ] = SkyfieldEphemerisCalculator,
+        path_finder_class: Type[ObservationPathFinder] = ObservationPathFinderSkyfield,
     ):
-        self._configuration = configuration
-        self._injected_event_finder = event_finder
+        self.configuration = configuration
+        self._path_finder_class = path_finder_class
+        self._ephemeris_calculator_class = ephemeris_calculator_class
 
     def get_satellites_above_horizon(self) -> list[SatelliteTrajectory]:
-        return self._event_finder.get_satellites_above_horizon()
+        """
+        Returns trajectories for all satellites that rise above the minimum altitude.
+        """
+        return find_satellites_above_horizon(
+            reservation=self.configuration.reservation,
+            satellites=self.configuration.satellites,
+            ephemeris_calculator=self.ephemeris_calculator,
+            min_altitude=self.configuration.runtime_settings.min_altitude,
+        )
 
     def get_satellites_crossing_main_beam(self) -> list[SatelliteTrajectory]:
-        return self._event_finder.get_satellites_crossing_main_beam()
+        """
+        Returns trajectories for satellites that cross the antenna's main beam.
+        """
+        return find_satellites_crossing_main_beam(
+            reservation=self.configuration.reservation,
+            satellites=self.configuration.satellites,
+            ephemeris_calculator=self.ephemeris_calculator,
+            antenna_trajectory=self.antenna_trajectory,
+            min_altitude=self.configuration.runtime_settings.min_altitude,
+        )
 
     @cached_property
-    def _event_finder(self) -> EventFinder:
-        if self._injected_event_finder:
-            return self._injected_event_finder
-
-        datetimes = generate_time_grid(
-            start=self._configuration.reservation.time.begin,
-            end=self._configuration.reservation.time.end,
-            resolution_seconds=self._configuration.runtime_settings.time_resolution_seconds,
+    def master_time_grid(self) -> np.ndarray:
+        return generate_time_grid(
+            start=self.configuration.reservation.time.begin,
+            end=self.configuration.reservation.time.end,
+            resolution_seconds=self.configuration.runtime_settings.time_resolution_seconds,
         )
 
-        ephemeris_calculator = SkyfieldEphemerisCalculator(
-            facility=self._configuration.reservation.facility, datetimes=datetimes
+    @cached_property
+    def ephemeris_calculator(self) -> EphemerisCalculator:
+        return self._ephemeris_calculator_class(
+            facility=self.configuration.reservation.facility,
+            datetimes=self.master_time_grid,
         )
 
-        return EventFinderSkyfield(
-            list_of_satellites=self._configuration.satellites,
-            reservation=self._configuration.reservation,
-            antenna_trajectory=self._configuration.antenna_trajectory,
-            ephemeris_calculator=ephemeris_calculator,
-            runtime_settings=self._configuration.runtime_settings,
-        )
+    @cached_property
+    def antenna_trajectory(self) -> AntennaTrajectory:
+        """
+        Builds the antenna trajectory based on the configuration variant.
+        """
+        config = self.configuration.antenna_config
+        times = self.master_time_grid
+
+        match config:
+            case CustomTrajectoryConfig(trajectory=traj):
+                return traj
+
+            case CelestialTrackingConfig(target=target):
+                path_finder = self._path_finder_class(
+                    facility=self.configuration.reservation.facility,
+                    observation_target=target,
+                    time_window=self.configuration.reservation.time,
+                )
+                return path_finder.calculate_path(time_grid=times)
+
+            case StaticPointingConfig(position=pos):
+                n = len(times)
+                return AntennaTrajectory(
+                    times=times,
+                    azimuth=np.full(n, pos.azimuth),
+                    altitude=np.full(n, pos.altitude),
+                )
+
+            case _:
+                raise ValueError(f"Unknown antenna configuration: {config}")
