@@ -1,9 +1,12 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
+import numpy.typing as npt
+import numpy as np
 
 from sopp.models.position import Position
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.satellite_trajectory import SatelliteTrajectory
+from sopp.models.facility import Facility
 from sopp.models.time_window import TimeWindow
 
 
@@ -11,6 +14,22 @@ class EphemerisCalculator(ABC):
     """
     Abstract contract for the physics engine.
     """
+
+    @abstractmethod
+    def __init__(
+        self,
+        facility: Facility,
+        datetimes: npt.NDArray[np.object_],  # datetime objects
+    ):
+        """
+        Initializes the calculator.
+
+        Args:
+            facility: The location observing the satellites.
+            datetimes: A sorted NumPy array of UTC datetime objects representing
+                       the simulation master grid.
+        """
+        pass
 
     @abstractmethod
     def calculate_visibility_windows(
