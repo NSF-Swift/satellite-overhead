@@ -2,6 +2,7 @@ import pickle
 import re
 import types
 from pathlib import Path
+
 from skyfield.api import load
 
 from tests.models.satellite.utilities import (
