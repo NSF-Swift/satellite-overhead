@@ -1,4 +1,5 @@
 import re
+import numpy as np
 
 from skyfield.api import load
 from skyfield.starlib import Star
@@ -20,15 +21,19 @@ class ObservationPathFinderSkyfield(ObservationPathFinder):
         self._observation_target = observation_target
         self._time_window = time_window
 
-    def calculate_path(self, resolution_seconds: float = 1.0) -> AntennaTrajectory:
-        t_start = self._time_window.begin
-        t_end = self._time_window.end
-
-        times = generate_time_grid(t_start, t_end, resolution_seconds)
+    def calculate_path(
+        self,
+        resolution_seconds: float = 1.0,
+        time_grid: np.ndarray | None = None,
+    ) -> AntennaTrajectory:
+        if time_grid is None:
+            time_grid = generate_time_grid(
+                self._time_window.begin, self._time_window.end, resolution_seconds
+            )
 
         # TODO: load only a single time
         ts = load.timescale()
-        t_vector = ts.from_datetimes(times)
+        t_vector = ts.from_datetimes(time_grid)
 
         observing_location = wgs84.latlon(
             latitude_degrees=self._facility.coordinates.latitude,

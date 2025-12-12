@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import numpy as np
 
 from sopp.models import AntennaTrajectory, Facility, ObservationTarget, TimeWindow
 
@@ -21,5 +22,7 @@ class ObservationPathFinder(ABC):
         self._time_window = time_window
 
     @abstractmethod
-    def calculate_path(self, resolution_seconds: float = 1.0) -> AntennaTrajectory:
+    def calculate_path(
+        self, resolution_seconds: float = 1.0, time_grid: np.ndarray | None = None
+    ) -> AntennaTrajectory:
         pass
