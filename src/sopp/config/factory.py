@@ -1,6 +1,7 @@
 from pathlib import Path
-from sopp.config.loader_base import ConfigFileLoaderBase
+
 from sopp.config.json_loader import ConfigFileLoaderJson
+from sopp.config.loader_base import ConfigFileLoaderBase
 
 LOADERS = [ConfigFileLoaderJson]
 

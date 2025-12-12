@@ -4,8 +4,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from sopp.config.loader_base import ConfigFileLoaderBase
 from sopp.config.builder import ConfigurationBuilder
+from sopp.config.loader_base import ConfigFileLoaderBase
 from sopp.models import (
     AntennaTrajectory,
     Coordinates,
@@ -19,12 +19,11 @@ from sopp.models import (
     TimeWindow,
 )
 from sopp.models.antenna_config import (
-    StaticPointingConfig,
     CelestialTrackingConfig,
     CustomTrajectoryConfig,
+    StaticPointingConfig,
 )
 from sopp.satellite_selection.filterer import Filterer
-
 
 # --- Helpers & Stubs ---
 

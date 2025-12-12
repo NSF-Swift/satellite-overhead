@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 import numpy as np
+from tests.conftest import ARBITRARY_ALTITUDE, ARBITRARY_AZIMUTH
 
 from sopp.analysis.interference import (
     find_satellites_above_horizon,
@@ -8,7 +9,6 @@ from sopp.analysis.interference import (
 )
 from sopp.models.antenna_trajectory import AntennaTrajectory
 from sopp.utils.time import generate_time_grid
-from tests.conftest import ARBITRARY_ALTITUDE, ARBITRARY_AZIMUTH
 
 
 def test_satellite_inside_beam_is_detected(

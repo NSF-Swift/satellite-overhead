@@ -2,19 +2,19 @@ from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
 
-from sopp.config.loader_base import ConfigFileLoaderBase
 from sopp.config.json_loader import ConfigFileLoaderJson
+from sopp.config.loader_base import ConfigFileLoaderBase
 from sopp.io.satellites_loader import (
     SatellitesLoaderFromFiles,
 )
-from sopp.models.antenna_trajectory import AntennaTrajectory
-from sopp.models.configuration import Configuration
 from sopp.models.antenna_config import (
     AntennaConfig,
-    StaticPointingConfig,
     CelestialTrackingConfig,
     CustomTrajectoryConfig,
+    StaticPointingConfig,
 )
+from sopp.models.antenna_trajectory import AntennaTrajectory
+from sopp.models.configuration import Configuration
 from sopp.models.coordinates import Coordinates
 from sopp.models.facility import Facility
 from sopp.models.frequency_range import FrequencyRange

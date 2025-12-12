@@ -1,4 +1,3 @@
-import numpy as np
 import pytest
 
 from sopp.models import Configuration, RuntimeSettings

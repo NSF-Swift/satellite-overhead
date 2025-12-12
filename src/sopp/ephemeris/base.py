@@ -1,12 +1,13 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-import numpy.typing as npt
-import numpy as np
 
+import numpy as np
+import numpy.typing as npt
+
+from sopp.models.facility import Facility
 from sopp.models.position import Position
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.satellite_trajectory import SatelliteTrajectory
-from sopp.models.facility import Facility
 from sopp.models.time_window import TimeWindow
 
 

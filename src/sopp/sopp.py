@@ -1,24 +1,24 @@
-import numpy as np
 from functools import cached_property
-from typing import Type
 
-from sopp.ephemeris.base import EphemerisCalculator
-from sopp.ephemeris.skyfield import SkyfieldEphemerisCalculator
-from sopp.models.configuration import Configuration
-from sopp.models.satellite_trajectory import SatelliteTrajectory
-from sopp.models.antenna_trajectory import AntennaTrajectory
-from sopp.models.antenna_config import (
-    StaticPointingConfig,
-    CustomTrajectoryConfig,
-    CelestialTrackingConfig,
-)
-from sopp.path_finders.base import ObservationPathFinder
-from sopp.path_finders.skyfield import ObservationPathFinderSkyfield
-from sopp.utils.time import generate_time_grid
+import numpy as np
+
 from sopp.analysis.interference import (
     find_satellites_above_horizon,
     find_satellites_crossing_main_beam,
 )
+from sopp.ephemeris.base import EphemerisCalculator
+from sopp.ephemeris.skyfield import SkyfieldEphemerisCalculator
+from sopp.models.antenna_config import (
+    CelestialTrackingConfig,
+    CustomTrajectoryConfig,
+    StaticPointingConfig,
+)
+from sopp.models.antenna_trajectory import AntennaTrajectory
+from sopp.models.configuration import Configuration
+from sopp.models.satellite_trajectory import SatelliteTrajectory
+from sopp.path_finders.base import ObservationPathFinder
+from sopp.path_finders.skyfield import ObservationPathFinderSkyfield
+from sopp.utils.time import generate_time_grid
 
 
 class Sopp:
@@ -29,10 +29,10 @@ class Sopp:
     def __init__(
         self,
         configuration: Configuration,
-        ephemeris_calculator_class: Type[
+        ephemeris_calculator_class: type[
             EphemerisCalculator
         ] = SkyfieldEphemerisCalculator,
-        path_finder_class: Type[ObservationPathFinder] = ObservationPathFinderSkyfield,
+        path_finder_class: type[ObservationPathFinder] = ObservationPathFinderSkyfield,
     ):
         self.configuration = configuration
         self._path_finder_class = path_finder_class
