@@ -50,6 +50,7 @@ def run_benchmark(
             begin=start_time,
             end=start_time + timedelta(hours=duration_hours),
         )
+        .set_observation_target(altitude=90, azimuth=90)
         .set_runtime_settings(
             concurrency_level=1,  # Force single-thread to measure algorithm speed
             time_resolution_seconds=1,
@@ -64,7 +65,7 @@ def run_benchmark(
     t_init_start = time.perf_counter()
     sopp = Sopp(config)
     # Force access to lazy property to trigger Skyfield timescale loading
-    _ = sopp._event_finder
+    _ = sopp.ephemeris_calculator
     t_init_end = time.perf_counter()
     print(f"      -> Warmup complete in {t_init_end - t_init_start:.4f}s")
 
