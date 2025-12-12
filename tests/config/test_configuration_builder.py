@@ -1,12 +1,13 @@
 from datetime import datetime, timezone
+from pathlib import Path
 
 import numpy as np
 import pytest
 
+from sopp.config.loader_base import ConfigFileLoaderBase
 from sopp.config.builder import ConfigurationBuilder
 from sopp.models import (
     AntennaTrajectory,
-    ConfigurationFile,
     Coordinates,
     Facility,
     FrequencyRange,
@@ -17,7 +18,15 @@ from sopp.models import (
     Satellite,
     TimeWindow,
 )
+from sopp.models.antenna_config import (
+    StaticPointingConfig,
+    CelestialTrackingConfig,
+    CustomTrajectoryConfig,
+)
 from sopp.satellite_selection.filterer import Filterer
+
+
+# --- Helpers & Stubs ---
 
 
 def expected_trajectory():
@@ -46,21 +55,37 @@ def expected_reservation():
     )
 
 
-class StubConfigFileLoader:
-    def __init__(self, filepath):
-        self.configuration = ConfigurationFile(
-            reservation=expected_reservation(),
-            observation_target="target",
+class StubConfigFileLoader(ConfigFileLoaderBase):
+    """
+    Mock loader that complies with the new Base Class structure.
+    """
+
+    @property
+    def facility(self):
+        return expected_reservation().facility
+
+    @property
+    def time_window(self):
+        return expected_reservation().time
+
+    @property
+    def frequency_range(self):
+        return expected_reservation().frequency
+
+    @property
+    def runtime_settings(self):
+        return RuntimeSettings()
+
+    @property
+    def antenna_config(self):
+        # Return a dummy tracking config
+        return CelestialTrackingConfig(
+            target=ObservationTarget(declination="1d", right_ascension="1h")
         )
 
-
-class StubPathFinder:
-    def __init__(self, facility, target, window):
-        pass
-
-    def calculate_path(self, resolution_seconds=1.0):
-        # Return the vectorized object
-        return expected_trajectory()
+    @classmethod
+    def filename_extension(cls):
+        return ".json"
 
 
 def mock_satellite_loader(monkeypatch):
@@ -109,27 +134,25 @@ def test_set_observation_target_error():
         builder.set_observation_target(altitude=1)
 
 
-def test_set_observation_target():
+def test_set_observation_target_tracking():
     builder = ConfigurationBuilder()
     builder.set_observation_target(
         declination="1d1m1s",
         right_ascension="1h1m1s",
     )
-    # Check internal state matches
-    assert builder._observation_target == ObservationTarget(
-        declination="1d1m1s",
-        right_ascension="1h1m1s",
-    )
+
+    # Verify it created the correct Variant
+    expected_target = ObservationTarget(declination="1d1m1s", right_ascension="1h1m1s")
+    assert builder.antenna_config == CelestialTrackingConfig(target=expected_target)
 
 
 def test_set_observation_target_static():
     builder = ConfigurationBuilder()
     builder.set_observation_target(altitude=1, azimuth=1)
 
-    assert builder._static_pointing == Position(
-        altitude=1,
-        azimuth=1,
-    )
+    # Verify it created the correct Variant
+    expected_pos = Position(altitude=1, azimuth=1)
+    assert builder.antenna_config == StaticPointingConfig(position=expected_pos)
 
 
 def test_set_observation_target_custom():
@@ -137,7 +160,8 @@ def test_set_observation_target_custom():
     traj = expected_trajectory()
     builder.set_observation_target(custom_antenna_trajectory=traj)
 
-    assert builder._custom_antenna_trajectory == traj
+    # Verify it created the correct Variant
+    assert builder.antenna_config == CustomTrajectoryConfig(trajectory=traj)
 
 
 def test_set_runtime_settings():
@@ -146,7 +170,7 @@ def test_set_runtime_settings():
 
     assert builder.runtime_settings == RuntimeSettings(
         concurrency_level=1,
-        time_resolution_seconds=1,
+        time_resolution_seconds=1.0,
     )
 
 
@@ -155,19 +179,6 @@ def test_set_time_window_str():
     builder.set_time_window(
         begin="2023-11-15T08:00:00.0",
         end="2023-11-15T08:30:00.0",
-    )
-
-    assert builder.time_window == TimeWindow(
-        begin=datetime(2023, 11, 15, 8, 0, tzinfo=timezone.utc),
-        end=datetime(2023, 11, 15, 8, 30, tzinfo=timezone.utc),
-    )
-
-
-def test_set_time_window_datetime():
-    builder = ConfigurationBuilder()
-    builder.set_time_window(
-        begin=datetime(2023, 11, 15, 8, 0, tzinfo=timezone.utc),
-        end=datetime(2023, 11, 15, 8, 30, tzinfo=timezone.utc),
     )
 
     assert builder.time_window == TimeWindow(
@@ -200,103 +211,49 @@ def test_set_satellites_filter(monkeypatch):
     assert builder.satellites == []
 
 
-def test_add_satellites_filter(monkeypatch):
-    mock_satellite_loader(monkeypatch)
-    builder = ConfigurationBuilder()
-    builder.satellites = [Satellite(name="TestSatellite")]
-
-    builder.add_filter(lambda sat: "Test" not in sat.name)
-    builder.satellites = builder._filterer.apply_filters(builder.satellites)
-
-    assert builder.satellites == []
-
-
-def test_build_antenna_trajectory_target():
-    builder = ConfigurationBuilder(path_finder_class=StubPathFinder)
-    # Set required time window for trajectory generation
-    builder.set_time_window(
-        begin="2023-11-15T08:00:00.0",
-        end="2023-11-15T08:30:00.0",
-    )
-    # Set dummy facility required for path finding
-    builder.set_facility(40, -120, 0, "Test", 3)
-
-    # Set target to trigger the path finder
-    builder._observation_target = "mock"
-
-    traj = builder._build_antenna_trajectory()
-    expected = expected_trajectory()
-
-    # Compare vector objects (using custom equality logic or just length/properties)
-    assert len(traj) == len(expected)
-    assert traj.times[0] == expected.times[0]
-
-
-def test_build_antenna_trajectory_static():
-    builder = ConfigurationBuilder()
-    # Manually set internal state to simulate "Static Pointing"
-    builder._static_pointing = Position(altitude=90, azimuth=0)
-    builder.set_time_window(
-        begin="2023-11-15T08:00:00.0",
-        end="2023-11-15T08:30:00.0",
-    )
-
-    traj = builder._build_antenna_trajectory()
-
-    # Should generate a vector covering the window (30 mins = 1801 points @ 1s)
-    assert len(traj) == 1801
-    assert traj.altitude[0] == 90
-
-
-def test_build_antenna_trajectory_custom():
-    builder = ConfigurationBuilder()
-    builder.set_time_window(
-        begin="2023-11-15T08:00:00.0",
-        end="2023-11-15T08:30:00.0",
-    )
-    custom = expected_trajectory()
-    builder._custom_antenna_trajectory = custom
-
-    traj = builder._build_antenna_trajectory()
-    assert traj == custom
-
-
 def test_build_error_incomplete():
+    """Verifies build() fails if required fields are missing."""
     builder = ConfigurationBuilder()
     with pytest.raises(ValueError):
         builder.build()
 
 
 def test_build_from_config_file(monkeypatch):
+    """
+    Verifies that set_from_config_file delegates to the Loader
+    and populates the Builder's state correctly.
+    """
     mock_satellite_loader(monkeypatch)
 
-    builder = ConfigurationBuilder(
-        config_file_loader_class=StubConfigFileLoader,
-        path_finder_class=StubPathFinder,
+    builder = ConfigurationBuilder()
+    # The path is ignored by our Stub
+    builder.set_from_config_file(
+        config_file=Path("mock/path"),
+        loader_class=StubConfigFileLoader,
     )
-    builder.set_from_config_file(config_file="mock/path")
-    # Need to load satellites as file loader usually doesn't do TLE I/O
+
+    # Load satellites (required for build)
     builder.set_satellites(tle_file="./path/satellites.tle")
 
     configuration = builder.build()
 
-    # Verify the built configuration matches expected values
+    # Verify the built configuration matches expected values from the stub
     assert configuration.reservation == expected_reservation()
     assert len(configuration.satellites) == 1
-    # Check trajectory was built
-    assert len(configuration.antenna_trajectory) > 0
+
+    # The stub returns a CelestialTrackingConfig
+    assert isinstance(configuration.antenna_config, CelestialTrackingConfig)
 
 
 def test_build_full_flow(monkeypatch):
+    """
+    Integration test for the whole builder chain.
+    """
     mock_satellite_loader(monkeypatch)
 
-    builder = ConfigurationBuilder(path_finder_class=StubPathFinder)
+    builder = ConfigurationBuilder()
     builder.set_facility(
-        latitude=1,
-        longitude=-1,
-        elevation=1,
-        name="HCRO",
-        beamwidth=3,
+        latitude=1, longitude=-1, elevation=1, name="HCRO", beamwidth=3
     )
     builder.set_frequency_range(bandwidth=10, frequency=135)
     builder.set_time_window(begin="2023-11-15T08:00:00.0", end="2023-11-15T08:30:00.0")
@@ -307,4 +264,6 @@ def test_build_full_flow(monkeypatch):
 
     assert configuration.reservation == expected_reservation()
     assert len(configuration.satellites) == 1
-    assert len(configuration.antenna_trajectory) > 0
+
+    # Verify intent was preserved
+    assert isinstance(configuration.antenna_config, CelestialTrackingConfig)
