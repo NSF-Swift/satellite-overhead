@@ -5,20 +5,17 @@ from sopp.io.get_frequency_data_from_csv import (
     GetFrequencyDataFromCsv,
 )
 from sopp.models.satellite.satellite import Satellite
-from sopp.utils.helpers import get_script_directory
 from tests.models.satellite.utilities import (
     expected_international_space_station_tle_as_satellite_cu,
 )
 
+TEST_DIR = Path(__file__).resolve().parent
+
 
 class TestTleToSatelliteCu:
     def test_single_satellite(self):
-        tle_file = Path(
-            get_script_directory(__file__), "international_space_station_tle.tle"
-        )
-        frequency_file = Path(
-            get_script_directory(__file__), "fake_ISS_frequency_file.csv"
-        )
+        tle_file = TEST_DIR / "international_space_station_tle.tle"
+        frequency_file = TEST_DIR / "fake_ISS_frequency_file.csv"
         satellite = Satellite.from_tle_file(tlefilepath=tle_file)
         frequency_list = GetFrequencyDataFromCsv(filepath=frequency_file).get()
         satellite_list_with_frequencies = [
@@ -33,13 +30,8 @@ class TestTleToSatelliteCu:
         assert satellite_list_with_frequencies == [self._expected_satellite_first]
 
     def test_multiple_satellites(self):
-        tle_file = Path(
-            get_script_directory(__file__),
-            "international_space_station_tle_multiple.tle",
-        )
-        frequency_file = Path(
-            get_script_directory(__file__), "fake_ISS_frequency_file_multiple.csv"
-        )
+        tle_file = TEST_DIR / "international_space_station_tle_multiple.tle"
+        frequency_file = TEST_DIR / "fake_ISS_frequency_file_multiple.csv"
         satellite = Satellite.from_tle_file(tlefilepath=tle_file)
         frequency_list = GetFrequencyDataFromCsv(filepath=frequency_file).get()
         satellite_list_with_frequencies = [

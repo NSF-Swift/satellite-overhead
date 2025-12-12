@@ -2,10 +2,8 @@ import pickle
 import re
 import types
 from pathlib import Path
-
 from skyfield.api import load
 
-from sopp.utils.helpers import get_script_directory
 from tests.models.satellite.utilities import (
     expected_international_space_station_tle_as_satellite_cu,
 )
@@ -24,8 +22,8 @@ class TestSatelliteToSkyfield:
     def given_a_skyfield_satellite_loaded_from_the_international_space_station_tle(
         self,
     ) -> None:
-        tle_file = Path(
-            get_script_directory(__file__), "international_space_station_tle.tle"
+        tle_file = (
+            Path(__file__).resolve().parent / "international_space_station_tle.tle"
         )
         self._skyfield_satellite = load.tle_file(url=str(tle_file))[0]
 
