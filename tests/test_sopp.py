@@ -14,8 +14,11 @@ from sopp.models import (
     SatelliteTrajectory,
     TimeWindow,
 )
+from sopp.models.antenna_config import CustomTrajectoryConfig
 from sopp.models.satellite import InternationalDesignator, MeanMotion, TleInformation
 from sopp.sopp import Sopp
+from sopp.utils.time import generate_time_grid
+from tests.conftest import ARBITRARY_ALTITUDE, ARBITRARY_AZIMUTH
 
 
 def assert_trajectories_eq(actual: SatelliteTrajectory, expected: SatelliteTrajectory):
@@ -61,7 +64,7 @@ class TestSopp:
         configuration = Configuration(
             reservation=res,
             satellites=self._satellites,
-            antenna_trajectory=antenna_traj,
+            antenna_config=CustomTrajectoryConfig(antenna_traj),
             runtime_settings=RuntimeSettings(
                 time_resolution_seconds=1.0, min_altitude=0.0
             ),
@@ -196,3 +199,103 @@ class TestSopp:
             ),
             frequency=[],
         )
+
+
+def test_reservation_begins_part_way_through_antenna_position_time(
+    arbitrary_datetime,
+    satellite,
+    make_reservation,
+    ephemeris_stub,
+):
+    """
+    Scenario: Antenna points at satellite starting at T-1s. Reservation starts at T=0.
+    Expected: Should detect interference only starting at T=0.
+    """
+    # 1. Setup Reservation (Start = T0)
+    reservation = make_reservation(start_time=arbitrary_datetime, duration_seconds=2)
+
+    # 2. Setup Mock Antenna Path (Starts at T-1)
+    # We create a grid from T-1 to T+2
+    t_start_ant = arbitrary_datetime - timedelta(seconds=1)
+    t_end_ant = arbitrary_datetime + timedelta(seconds=2)
+
+    times = generate_time_grid(t_start_ant, t_end_ant, resolution_seconds=1)
+    n = len(times)
+
+    # Antenna is STATIC, pointing exactly at ARBITRARY_AZIMUTH/ALTITUDE
+    trajectory = AntennaTrajectory(
+        times=times,
+        azimuth=np.full(n, ARBITRARY_AZIMUTH),
+        altitude=np.full(n, ARBITRARY_ALTITUDE),
+    )
+
+    config = Configuration(
+        reservation=reservation,
+        satellites=[satellite],
+        antenna_config=CustomTrajectoryConfig(trajectory),
+    )
+
+    # 3. Setup Sopp
+    sopp = Sopp(configuration=config, ephemeris_calculator_class=ephemeris_stub)
+
+    # 4. Execute
+    trajectories = sopp.get_satellites_crossing_main_beam()
+
+    # 5. Verify
+    assert len(trajectories) == 1
+    traj = trajectories[0]
+
+    # Verify the satellite is correct
+    assert traj.satellite.name == satellite.name
+
+    # Verify the start time is clipped to the Reservation Start (T0)
+    assert traj.times[0] == reservation.time.begin
+    assert len(traj) > 0
+
+
+def test_antenna_positions_that_end_before_reservation_starts_are_not_included(
+    arbitrary_datetime,
+    satellite,
+    make_reservation,
+    facility,
+    ephemeris_stub,
+):
+    """
+    Scenario: Antenna points at satellite at T-1, but moves away at T=0.
+    Expected: No interference found because the overlap happened before the reservation.
+    """
+    # 1. Setup Reservation (Start = T0)
+    reservation = make_reservation(start_time=arbitrary_datetime, duration_seconds=2)
+
+    # 2. Setup Mock Antenna Path
+    # Grid: T-1 to T+1
+    t_minus_1 = arbitrary_datetime - timedelta(seconds=1)
+    t_plus_1 = arbitrary_datetime + timedelta(seconds=1)
+    times = generate_time_grid(t_minus_1, t_plus_1, resolution_seconds=1)
+
+    # Define Altitudes
+    # T-1: Hits Satellite
+    # T=0+: Misses Satellite (Shifted by beamwidth + epsilon)
+    alt_hit = ARBITRARY_ALTITUDE
+    alt_miss = ARBITRARY_ALTITUDE + facility.beamwidth
+
+    # Create array: [Hit, Miss, Miss]
+    altitudes = np.array([alt_hit, alt_miss, alt_miss])
+    azimuths = np.full(len(times), ARBITRARY_AZIMUTH)
+
+    trajectory = AntennaTrajectory(times=times, azimuth=azimuths, altitude=altitudes)
+
+    # 3. Setup Sopp
+    config = Configuration(
+        reservation=reservation,
+        satellites=[satellite],
+        antenna_config=CustomTrajectoryConfig(trajectory),
+    )
+
+    sopp = Sopp(configuration=config, ephemeris_calculator_class=ephemeris_stub)
+
+    # 4. Execute
+    trajectories = sopp.get_satellites_crossing_main_beam()
+
+    # 5. Verify
+    assert len(trajectories) == 0

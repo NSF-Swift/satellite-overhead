@@ -31,6 +31,9 @@ class EphemerisCalculatorStub(EphemerisCalculator):
     (ARBITRARY_AZIMUTH, ARBITRARY_ALTITUDE).
     """
 
+    def __init__(*args, **kwargs):
+        pass
+
     def calculate_visibility_windows(
         self, satellite, min_altitude, start_time, end_time
     ) -> list[TimeWindow]:
@@ -83,7 +86,7 @@ def facility():
 
 @pytest.fixture
 def ephemeris_stub():
-    return EphemerisCalculatorStub()
+    return EphemerisCalculatorStub
 
 
 @pytest.fixture
@@ -103,6 +106,11 @@ def antenna_trajectory():
         np.array([ARBITRARY_AZIMUTH]),
         np.array([ARBITRARY_ALTITUDE]),
     )
+
+
+@pytest.fixture
+def antenna_config(antenna_trajectory):
+    return CustomTrajectoryConfig(antenna_trajectory)
 
 
 @pytest.fixture
