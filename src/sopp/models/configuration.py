@@ -21,6 +21,7 @@ class Configuration:
         self._validate_satellites()
         self._validate_reservation()
         self._validate_settings()
+        self._validate_antenna_config()
 
     def _validate_satellites(self):
         if not self.satellites:
@@ -44,6 +45,10 @@ class Configuration:
             raise ValueError("Concurrency level must be at least 1.")
         if self.runtime_settings.min_altitude < 0:
             raise ValueError("Minimum altitude must be non-negative.")
+
+    def _validate_antenna_config(self):
+        if not isinstance(self.antenna_config, AntennaConfig):
+            raise ValueError("Invalid antenna configuration.")
 
     def __str__(self):
         return (

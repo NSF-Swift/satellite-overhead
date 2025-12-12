@@ -24,10 +24,6 @@ from sopp.models.reservation import Reservation
 from sopp.models.runtime_settings import RuntimeSettings
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.time_window import TimeWindow
-from sopp.path_finders.base import ObservationPathFinder
-from sopp.path_finders.skyfield import (
-    ObservationPathFinderSkyfield,
-)
 from sopp.satellite_selection.filterer import Filterer
 from sopp.utils.helpers import parse_time_and_convert_to_utc
 
@@ -35,15 +31,11 @@ from sopp.utils.helpers import parse_time_and_convert_to_utc
 class ConfigurationBuilder:
     def __init__(
         self,
-        path_finder_class: type[ObservationPathFinder] = ObservationPathFinderSkyfield,
-        config_file_loader_class: type[ConfigFileLoaderBase] = ConfigFileLoaderJson,
     ):
         self.facility: Facility | None = None
         self.time_window: TimeWindow | None = None
         self.frequency_range: FrequencyRange | None = None
 
-        self.path_finder_class = path_finder_class
-        self._config_file_loader_class = config_file_loader_class
         self._filterer: Filterer = Filterer()
 
         self.antenna_config: AntennaConfig | None = None
@@ -139,8 +131,12 @@ class ConfigurationBuilder:
         )
         return self
 
-    def set_from_config_file(self, config_file: Path) -> "ConfigurationBuilder":
-        loader = self._config_file_loader_class(filepath=config_file)
+    def set_from_config_file(
+        self,
+        config_file: Path,
+        loader_class: type[ConfigFileLoaderBase] = ConfigFileLoaderJson,
+    ) -> "ConfigurationBuilder":
+        loader = loader_class(filepath=config_file)
 
         self.frequency_range = loader.frequency_range
         self.facility = loader.facility
