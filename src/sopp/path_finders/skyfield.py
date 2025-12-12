@@ -55,7 +55,9 @@ class ObservationPathFinderSkyfield(ObservationPathFinder):
         apparent = astrometric.apparent()
         alt, az, _ = apparent.altaz()
 
-        return AntennaTrajectory(times=times, azimuth=az.degrees, altitude=alt.degrees)
+        return AntennaTrajectory(
+            times=time_grid, azimuth=az.degrees, altitude=alt.degrees
+        )
 
     @staticmethod
     def _parse_coordinate(coordinate_str: str) -> tuple[float, ...]:
