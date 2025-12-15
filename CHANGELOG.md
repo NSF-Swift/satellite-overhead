@@ -96,7 +96,7 @@
 
 ### Fix
 
-* fix: Provide a default antenna_direction_path for use in get_satellites_above_horizon if user supplies none. ([`c2f0e45`](https://github.com/NSF-Swift/satellite-overhead/commit/c2f0e451429fef80f87bdc04315963b31fef6898))
+* fix: Provide a default antenna_trajectory for use in get_satellites_above_horizon if user supplies none. ([`c2f0e45`](https://github.com/NSF-Swift/satellite-overhead/commit/c2f0e451429fef80f87bdc04315963b31fef6898))
 
 
 ### Performance

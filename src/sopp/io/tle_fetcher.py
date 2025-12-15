@@ -3,16 +3,10 @@ from pathlib import Path
 
 import requests
 
-from sopp.utils.helpers import get_satellites_filepath
-
 
 class TleFetcherBase(ABC):
-    def __init__(self, tle_file_path: str | None = None):
-        self._tle_file_path = (
-            Path(tle_file_path)
-            if tle_file_path is not None
-            else get_satellites_filepath()
-        )
+    def __init__(self, tle_file_path: str):
+        self._tle_file_path = Path(tle_file_path)
 
     @abstractmethod
     def _fetch_content(self) -> requests.Response:

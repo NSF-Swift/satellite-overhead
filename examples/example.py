@@ -1,3 +1,5 @@
+import numpy as np
+
 from sopp.config.builder import ConfigurationBuilder
 from sopp.satellite_selection.filters import (
     filter_name_does_not_contain,
@@ -17,11 +19,11 @@ def main():
             beamwidth=3,
         )
         .set_frequency_range(bandwidth=10, frequency=135)
-        .set_time_window(begin="2024-01-18T08:00:00.0", end="2024-01-18T08:30:00.0")
+        .set_time_window(begin="2025-12-10T08:00:00.0", end="2025-12-10T08:30:00.0")
         .set_observation_target(
             declination="7d24m25.426s", right_ascension="5h55m10.3s"
         )
-        .set_runtime_settings(concurrency_level=8, time_continuity_resolution=1)
+        .set_runtime_settings(concurrency_level=8, time_resolution_seconds=1)
         # Alternatively set all of the above settings from a config file
         # .set_from_config_file(config_file='./supplements/config.json')
         .set_satellites(tle_file="./supplements/satellites.tle")
@@ -52,22 +54,22 @@ def main():
     )
     print("==============================================================\n")
 
-    for i, window in enumerate(interference_events, start=1):
-        max_alt = max(window.positions, key=lambda pt: pt.position.altitude)
+    for i, satellite_traj in enumerate(interference_events, start=1):
+        max_alt = np.max(satellite_traj.altitude)
 
         print(f"Satellite interference event #{i}:")
-        print(f"Satellite: {window.satellite.name}")
+        print(f"Satellite: {satellite_traj.satellite.name}")
         print(
-            f"Satellite enters view: {window.overhead_time.begin} at "
-            f"{window.positions[0].position.azimuth:.2f} "
-            f"Distance: {window.positions[0].position.distance_km:.2f} km"
+            f"Satellite enters view: {satellite_traj.overhead_time.begin} at "
+            f"{satellite_traj.azimuth[0]:.2f} "
+            f"Distance: {satellite_traj.distance_km[0]:.2f} km"
         )
         print(
-            f"Satellite leaves view: {window.overhead_time.end} at "
-            f"{window.positions[-1].position.azimuth:.2f} "
-            f"Distance: {window.positions[-1].position.distance_km:.2f} km"
+            f"Satellite leaves view: {satellite_traj.overhead_time.end} at "
+            f"{satellite_traj.azimuth[-1]:.2f} "
+            f"Distance: {satellite_traj.distance_km[-1]:.2f} km"
         )
-        print(f"Satellite maximum altitude: {max_alt.position.altitude:.2f}")
+        print(f"Satellite maximum altitude: {max_alt:.2f}")
         print("__________________________________________________\n")
 
 

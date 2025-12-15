@@ -4,14 +4,13 @@ from sopp.io.get_frequency_data_from_csv import (
     GetFrequencyDataFromCsv,
 )
 from sopp.models.frequency_range import FrequencyRange
-from sopp.utils.helpers import get_script_directory
+
+TEST_DIR = Path(__file__).resolve().parent
 
 
 class TestFromCsv:
     def test_one_frequency(self):
-        frequency_file = Path(
-            get_script_directory(__file__), "arbitrary_frequency_file.csv"
-        )
+        frequency_file = TEST_DIR / "arbitrary_frequency_file.csv"
         frequency_list = GetFrequencyDataFromCsv(filepath=frequency_file).get()
         frequencies = frequency_list[2023]
         assert frequencies == [
@@ -19,10 +18,7 @@ class TestFromCsv:
         ]
 
     def test_two_frequencies(self):
-        frequency_file = Path(
-            get_script_directory(__file__),
-            "arbitrary_frequency_file_two_frequencies.csv",
-        )
+        frequency_file = TEST_DIR / "arbitrary_frequency_file_two_frequencies.csv"
         frequency_list = GetFrequencyDataFromCsv(filepath=frequency_file).get()
         frequencies = frequency_list[2023]
         assert frequencies == [
@@ -31,10 +27,7 @@ class TestFromCsv:
         ]
 
     def test_with_bandwidth(self):
-        frequency_file = Path(
-            get_script_directory(__file__),
-            "arbitrary_frequency_file_with_bandwidth.csv",
-        )
+        frequency_file = TEST_DIR / "arbitrary_frequency_file_with_bandwidth.csv"
         frequency_list = GetFrequencyDataFromCsv(filepath=frequency_file).get()
         frequencies = frequency_list[2023]
         assert frequencies == [
@@ -44,9 +37,7 @@ class TestFromCsv:
         ]
 
     def test_no_sat_id(self):
-        frequency_file = Path(
-            get_script_directory(__file__), "arbitrary_frequency_file_none.csv"
-        )
+        frequency_file = TEST_DIR / "arbitrary_frequency_file_none.csv"
         frequency_list = GetFrequencyDataFromCsv(filepath=frequency_file).get()
         frequencies = frequency_list[2023]
         assert len(frequency_list) == 1
@@ -55,9 +46,7 @@ class TestFromCsv:
         ]
 
     def test_junk_data(self):
-        frequency_file = Path(
-            get_script_directory(__file__), "arbitrary_frequency_file_junk.csv"
-        )
+        frequency_file = TEST_DIR / "arbitrary_frequency_file_junk.csv"
         frequency_list = GetFrequencyDataFromCsv(filepath=frequency_file).get()
         frequencies = frequency_list[2023]
         assert len(frequency_list) == 1

@@ -1,83 +1,108 @@
-from datetime import timedelta
 from functools import cached_property
 
-from sopp.analysis.event_finders.base import EventFinder
-from sopp.analysis.event_finders.rhodesmill import (
-    EventFinderRhodesmill,
+import numpy as np
+
+from sopp.analysis.interference import (
+    find_satellites_above_horizon,
+    find_satellites_crossing_main_beam,
 )
+from sopp.ephemeris.base import EphemerisCalculator
+from sopp.ephemeris.skyfield import SkyfieldEphemerisCalculator
+from sopp.models.antenna_config import (
+    CelestialTrackingConfig,
+    CustomTrajectoryConfig,
+    StaticPointingConfig,
+)
+from sopp.models.antenna_trajectory import AntennaTrajectory
 from sopp.models.configuration import Configuration
-from sopp.models.overhead_window import OverheadWindow
+from sopp.models.satellite_trajectory import SatelliteTrajectory
+from sopp.path_finders.base import ObservationPathFinder
+from sopp.path_finders.skyfield import ObservationPathFinderSkyfield
+from sopp.utils.time import generate_time_grid
 
 
 class Sopp:
+    """
+    The main entry point for the SOPP simulation engine.
+    """
+
     def __init__(
         self,
         configuration: Configuration,
-        event_finder_class: type[EventFinder] = EventFinderRhodesmill,
+        ephemeris_calculator_class: type[
+            EphemerisCalculator
+        ] = SkyfieldEphemerisCalculator,
+        path_finder_class: type[ObservationPathFinder] = ObservationPathFinderSkyfield,
     ):
-        self._configuration = configuration
-        self._event_finder_class = event_finder_class
+        self.configuration = configuration
+        self._path_finder_class = path_finder_class
+        self._ephemeris_calculator_class = ephemeris_calculator_class
 
-    def get_satellites_above_horizon(self) -> list[OverheadWindow]:
-        return self._event_finder.get_satellites_above_horizon()
-
-    def get_satellites_crossing_main_beam(self) -> list[OverheadWindow]:
-        return self._event_finder.get_satellites_crossing_main_beam()
-
-    @cached_property
-    def _event_finder(self) -> EventFinder:
-        self._validate_configuration()
-        return self._event_finder_class(
-            list_of_satellites=self._configuration.satellites,
-            reservation=self._configuration.reservation,
-            antenna_direction_path=self._configuration.antenna_direction_path,
-            runtime_settings=self._configuration.runtime_settings,
+    def get_satellites_above_horizon(self) -> list[SatelliteTrajectory]:
+        """
+        Returns trajectories for all satellites that rise above the minimum altitude.
+        """
+        return find_satellites_above_horizon(
+            reservation=self.configuration.reservation,
+            satellites=self.configuration.satellites,
+            ephemeris_calculator=self.ephemeris_calculator,
+            min_altitude=self.configuration.runtime_settings.min_altitude,
         )
 
-    def _validate_configuration(self):
-        self._validate_satellites()
-        self._validate_runtime_settings()
-        self._validate_reservation()
-        self._validate_antenna_direction_path()
+    def get_satellites_crossing_main_beam(self) -> list[SatelliteTrajectory]:
+        """
+        Returns trajectories for satellites that cross the antenna's main beam.
+        """
+        return find_satellites_crossing_main_beam(
+            reservation=self.configuration.reservation,
+            satellites=self.configuration.satellites,
+            ephemeris_calculator=self.ephemeris_calculator,
+            antenna_trajectory=self.antenna_trajectory,
+            min_altitude=self.configuration.runtime_settings.min_altitude,
+        )
 
-    def _validate_satellites(self):
-        satellites = self._configuration.satellites
-        if not satellites:
-            raise ValueError("Satellites list empty.")
+    @cached_property
+    def master_time_grid(self) -> np.ndarray:
+        return generate_time_grid(
+            start=self.configuration.reservation.time.begin,
+            end=self.configuration.reservation.time.end,
+            resolution_seconds=self.configuration.runtime_settings.time_resolution_seconds,
+        )
 
-    def _validate_runtime_settings(self):
-        runtime_settings = self._configuration.runtime_settings
-        if runtime_settings.time_continuity_resolution < timedelta(seconds=1):
-            raise ValueError(
-                f"time_continuity_resolution must be at least 1 second, provided: {runtime_settings.time_continuity_resolution}"
-            )
-        if runtime_settings.concurrency_level < 1:
-            raise ValueError(
-                f"concurrency_level must be at least 1, provided: {runtime_settings.concurrency_level}"
-            )
-        if runtime_settings.min_altitude < 0.0:
-            raise ValueError(
-                f"min_altitude must be non-negative, provided: {runtime_settings.min_altitude}"
-            )
+    @cached_property
+    def ephemeris_calculator(self) -> EphemerisCalculator:
+        return self._ephemeris_calculator_class(
+            facility=self.configuration.reservation.facility,
+            datetimes=self.master_time_grid,
+        )
 
-    def _validate_reservation(self):
-        reservation = self._configuration.reservation
-        if reservation.time.begin >= reservation.time.end:
-            raise ValueError(
-                f"reservation.time.begin time is later than or equal to end time, provided begin: {reservation.time.begin} end: {reservation.time.end}"
-            )
-        if reservation.facility.beamwidth <= 0:
-            raise ValueError(
-                f"reservation.facility.beamwidth must be greater than 0, provided: {reservation.facility.beamwidth}"
-            )
+    @cached_property
+    def antenna_trajectory(self) -> AntennaTrajectory:
+        """
+        Builds the antenna trajectory based on the configuration variant.
+        """
+        config = self.configuration.antenna_config
+        times = self.master_time_grid
 
-    def _validate_antenna_direction_path(self):
-        antenna_direction_path = self._configuration.antenna_direction_path
-        if not antenna_direction_path:
-            raise ValueError("No antenna direction path provided.")
+        match config:
+            case CustomTrajectoryConfig(trajectory=traj):
+                return traj
 
-        for current_time, next_time in zip(
-            antenna_direction_path, antenna_direction_path[1:], strict=False
-        ):
-            if current_time.time >= next_time.time:
-                raise ValueError("Times in antenna_direction_path must be increasing.")
+            case CelestialTrackingConfig(target=target):
+                path_finder = self._path_finder_class(
+                    facility=self.configuration.reservation.facility,
+                    observation_target=target,
+                    time_window=self.configuration.reservation.time,
+                )
+                return path_finder.calculate_path(time_grid=times)
+
+            case StaticPointingConfig(position=pos):
+                n = len(times)
+                return AntennaTrajectory(
+                    times=times,
+                    azimuth=np.full(n, pos.azimuth),
+                    altitude=np.full(n, pos.altitude),
+                )
+
+            case _:
+                raise ValueError(f"Unknown antenna configuration: {config}")

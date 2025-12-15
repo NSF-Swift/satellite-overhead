@@ -9,7 +9,7 @@ from sopp.models.satellite.tle_information import TleInformation
 
 """
 The Satellite data class stores all of the TLE information for each satellite, which is loaded from a TLE file using the class method from_tle_file()
-and can be converted to a Skyfield API object EarthSatellite using the to_rhodesmill() method. It also stores all the frequency information
+and can be converted to a Skyfield API object EarthSatellite using the to_skyfield() method. It also stores all the frequency information
 for each satellite.
 
   + name:               name of satellite. string.
@@ -17,7 +17,7 @@ for each satellite.
                         ROOT/sopp/custom_dataclasses/satellite/tle_information.py
   + frequency:          list of type FrequencyRange. FrequencyRange is a custom dataclass that stores a center frequency and bandwidth.
 
-  + to_rhodesmill():    class method to convert a Satellite object into a Rhodemill-Skyfield EarthSatellite object for use with the Skyfield API
+  + to_skyfield():    class method to convert a Satellite object into a Skyfield EarthSatellite object for use with the Skyfield API
   + from_tle_file():    class method to load Satellite from provided TLE file. Returns a list of type Satellite.
 """
 
@@ -30,7 +30,7 @@ class Satellite:
     tle_information: TleInformation | None = None
     frequency: list[FrequencyRange] = field(default_factory=list)
 
-    def to_rhodesmill(self) -> EarthSatellite:
+    def to_skyfield(self) -> EarthSatellite:
         line1, line2 = self.tle_information.to_tle_lines()
         return EarthSatellite(line1=line1, line2=line2, name=self.name)
 
