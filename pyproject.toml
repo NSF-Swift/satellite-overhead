@@ -39,9 +39,6 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build]
 path = "src"
-exclude = [
-  "src/sopp.reporting",
-]
 
 [tool.hatch.version]
 path = "src/sopp/__about__.py"
