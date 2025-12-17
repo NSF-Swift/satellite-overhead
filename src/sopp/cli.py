@@ -1,8 +1,8 @@
 import sys
 
 from sopp.config.builder import ConfigurationBuilder
+from sopp.filtering.presets import filter_frequency
 from sopp.io.tle_fetcher import TleFetcherCelestrak
-from sopp.satellite_selection.filters import filter_frequency
 from sopp.sopp import Sopp
 from sopp.utils.helpers import (
     get_default_config_file_filepath,

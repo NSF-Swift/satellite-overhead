@@ -1,7 +1,7 @@
 import numpy as np
 
 from sopp.config.builder import ConfigurationBuilder
-from sopp.satellite_selection.filters import (
+from sopp.filtering.presets import (
     filter_name_does_not_contain,
     filter_orbit_is,
 )

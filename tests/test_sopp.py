@@ -3,7 +3,6 @@ from datetime import datetime, timedelta, timezone
 import numpy as np
 
 from sopp.models import (
-    AntennaTrajectory,
     Configuration,
     Coordinates,
     Facility,
@@ -14,7 +13,8 @@ from sopp.models import (
     SatelliteTrajectory,
     TimeWindow,
 )
-from sopp.models.antenna_config import CustomTrajectoryConfig
+from sopp.models.ground.config import CustomTrajectoryConfig
+from sopp.models.ground.trajectory import AntennaTrajectory
 from sopp.models.satellite import InternationalDesignator, MeanMotion, TleInformation
 from sopp.sopp import Sopp
 from sopp.utils.time import generate_time_grid

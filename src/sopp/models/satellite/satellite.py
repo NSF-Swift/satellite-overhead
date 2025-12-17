@@ -1,11 +1,10 @@
 import math
 from dataclasses import dataclass, field
-from pathlib import Path
 
 from skyfield.sgp4lib import EarthSatellite
 
-from sopp.models.frequency_range import FrequencyRange
-from sopp.models.satellite.tle_information import TleInformation
+from sopp.models.core import FrequencyRange
+from sopp.models.satellite.tle import TleInformation
 
 """
 The Satellite data class stores all of the TLE information for each satellite, which is loaded from a TLE file using the class method from_tle_file()
@@ -14,7 +13,7 @@ for each satellite.
 
   + name:               name of satellite. string.
   + tle_information:    stores TLE information. TleInformation is another custom object to store TLE data and can be found in
-                        ROOT/sopp/custom_dataclasses/satellite/tle_information.py
+                        ROOT/sopp.models.satellite.tle.py
   + frequency:          list of type FrequencyRange. FrequencyRange is a custom dataclass that stores a center frequency and bandwidth.
 
   + to_skyfield():    class method to convert a Satellite object into a Skyfield EarthSatellite object for use with the Skyfield API
@@ -27,7 +26,7 @@ NUMBER_OF_LINES_PER_TLE_OBJECT = 3
 @dataclass
 class Satellite:
     name: str
-    tle_information: TleInformation | None = None
+    tle_information: TleInformation
     frequency: list[FrequencyRange] = field(default_factory=list)
 
     def to_skyfield(self) -> EarthSatellite:
@@ -37,18 +36,3 @@ class Satellite:
     @property
     def orbits_per_day(self) -> float:
         return self.tle_information.mean_motion.value * 1440 / (2 * math.pi)
-
-    @classmethod
-    def from_tle_file(cls, tlefilepath: Path) -> list["Satellite"]:
-        with open(tlefilepath) as f:
-            lines = f.readlines()
-        name_line_indices = range(0, len(lines), NUMBER_OF_LINES_PER_TLE_OBJECT)
-        return [
-            Satellite(
-                name=lines[name_line_index].strip(),
-                tle_information=TleInformation.from_tle_lines(
-                    line1=lines[name_line_index + 1], line2=lines[name_line_index + 2]
-                ),
-            )
-            for name_line_index in name_line_indices
-        ]

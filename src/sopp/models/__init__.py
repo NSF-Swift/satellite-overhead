@@ -1,27 +1,47 @@
-from .antenna_trajectory import AntennaTrajectory
-from .configuration import Configuration
-from .coordinates import Coordinates
-from .facility import Facility
-from .frequency_range import FrequencyRange
-from .observation_target import ObservationTarget
-from .position import Position
+# Core Primitives
+# High-Level Simulation Objects
+from .configuration import Configuration, RuntimeSettings
+from .core import Coordinates, FrequencyRange, Position, TimeWindow
+from .ground import (
+    AntennaConfig,
+    AntennaTrajectory,
+    CelestialTrackingConfig,
+    CustomTrajectoryConfig,
+    Facility,
+    ObservationTarget,
+    StaticPointingConfig,
+)
 from .reservation import Reservation
-from .runtime_settings import RuntimeSettings
-from .satellite.satellite import Satellite
-from .satellite_trajectory import SatelliteTrajectory
-from .time_window import TimeWindow
+from .satellite import (
+    InternationalDesignator,
+    MeanMotion,
+    Satellite,
+    SatelliteTrajectory,
+    TleInformation,
+)
 
 __all__ = [
-    "Position",
-    "TimeWindow",
-    "Reservation",
-    "Facility",
-    "RuntimeSettings",
-    "Satellite",
-    "Configuration",
+    # Core
     "Coordinates",
     "FrequencyRange",
-    "ObservationTarget",
-    "SatelliteTrajectory",
+    "Position",
+    "TimeWindow",
+    # Simulation
+    "Configuration",
+    "Reservation",
+    "RuntimeSettings",
+    # Ground
+    "AntennaConfig",
     "AntennaTrajectory",
+    "CelestialTrackingConfig",
+    "CustomTrajectoryConfig",
+    "Facility",
+    "ObservationTarget",
+    "StaticPointingConfig",
+    # Satellite
+    "Satellite",
+    "SatelliteTrajectory",
+    "TleInformation",
+    "MeanMotion",
+    "InternationalDesignator",
 ]

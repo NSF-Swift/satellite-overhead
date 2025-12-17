@@ -1,8 +1,7 @@
 import pytest
 
-from sopp.models.satellite.mean_motion import MeanMotion
 from sopp.models.satellite.satellite import Satellite
-from sopp.models.satellite.tle_information import TleInformation
+from sopp.models.satellite.tle import MeanMotion, TleInformation
 
 
 class TestSatellite:
@@ -14,8 +13,9 @@ class TestSatellite:
 
     @property
     def sat0(self):
-        sat0 = Satellite(name="TestSatellite0")
-        sat0.tle_information = self.arbitrary_tle_information
+        sat0 = Satellite(
+            name="TestSatellite0", tle_information=self.arbitrary_tle_information
+        )
         return sat0
 
     @property

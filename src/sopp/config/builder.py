@@ -2,29 +2,22 @@ from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
 
-from sopp.config.json_loader import ConfigFileLoaderJson
-from sopp.config.loader_base import ConfigFileLoaderBase
-from sopp.io.satellites_loader import (
-    SatellitesLoaderFromFiles,
-)
-from sopp.models.antenna_config import (
+from sopp.config.loaders import ConfigFileLoaderBase, ConfigFileLoaderJson
+from sopp.filtering.filterer import Filterer
+from sopp.io.tle import load_satellites
+from sopp.models.configuration import Configuration, RuntimeSettings
+from sopp.models.core import Coordinates, FrequencyRange, Position, TimeWindow
+from sopp.models.ground.config import (
     AntennaConfig,
     CelestialTrackingConfig,
     CustomTrajectoryConfig,
     StaticPointingConfig,
 )
-from sopp.models.antenna_trajectory import AntennaTrajectory
-from sopp.models.configuration import Configuration
-from sopp.models.coordinates import Coordinates
-from sopp.models.facility import Facility
-from sopp.models.frequency_range import FrequencyRange
-from sopp.models.observation_target import ObservationTarget
-from sopp.models.position import Position
+from sopp.models.ground.facility import Facility
+from sopp.models.ground.target import ObservationTarget
+from sopp.models.ground.trajectory import AntennaTrajectory
 from sopp.models.reservation import Reservation
-from sopp.models.runtime_settings import RuntimeSettings
 from sopp.models.satellite.satellite import Satellite
-from sopp.models.time_window import TimeWindow
-from sopp.satellite_selection.filterer import Filterer
 from sopp.utils.helpers import parse_time_and_convert_to_utc
 
 
@@ -109,13 +102,17 @@ class ConfigurationBuilder:
             )
         return self
 
-    def set_satellites(
-        self, tle_file: str, frequency_file: str | None = None
+    def set_satellites(self, satellites: list[Satellite]) -> "ConfigurationBuilder":
+        self.satellites = satellites
+        return self
+
+    def load_satellites(
+        self, tle_file: str | Path, frequency_file: str | Path | None = None
     ) -> "ConfigurationBuilder":
-        self.satellites = SatellitesLoaderFromFiles(
-            tle_file=tle_file,
-            frequency_file=frequency_file,
-        ).load_satellites()
+        self.satellites = load_satellites(
+            tle_file=Path(tle_file),
+            frequency_file=Path(frequency_file) if frequency_file else None,
+        )
         return self
 
     def set_runtime_settings(

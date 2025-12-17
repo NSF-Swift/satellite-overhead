@@ -8,16 +8,16 @@ from sopp.analysis.interference import (
 )
 from sopp.ephemeris.base import EphemerisCalculator
 from sopp.ephemeris.skyfield import SkyfieldEphemerisCalculator
-from sopp.models.antenna_config import (
+from sopp.models.configuration import Configuration
+from sopp.models.ground.config import (
     CelestialTrackingConfig,
     CustomTrajectoryConfig,
     StaticPointingConfig,
 )
-from sopp.models.antenna_trajectory import AntennaTrajectory
-from sopp.models.configuration import Configuration
-from sopp.models.satellite_trajectory import SatelliteTrajectory
-from sopp.path_finders.base import ObservationPathFinder
-from sopp.path_finders.skyfield import ObservationPathFinderSkyfield
+from sopp.models.ground.trajectory import AntennaTrajectory
+from sopp.models.satellite.trajectory import SatelliteTrajectory
+from sopp.pointing.base import PointingCalculator
+from sopp.pointing.skyfield import PointingCalculatorSkyfield
 from sopp.utils.time import generate_time_grid
 
 
@@ -32,7 +32,7 @@ class Sopp:
         ephemeris_calculator_class: type[
             EphemerisCalculator
         ] = SkyfieldEphemerisCalculator,
-        path_finder_class: type[ObservationPathFinder] = ObservationPathFinderSkyfield,
+        path_finder_class: type[PointingCalculator] = PointingCalculatorSkyfield,
     ):
         self.configuration = configuration
         self._path_finder_class = path_finder_class
@@ -94,7 +94,7 @@ class Sopp:
                     observation_target=target,
                     time_window=self.configuration.reservation.time,
                 )
-                return path_finder.calculate_path(time_grid=times)
+                return path_finder.calculate_trajectory(time_grid=times)
 
             case StaticPointingConfig(position=pos):
                 n = len(times)

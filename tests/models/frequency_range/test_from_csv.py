@@ -1,9 +1,9 @@
 from pathlib import Path
 
-from sopp.io.get_frequency_data_from_csv import (
+from sopp.io.frequency import (
     GetFrequencyDataFromCsv,
 )
-from sopp.models.frequency_range import FrequencyRange
+from sopp.models.core import FrequencyRange
 
 TEST_DIR = Path(__file__).resolve().parent
 
@@ -14,7 +14,7 @@ class TestFromCsv:
         frequency_list = GetFrequencyDataFromCsv(filepath=frequency_file).get()
         frequencies = frequency_list[2023]
         assert frequencies == [
-            FrequencyRange(frequency=136.65, bandwidth=None, status="active")
+            FrequencyRange(frequency=136.65, bandwidth=10.0, status="active")
         ]
 
     def test_two_frequencies(self):
@@ -22,8 +22,8 @@ class TestFromCsv:
         frequency_list = GetFrequencyDataFromCsv(filepath=frequency_file).get()
         frequencies = frequency_list[2023]
         assert frequencies == [
-            FrequencyRange(frequency=136.65, bandwidth=None, status="active"),
-            FrequencyRange(frequency=2, bandwidth=None, status="active"),
+            FrequencyRange(frequency=136.65, bandwidth=10.0, status="active"),
+            FrequencyRange(frequency=2, bandwidth=10.0, status="active"),
         ]
 
     def test_with_bandwidth(self):
@@ -31,9 +31,7 @@ class TestFromCsv:
         frequency_list = GetFrequencyDataFromCsv(filepath=frequency_file).get()
         frequencies = frequency_list[2023]
         assert frequencies == [
-            FrequencyRange(frequency=136.65, bandwidth=None, status="active"),
-            FrequencyRange(frequency=2, bandwidth=None, status="active"),
-            FrequencyRange(frequency=700, bandwidth=10, status="active"),
+            FrequencyRange(frequency=700, bandwidth=10.0, status="active"),
         ]
 
     def test_no_sat_id(self):
@@ -42,7 +40,7 @@ class TestFromCsv:
         frequencies = frequency_list[2023]
         assert len(frequency_list) == 1
         assert frequencies == [
-            FrequencyRange(frequency=136.65, bandwidth=None, status="active")
+            FrequencyRange(frequency=136.65, bandwidth=10.0, status="active")
         ]
 
     def test_junk_data(self):
