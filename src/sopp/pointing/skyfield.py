@@ -9,11 +9,11 @@ from sopp.models.core import TimeWindow
 from sopp.models.ground.facility import Facility
 from sopp.models.ground.target import ObservationTarget
 from sopp.models.ground.trajectory import AntennaTrajectory
-from sopp.pointing.base import ObservationPathFinder
+from sopp.pointing.base import PointingCalculator
 from sopp.utils.time import generate_time_grid
 
 
-class ObservationPathFinderSkyfield(ObservationPathFinder):
+class PointingCalculatorSkyfield(PointingCalculator):
     def __init__(
         self,
         facility: Facility,
@@ -24,7 +24,7 @@ class ObservationPathFinderSkyfield(ObservationPathFinder):
         self._observation_target = observation_target
         self._time_window = time_window
 
-    def calculate_path(
+    def calculate_trajectory(
         self,
         resolution_seconds: float = 1.0,
         time_grid: np.ndarray | None = None,
@@ -72,7 +72,7 @@ class ObservationPathFinderSkyfield(ObservationPathFinder):
     def right_ascension_to_skyfield(
         observation_target: ObservationTarget,
     ) -> tuple[float, ...]:
-        return ObservationPathFinderSkyfield._parse_coordinate(
+        return PointingCalculatorSkyfield._parse_coordinate(
             observation_target.right_ascension
         )
 
@@ -80,6 +80,6 @@ class ObservationPathFinderSkyfield(ObservationPathFinder):
     def declination_to_skyfield(
         observation_target: ObservationTarget,
     ) -> tuple[float, ...]:
-        return ObservationPathFinderSkyfield._parse_coordinate(
+        return PointingCalculatorSkyfield._parse_coordinate(
             observation_target.declination
         )

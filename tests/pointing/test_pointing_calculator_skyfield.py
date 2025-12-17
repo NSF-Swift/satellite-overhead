@@ -5,7 +5,7 @@ import pytest
 from sopp.models.core import Coordinates, TimeWindow
 from sopp.models.ground.facility import Facility
 from sopp.models.ground.target import ObservationTarget
-from sopp.pointing.skyfield import ObservationPathFinderSkyfield
+from sopp.pointing.skyfield import PointingCalculatorSkyfield
 
 
 @pytest.mark.parametrize(
@@ -41,11 +41,11 @@ def test_observation_path_physics_accuracy(
     # Target: Celestial Equator, 12h RA (Autumnal Equinox)
     obs_target = ObservationTarget(declination="0d0m0s", right_ascension="12h0m0s")
 
-    path_finder = ObservationPathFinderSkyfield(facility, obs_target, time_window)
+    path_finder = PointingCalculatorSkyfield(facility, obs_target, time_window)
 
     # 2. Execute
     # Default resolution is fine
-    trajectory = path_finder.calculate_path()
+    trajectory = path_finder.calculate_trajectory()
 
     # 3. Verify
     # We check the first point
@@ -75,8 +75,8 @@ def test_coordinate_parsing(declination, right_ascension, expected):
         declination=declination, right_ascension=right_ascension
     )
 
-    actual_ra = ObservationPathFinderSkyfield.right_ascension_to_skyfield(obs_target)
-    actual_dec = ObservationPathFinderSkyfield.declination_to_skyfield(obs_target)
+    actual_ra = PointingCalculatorSkyfield.right_ascension_to_skyfield(obs_target)
+    actual_dec = PointingCalculatorSkyfield.declination_to_skyfield(obs_target)
 
     assert actual_ra == expected
     assert actual_dec == expected

@@ -8,11 +8,9 @@ from sopp.models.ground.target import ObservationTarget
 from sopp.models.ground.trajectory import AntennaTrajectory
 
 
-class ObservationPathFinder(ABC):
+class PointingCalculator(ABC):
     """
-    The ObservationPathFinder determines the path the telescope will need to follow to track its target and returns
-    a list of altitude, azimuth, and timestamp to represent the telescope's movement. It uses the observation
-    target's right ascension and declination to determine this path.
+    Abstract base for engines that calculate where the antenna is pointing over time.
     """
 
     def __init__(
@@ -26,7 +24,10 @@ class ObservationPathFinder(ABC):
         self._time_window = time_window
 
     @abstractmethod
-    def calculate_path(
+    def calculate_trajectory(
         self, resolution_seconds: float = 1.0, time_grid: np.ndarray | None = None
     ) -> AntennaTrajectory:
+        """
+        Generates the vector of Az/Alt positions for the antenna.
+        """
         pass
