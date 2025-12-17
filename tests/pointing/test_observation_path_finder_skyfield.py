@@ -2,11 +2,11 @@ from datetime import datetime, timezone
 
 import pytest
 
-from sopp.models.coordinates import Coordinates
-from sopp.models.facility import Facility
-from sopp.models.observation_target import ObservationTarget
-from sopp.models.time_window import TimeWindow
-from sopp.path_finders.skyfield import ObservationPathFinderSkyfield
+from sopp.models.core import Coordinates
+from sopp.models.ground.facility import Facility
+from sopp.models.ground.target import ObservationTarget
+from sopp.models.core import TimeWindow
+from sopp.pointing.skyfield import ObservationPathFinderSkyfield
 
 
 @pytest.mark.parametrize(

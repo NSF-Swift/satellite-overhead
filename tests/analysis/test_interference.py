@@ -7,7 +7,7 @@ from sopp.analysis.interference import (
     find_satellites_above_horizon,
     find_satellites_crossing_main_beam,
 )
-from sopp.models.antenna_trajectory import AntennaTrajectory
+from sopp.models.ground.trajectory import AntennaTrajectory
 from sopp.utils.time import generate_time_grid
 
 

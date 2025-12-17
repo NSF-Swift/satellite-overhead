@@ -1,4 +1,4 @@
 ﻿,ID,Name,Frequency [MHz],Bandwidth [kHz]/Baud,Status,Description,Source
-0,2023,ARBITRARY SAT,136.65,,active,Upper side band (drifting),FCC
-1,2023,ARBITRARY SAT,2,,active,Upper side band (drifting),FCC
+0,2023,ARBITRARY SAT,136.65,10000,active,Upper side band (drifting),FCC
+1,2023,ARBITRARY SAT,2,10000,active,Upper side band (drifting),FCC
 2,200,ARBITRARY SAT II,132,,active,Upper side band (drifting),FCC

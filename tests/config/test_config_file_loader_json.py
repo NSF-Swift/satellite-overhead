@@ -4,19 +4,19 @@ from pathlib import Path
 import pytest
 
 from sopp.config.factory import get_config_file_object
-from sopp.models.antenna_config import (
+from sopp.models.ground.config import (
     CelestialTrackingConfig,
     CustomTrajectoryConfig,
     StaticPointingConfig,
 )
-from sopp.models.antenna_trajectory import AntennaTrajectory
-from sopp.models.coordinates import Coordinates
-from sopp.models.facility import Facility
-from sopp.models.frequency_range import FrequencyRange
-from sopp.models.observation_target import ObservationTarget
-from sopp.models.position import Position
-from sopp.models.runtime_settings import RuntimeSettings
-from sopp.models.time_window import TimeWindow
+from sopp.models.ground.trajectory import AntennaTrajectory
+from sopp.models.core import Coordinates
+from sopp.models.ground.facility import Facility
+from sopp.models.core import FrequencyRange
+from sopp.models.ground.target import ObservationTarget
+from sopp.models.core import Position
+from sopp.models.configuration import RuntimeSettings
+from sopp.models.core import TimeWindow
 
 
 @pytest.fixture

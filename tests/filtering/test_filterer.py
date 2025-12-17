@@ -1,4 +1,4 @@
-from sopp.satellite_selection.filterer import Filterer
+from sopp.filtering.filterer import Filterer
 
 
 class TestFilterer:

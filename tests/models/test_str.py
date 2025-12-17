@@ -1,14 +1,14 @@
 import pytest
 
-from sopp.models.antenna_config import CustomTrajectoryConfig
+from sopp.models.ground.config import CustomTrajectoryConfig
 from sopp.models.configuration import Configuration
-from sopp.models.coordinates import Coordinates
-from sopp.models.facility import Facility
-from sopp.models.frequency_range import FrequencyRange
+from sopp.models.core import Coordinates
+from sopp.models.ground.facility import Facility
+from sopp.models.core import FrequencyRange
 from sopp.models.reservation import Reservation
-from sopp.models.runtime_settings import RuntimeSettings
+from sopp.models.configuration import RuntimeSettings
 from sopp.models.satellite.satellite import Satellite
-from sopp.models.time_window import TimeWindow
+from sopp.models.core import TimeWindow
 
 
 def test_time_window(time_window):
@@ -90,10 +90,16 @@ def reservation(facility, time_window, frequency_range):
 
 
 @pytest.fixture
-def configuration(reservation, antenna_trajectory, runtime_settings):
+def test_satellite(satellite):
+    satellite.name = "Test"
+    return satellite
+
+
+@pytest.fixture
+def configuration(reservation, antenna_trajectory, runtime_settings, test_satellite):
     return Configuration(
         reservation,
-        [Satellite(name="Test")],
+        [test_satellite],
         CustomTrajectoryConfig(antenna_trajectory),
         runtime_settings,
     )

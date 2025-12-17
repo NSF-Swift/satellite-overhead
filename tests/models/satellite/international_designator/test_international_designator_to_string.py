@@ -1,4 +1,4 @@
-from sopp.models.satellite.international_designator import (
+from sopp.models.satellite.tle import (
     InternationalDesignator,
 )
 

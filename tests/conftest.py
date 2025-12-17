@@ -4,21 +4,17 @@ import numpy as np
 import pytest
 
 from sopp.ephemeris.base import EphemerisCalculator
-from sopp.models import (
-    Configuration,
-    Coordinates,
-    Facility,
-    Position,
-    Reservation,
-    RuntimeSettings,
-    Satellite,
-    SatelliteTrajectory,
-    TimeWindow,
-)
-from sopp.models.antenna_config import CustomTrajectoryConfig
-from sopp.models.antenna_trajectory import AntennaTrajectory
+from sopp.models.configuration import Configuration, RuntimeSettings
+from sopp.models.ground.facility import Facility
+from sopp.models.reservation import Reservation
+from sopp.models.satellite.satellite import Satellite
+from sopp.models.satellite.trajectory import SatelliteTrajectory
+from sopp.models.core import FrequencyRange, Position, TimeWindow, Coordinates
+from sopp.models.ground.config import CustomTrajectoryConfig
+from sopp.models.ground.trajectory import AntennaTrajectory
 from sopp.models.satellite import InternationalDesignator, MeanMotion, TleInformation
 from sopp.utils.time import generate_time_grid
+from tests.models.test_str import frequency_range
 
 # Constants
 ARBITRARY_ALTITUDE = 0
@@ -114,10 +110,16 @@ def antenna_config(antenna_trajectory):
 
 
 @pytest.fixture
-def reservation(start_time, time_window_duration):
+def frequency_range():
+    return FrequencyRange(frequency=10, bandwidth=10, status="active")
+
+
+@pytest.fixture
+def reservation(start_time, time_window_duration, frequency_range):
     return Reservation(
         facility=Facility(coordinates=Coordinates(latitude=0, longitude=0)),
         time=TimeWindow(begin=start_time, end=start_time + time_window_duration),
+        frequency=frequency_range,
     )
 
 
@@ -138,31 +140,36 @@ def configuration(
 
 
 @pytest.fixture
-def satellite() -> Satellite:
+def satellite(tle_information) -> Satellite:
     """COSMOS 1932 DEB"""
     return Satellite(
         name="ARBITRARY SATELLITE",
-        tle_information=TleInformation(
-            argument_of_perigee=5.153187590939126,
-            drag_coefficient=0.00015211,
-            eccentricity=0.0057116,
-            epoch_days=26633.28893622,
-            inclination=1.1352005427406557,
-            international_designator=InternationalDesignator(
-                year=88, launch_number=19, launch_piece="F"
-            ),
-            mean_anomaly=4.188343400497881,
-            mean_motion=MeanMotion(
-                first_derivative=2.363466695408988e-12,
-                second_derivative=0.0,
-                value=0.060298700041442894,
-            ),
-            revolution_number=95238,
-            right_ascension_of_ascending_node=2.907844197528697,
-            satellite_number=28275,
-            classification="U",
-        ),
+        tle_information=tle_information,
         frequency=[],
+    )
+
+
+@pytest.fixture
+def tle_information() -> TleInformation:
+    return TleInformation(
+        argument_of_perigee=5.153187590939126,
+        drag_coefficient=0.00015211,
+        eccentricity=0.0057116,
+        epoch_days=26633.28893622,
+        inclination=1.1352005427406557,
+        international_designator=InternationalDesignator(
+            year=88, launch_number=19, launch_piece="F"
+        ),
+        mean_anomaly=4.188343400497881,
+        mean_motion=MeanMotion(
+            first_derivative=2.363466695408988e-12,
+            second_derivative=0.0,
+            value=0.060298700041442894,
+        ),
+        revolution_number=95238,
+        right_ascension_of_ascending_node=2.907844197528697,
+        satellite_number=28275,
+        classification="U",
     )
 
 
@@ -174,6 +181,10 @@ def make_reservation(facility):
         window = TimeWindow(
             begin=start_time, end=start_time + timedelta(seconds=duration_seconds)
         )
-        return Reservation(facility=facility, time=window)
+        return Reservation(
+            facility=facility,
+            time=window,
+            frequency=frequency_range,
+        )
 
     return _make

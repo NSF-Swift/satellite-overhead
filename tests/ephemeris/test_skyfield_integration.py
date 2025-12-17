@@ -3,11 +3,11 @@ from datetime import datetime, timezone
 import pytest
 from skyfield.api import load, wgs84
 
-from sopp.models.frequency_range import FrequencyRange
-from sopp.models.satellite.international_designator import InternationalDesignator
-from sopp.models.satellite.mean_motion import MeanMotion
+from sopp.models.core import FrequencyRange
+from sopp.models.satellite.tle import InternationalDesignator
+from sopp.models.satellite.tle import MeanMotion
 from sopp.models.satellite.satellite import Satellite
-from sopp.models.satellite.tle_information import TleInformation
+from sopp.models.satellite.tle import TleInformation
 
 # Constants
 MINUTE_BEFORE_ENTERS = 34

@@ -1,15 +1,13 @@
 import os
 
-from sopp.io.satellites_loader import (
-    SatellitesLoaderFromFiles,
-)
-from sopp.models.frequency_range import FrequencyRange
-from sopp.models.satellite.international_designator import (
+from sopp.io.tle import load_satellites
+from sopp.models.core import FrequencyRange
+from sopp.models.satellite.tle import (
+    TleInformation,
     InternationalDesignator,
+    MeanMotion,
 )
-from sopp.models.satellite.mean_motion import MeanMotion
 from sopp.models.satellite.satellite import Satellite
-from sopp.models.satellite.tle_information import TleInformation
 
 
 class TestSatellitesLoaderFromFiles:
@@ -21,9 +19,7 @@ class TestSatellitesLoaderFromFiles:
             test_script_directory, "satellite_frequencies.csv"
         )
 
-        satellites = SatellitesLoaderFromFiles(
-            tle_file=tle_file, frequency_file=frequency_file
-        ).load_satellites()
+        satellites = load_satellites(tle_file=tle_file, frequency_file=frequency_file)
 
         assert satellites[0] == Satellite(
             name="ROSEYCUBESAT-1",
@@ -48,9 +44,9 @@ class TestSatellitesLoaderFromFiles:
                 classification="U",
             ),
             frequency=[
-                FrequencyRange(frequency=436.825, bandwidth=None, status="inactive"),
-                FrequencyRange(frequency=436.825, bandwidth=None, status="active"),
-                FrequencyRange(frequency=436.825, bandwidth=None, status="active"),
+                FrequencyRange(frequency=436.825, bandwidth=10.0, status="inactive"),
+                FrequencyRange(frequency=436.825, bandwidth=10.0, status="active"),
+                FrequencyRange(frequency=436.825, bandwidth=10.0, status="active"),
             ],
         )
 
@@ -77,8 +73,8 @@ class TestSatellitesLoaderFromFiles:
                 classification="U",
             ),
             frequency=[
-                FrequencyRange(frequency=437.41, bandwidth=None, status="active"),
-                FrequencyRange(frequency=435.2, bandwidth=None, status="active"),
+                FrequencyRange(frequency=437.41, bandwidth=10.0, status="active"),
+                FrequencyRange(frequency=435.2, bandwidth=10.0, status="active"),
             ],
         )
 
@@ -86,7 +82,7 @@ class TestSatellitesLoaderFromFiles:
         test_script_directory = os.path.dirname(os.path.abspath(__file__))
 
         tle_file = os.path.join(test_script_directory, "satellites.tle")
-        satellites = SatellitesLoaderFromFiles(tle_file=tle_file).load_satellites()
+        satellites = load_satellites(tle_file=tle_file)
 
         assert satellites[0] == Satellite(
             name="ROSEYCUBESAT-1",

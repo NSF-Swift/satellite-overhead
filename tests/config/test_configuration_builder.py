@@ -5,25 +5,23 @@ import numpy as np
 import pytest
 
 from sopp.config.builder import ConfigurationBuilder
-from sopp.config.loader_base import ConfigFileLoaderBase
-from sopp.models import (
-    AntennaTrajectory,
-    Coordinates,
-    Facility,
-    FrequencyRange,
-    ObservationTarget,
-    Position,
-    Reservation,
-    RuntimeSettings,
-    Satellite,
-    TimeWindow,
-)
-from sopp.models.antenna_config import (
+from sopp.config.loaders import ConfigFileLoaderBase
+from sopp.models.core import Coordinates
+from sopp.models.ground.facility import Facility
+from sopp.models.core import FrequencyRange
+from sopp.models.core import Position
+from sopp.models.reservation import Reservation
+from sopp.models.configuration import RuntimeSettings
+from sopp.models.satellite.satellite import Satellite
+from sopp.models.core import TimeWindow
+from sopp.models.ground.config import (
     CelestialTrackingConfig,
     CustomTrajectoryConfig,
     StaticPointingConfig,
 )
-from sopp.satellite_selection.filterer import Filterer
+from sopp.models.ground.trajectory import AntennaTrajectory
+from sopp.models.ground.target import ObservationTarget
+from sopp.filtering.filterer import Filterer
 
 # --- Helpers & Stubs ---
 
@@ -87,14 +85,23 @@ class StubConfigFileLoader(ConfigFileLoaderBase):
         return ".json"
 
 
+@pytest.fixture
 def mock_satellite_loader(monkeypatch):
-    def mock(tle_file, frequency_file=None):
-        return [Satellite(name="TestSatellite")]
+    def _patch(satellites_to_return: list[Satellite]):
+        target_path = "sopp.config.builder.load_satellites"
 
-    monkeypatch.setattr(
-        "sopp.io.satellites_loader.SatellitesLoaderFromFiles.load_satellites",
-        mock,
-    )
+        def mock_impl(*args, **kwargs):
+            return satellites_to_return
+
+        monkeypatch.setattr(target_path, mock_impl)
+
+    return _patch
+
+
+@pytest.fixture
+def test_satellite(satellite) -> Satellite:
+    satellite.name = "TestSatellite"
+    return satellite
 
 
 # --- Tests ---
@@ -186,19 +193,18 @@ def test_set_time_window_str():
     )
 
 
-def test_set_satellites(monkeypatch):
-    mock_satellite_loader(monkeypatch)
+def test_load_satellites(mock_satellite_loader, satellite):
+    mock_satellite_loader([satellite])
     builder = ConfigurationBuilder()
-    builder.set_satellites("/mock/tle", "mock/frequency")
+    builder.load_satellites("mock/tle")
 
-    assert builder.satellites == [Satellite(name="TestSatellite")]
+    assert builder.satellites == [satellite]
 
 
-def test_set_satellites_filter(monkeypatch):
+def test_set_satellites_filter(test_satellite):
     # This test verifies the filter logic integration
-    mock_satellite_loader(monkeypatch)
     builder = ConfigurationBuilder()
-    builder.satellites = [Satellite(name="TestSatellite")]
+    builder.satellites = [test_satellite]
 
     # Filter that removes everything containing "Test"
     filterer = Filterer().add_filter(lambda sat: "Test" not in sat.name)
@@ -217,13 +223,11 @@ def test_build_error_incomplete():
         builder.build()
 
 
-def test_build_from_config_file(monkeypatch):
+def test_build_from_config_file(satellite):
     """
     Verifies that set_from_config_file delegates to the Loader
     and populates the Builder's state correctly.
     """
-    mock_satellite_loader(monkeypatch)
-
     builder = ConfigurationBuilder()
     # The path is ignored by our Stub
     builder.set_from_config_file(
@@ -232,7 +236,7 @@ def test_build_from_config_file(monkeypatch):
     )
 
     # Load satellites (required for build)
-    builder.set_satellites(tle_file="./path/satellites.tle")
+    builder.set_satellites([satellite])
 
     configuration = builder.build()
 
@@ -244,11 +248,11 @@ def test_build_from_config_file(monkeypatch):
     assert isinstance(configuration.antenna_config, CelestialTrackingConfig)
 
 
-def test_build_full_flow(monkeypatch):
+def test_build_full_flow(mock_satellite_loader, satellite):
     """
     Integration test for the whole builder chain.
     """
-    mock_satellite_loader(monkeypatch)
+    mock_satellite_loader([satellite])
 
     builder = ConfigurationBuilder()
     builder.set_facility(
@@ -257,7 +261,7 @@ def test_build_full_flow(monkeypatch):
     builder.set_frequency_range(bandwidth=10, frequency=135)
     builder.set_time_window(begin="2023-11-15T08:00:00.0", end="2023-11-15T08:30:00.0")
     builder.set_observation_target(declination="1d1m1s", right_ascension="1h1m1s")
-    builder.set_satellites(tle_file="./path/satellites.tle")
+    builder.load_satellites(tle_file="./path/satellites.tle")
 
     configuration = builder.build()
 

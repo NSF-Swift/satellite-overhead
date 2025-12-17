@@ -1,6 +1,6 @@
 ,ID,Name,Frequency [MHz],Bandwidth [kHz]/Baud,Status,Description,Source
-0,56212,RoseyCubesat-1,436.825,,inactive,Mode U - BPSK1k2 GR3UH AX.25,FCC
-1,56212,RoseyCubesat-1,436.825,,active,Mode V/U - Transceiver,FCC
-2,56212,RoseyCubesat-1,436.825,,active,Mode U - BPSK9k6 GR3UH AX.25,FCC
-3,56211,INSPIRE-SAT 7,437.41,,active,Mode U TLM - BPSK9k6 AX.25,FCC
-4,56211,INSPIRE-SAT 7,435.2,,active,Mode V/U - FM Transceiver - SPINO,FCC
+0,56212,RoseyCubesat-1,436.825,10000.0,inactive,Mode U - BPSK1k2 GR3UH AX.25,FCC
+1,56212,RoseyCubesat-1,436.825,10000.0,active,Mode V/U - Transceiver,FCC
+2,56212,RoseyCubesat-1,436.825,10000.0,active,Mode U - BPSK9k6 GR3UH AX.25,FCC
+3,56211,INSPIRE-SAT 7,437.41,10000.0,active,Mode U TLM - BPSK9k6 AX.25,FCC
+4,56211,INSPIRE-SAT 7,435.2,10000.0,active,Mode V/U - FM Transceiver - SPINO,FCC
