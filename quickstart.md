@@ -282,7 +282,7 @@ The list of satellites can be filtered by using a `Filterer` object, adding filt
 If `None` is passed to any of the filters, no filtering for that specific filter will be applied.
 Alternatively to passing a `Filterer` object to the `ConfigurationBuilder` via `set_satellites_filter`, filters can simply be added with `add_filter(filter_name_contains('STARLINK'))`.
 
-The provided filters accessible from `sopp.satellite_selection.filters` include:
+The provided filters accessible from `sopp.filtering.presets` include:
 
 #### `filter_frequency()`:
 
@@ -342,8 +342,8 @@ The filter checks if the satellite's orbits per day is >= 0.85 and < 1.5
 For example, to find all Satellites that are not Starlink, but are in LEO and that have overlapping downlink transmission frequency:
 
 ```python
-from sopp.satellite_selection.filterer import Filterer
-from sopp.satellite_selection.filters import (
+from sopp.filtering.filterer import Filterer
+from sopp.filtering.presets import (
     filter_name_does_not_contain,
     filter_orbit_is,
     filter_frequency,
@@ -414,7 +414,7 @@ custom_path = [
 ```python
 from sopp.sopp import Sopp
 from sopp.config.builder import ConfigurationBuilder
-from sopp.satellite_selection.filters import (
+from sopp.filtering.presets import (
     filter_name_does_not_contain,
     filter_orbit_is,
 )
