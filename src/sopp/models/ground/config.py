@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 
-from sopp.models.ground.trajectory import AntennaTrajectory
-from sopp.models.ground.target import ObservationTarget
 from sopp.models.core import Position
+from sopp.models.ground.target import ObservationTarget
+from sopp.models.ground.trajectory import AntennaTrajectory
 
 
 @dataclass

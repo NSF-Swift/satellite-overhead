@@ -1,5 +1,5 @@
 from .satellite import Satellite
-from .tle import TleInformation, MeanMotion, InternationalDesignator
+from .tle import InternationalDesignator, MeanMotion, TleInformation
 from .trajectory import SatelliteTrajectory
 
 __all__ = [

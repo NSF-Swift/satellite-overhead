@@ -1,7 +1,6 @@
 import os
 from dataclasses import replace
 from pathlib import Path
-from typing import Optional
 
 import requests
 

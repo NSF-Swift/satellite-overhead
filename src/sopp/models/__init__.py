@@ -1,10 +1,7 @@
 # Core Primitives
-from .core import Coordinates, FrequencyRange, Position, TimeWindow
-
 # High-Level Simulation Objects
 from .configuration import Configuration, RuntimeSettings
-from .reservation import Reservation
-
+from .core import Coordinates, FrequencyRange, Position, TimeWindow
 from .ground import (
     AntennaConfig,
     AntennaTrajectory,
@@ -14,12 +11,13 @@ from .ground import (
     ObservationTarget,
     StaticPointingConfig,
 )
+from .reservation import Reservation
 from .satellite import (
+    InternationalDesignator,
+    MeanMotion,
     Satellite,
     SatelliteTrajectory,
     TleInformation,
-    MeanMotion,
-    InternationalDesignator,
 )
 
 __all__ = [

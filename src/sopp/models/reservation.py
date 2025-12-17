@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 
+from sopp.models.core import FrequencyRange, TimeWindow
 from sopp.models.ground.facility import Facility
-from sopp.models.core import FrequencyRange
-from sopp.models.core import TimeWindow
 
 """
 The Reservation class stores the Facility, as well as some additional reservation-specific information, such as reservation start and end times.

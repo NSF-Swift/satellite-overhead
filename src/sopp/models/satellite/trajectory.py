@@ -3,8 +3,8 @@ from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 
-from sopp.models.satellite.satellite import Satellite
 from sopp.models.core import TimeWindow
+from sopp.models.satellite.satellite import Satellite
 
 
 @dataclass

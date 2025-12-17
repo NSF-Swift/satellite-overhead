@@ -2,27 +2,22 @@ from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
 
-from sopp.config.loaders import ConfigFileLoaderJson, ConfigFileLoaderBase
+from sopp.config.loaders import ConfigFileLoaderBase, ConfigFileLoaderJson
+from sopp.filtering.filterer import Filterer
 from sopp.io.tle import load_satellites
-
+from sopp.models.configuration import Configuration, RuntimeSettings
+from sopp.models.core import Coordinates, FrequencyRange, Position, TimeWindow
 from sopp.models.ground.config import (
     AntennaConfig,
     CelestialTrackingConfig,
     CustomTrajectoryConfig,
     StaticPointingConfig,
 )
-from sopp.models.ground.trajectory import AntennaTrajectory
-from sopp.models.configuration import Configuration
-from sopp.models.core import Coordinates
 from sopp.models.ground.facility import Facility
-from sopp.models.core import FrequencyRange
 from sopp.models.ground.target import ObservationTarget
-from sopp.models.core import Position
+from sopp.models.ground.trajectory import AntennaTrajectory
 from sopp.models.reservation import Reservation
-from sopp.models.configuration import RuntimeSettings
 from sopp.models.satellite.satellite import Satellite
-from sopp.models.core import TimeWindow
-from sopp.filtering.filterer import Filterer
 from sopp.utils.helpers import parse_time_and_convert_to_utc
 
 

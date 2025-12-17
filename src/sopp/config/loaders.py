@@ -1,23 +1,21 @@
 import json
-from functools import cached_property
 from abc import ABC, abstractmethod
+from functools import cached_property
 from pathlib import Path
+
 import numpy as np
 
+from sopp.models.configuration import RuntimeSettings
+from sopp.models.core import Coordinates, FrequencyRange, Position, TimeWindow
 from sopp.models.ground.config import (
     AntennaConfig,
     CelestialTrackingConfig,
     CustomTrajectoryConfig,
     StaticPointingConfig,
 )
-from sopp.models.ground.trajectory import AntennaTrajectory
-from sopp.models.core import Coordinates
 from sopp.models.ground.facility import Facility
-from sopp.models.core import FrequencyRange
 from sopp.models.ground.target import ObservationTarget
-from sopp.models.core import Position
-from sopp.models.configuration import RuntimeSettings
-from sopp.models.core import TimeWindow
+from sopp.models.ground.trajectory import AntennaTrajectory
 from sopp.utils.helpers import read_datetime_string_as_utc
 
 
