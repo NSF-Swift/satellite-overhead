@@ -3,7 +3,7 @@ import time
 from datetime import timedelta
 
 from sopp.config.builder import ConfigurationBuilder
-from sopp.io.satellites_loader import SatellitesLoaderFromFiles
+from sopp.io.tle import load_satellites
 from sopp.sopp import Sopp
 from sopp.utils.helpers import read_datetime_string_as_utc
 
@@ -17,7 +17,7 @@ def run_benchmark(
 
     # 1. Load Satellites
     print(f"\n[1/4] Loading satellites from '{tle_file}'...")
-    all_satellites = SatellitesLoaderFromFiles(tle_file=tle_file).load_satellites()
+    all_satellites = load_satellites(tle_file)
 
     if limit > 0:
         satellites = all_satellites[:limit]
