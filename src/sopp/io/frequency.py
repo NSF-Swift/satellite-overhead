@@ -3,7 +3,7 @@ from collections import defaultdict
 from enum import Enum
 from pathlib import Path
 
-from sopp.models.frequency_range import FrequencyRange
+from sopp.models.core import FrequencyRange
 
 
 class FrequencyCsvKeys(Enum):
@@ -25,25 +25,49 @@ class GetFrequencyDataFromCsv:
     | LineNo |   ID   |   Name   |   Frequency   |   Bandwidth   |   Status   |   Description   |  Source  |
 
     With all values in the frequency column of the same order of magnitude (typically MHz). The same goes for bandwidth. These columns should have the integer value alone.
-
-
     """
 
     def __init__(self, filepath: Path):
         self._filepath = filepath
 
+    # def get(self) -> dict[int, list["FrequencyRange"]]:
+    #    frequencies = defaultdict(list)
+    #    for line in self._data[1:]:
+    #        id_string = line[FrequencyCsvKeys.ID.value]
+    #        if not id_string or id_string == "None" or id_string == "nan":
+    #            continue
+
+    #        frequency_range = FrequencyRange(
+    #            frequency=self._get_frequency(line),
+    #            bandwidth=self._get_bandwidth(line),
+    #            status=self._get_status(line),
+    #        )
+    #        id_int = int(id_string)
+    #        frequencies[id_int].append(frequency_range)
+
+    #    return frequencies
+
     def get(self) -> dict[int, list["FrequencyRange"]]:
         frequencies = defaultdict(list)
-        for line in self._data[1:]:
+        iterator = self._data[1:]
+
+        for line in iterator:
             id_string = line[FrequencyCsvKeys.ID.value]
             if not id_string or id_string == "None" or id_string == "nan":
                 continue
 
+            freq = self._get_frequency(line)
+            bw = self._get_bandwidth(line)
+
+            if freq is None or bw is None:
+                continue
+
             frequency_range = FrequencyRange(
-                frequency=self._get_frequency(line),
-                bandwidth=self._get_bandwidth(line),
+                frequency=freq,
+                bandwidth=bw,
                 status=self._get_status(line),
             )
+
             id_int = int(id_string)
             frequencies[id_int].append(frequency_range)
 

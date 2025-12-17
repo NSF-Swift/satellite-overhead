@@ -5,10 +5,39 @@ from sgp4.io import verify_checksum
 from sgp4.model import Satrec
 from sgp4.vallado_cpp import WGS72
 
-from sopp.models.satellite.international_designator import (
-    InternationalDesignator,
-)
-from sopp.models.satellite.mean_motion import MeanMotion
+
+@dataclass
+class MeanMotion:
+    """
+    Represents the mean motion of a satellite in radians per minute.
+
+    Attributes:
+    - first_derivative (float): The first derivative of the mean motion.
+    - second_derivative (float): The second derivative of the mean motion.
+    - value (float): The actual mean motion value in radians per minute.
+    """
+
+    first_derivative: float
+    second_derivative: float
+    value: float
+
+
+@dataclass
+class InternationalDesignator:
+    year: int
+    launch_number: int
+    launch_piece: str
+
+    def to_tle_string(self) -> str:
+        return f"{str(self.year).zfill(2)}{str(self.launch_number).zfill(3)}{self.launch_piece}"
+
+    @classmethod
+    def from_tle_string(cls, tle_string: str) -> "InternationalDesignator":
+        return InternationalDesignator(
+            year=int(tle_string[0:2]),
+            launch_number=int(tle_string[2:5]),
+            launch_piece=tle_string[5:].strip(),
+        )
 
 
 @dataclass

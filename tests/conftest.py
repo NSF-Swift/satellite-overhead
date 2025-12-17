@@ -5,16 +5,15 @@ import pytest
 
 from sopp.ephemeris.base import EphemerisCalculator
 from sopp.models.configuration import Configuration, RuntimeSettings
+from sopp.models.core import Coordinates, FrequencyRange, Position, TimeWindow
+from sopp.models.ground.config import CustomTrajectoryConfig
 from sopp.models.ground.facility import Facility
+from sopp.models.ground.trajectory import AntennaTrajectory
 from sopp.models.reservation import Reservation
+from sopp.models.satellite import InternationalDesignator, MeanMotion, TleInformation
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.satellite.trajectory import SatelliteTrajectory
-from sopp.models.core import FrequencyRange, Position, TimeWindow, Coordinates
-from sopp.models.ground.config import CustomTrajectoryConfig
-from sopp.models.ground.trajectory import AntennaTrajectory
-from sopp.models.satellite import InternationalDesignator, MeanMotion, TleInformation
 from sopp.utils.time import generate_time_grid
-from tests.models.test_str import frequency_range
 
 # Constants
 ARBITRARY_ALTITUDE = 0

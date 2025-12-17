@@ -8,16 +8,16 @@ from sopp.analysis.interference import (
 )
 from sopp.ephemeris.base import EphemerisCalculator
 from sopp.ephemeris.skyfield import SkyfieldEphemerisCalculator
-from sopp.models.antenna_config import (
+from sopp.models.ground.config import (
     CelestialTrackingConfig,
     CustomTrajectoryConfig,
     StaticPointingConfig,
 )
-from sopp.models.antenna_trajectory import AntennaTrajectory
+from sopp.models.ground.trajectory import AntennaTrajectory
 from sopp.models.configuration import Configuration
-from sopp.models.satellite_trajectory import SatelliteTrajectory
-from sopp.path_finders.base import ObservationPathFinder
-from sopp.path_finders.skyfield import ObservationPathFinderSkyfield
+from sopp.models.satellite.trajectory import SatelliteTrajectory
+from sopp.pointing.base import ObservationPathFinder
+from sopp.pointing.skyfield import ObservationPathFinderSkyfield
 from sopp.utils.time import generate_time_grid
 
 

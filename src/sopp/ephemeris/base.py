@@ -4,11 +4,11 @@ from datetime import datetime
 import numpy as np
 import numpy.typing as npt
 
-from sopp.models.facility import Facility
-from sopp.models.position import Position
+from sopp.models.ground.facility import Facility
+from sopp.models.core import Position
 from sopp.models.satellite.satellite import Satellite
-from sopp.models.satellite_trajectory import SatelliteTrajectory
-from sopp.models.time_window import TimeWindow
+from sopp.models.satellite.trajectory import SatelliteTrajectory
+from sopp.models.core import TimeWindow
 
 
 class EphemerisCalculator(ABC):

@@ -13,15 +13,18 @@ NUMBER_OF_LINES_PER_TLE_OBJECT = 3
 
 
 def load_satellites(
-    tle_file: Path, frequency_file: Optional[Path] = None
+    tle_file: Path | str, frequency_file: Path | str | None = None
 ) -> list[Satellite]:
     """
     Loads TLEs from disk and optionally attaches frequency data.
     """
-    satellites = _parse_tle_file(tle_file)
+    tle_path = Path(tle_file)
+    freq_path = Path(frequency_file) if frequency_file else None
 
-    if frequency_file:
-        freq_data = GetFrequencyDataFromCsv(filepath=frequency_file).get()
+    satellites = _parse_tle_file(tle_path)
+
+    if freq_path:
+        freq_data = GetFrequencyDataFromCsv(filepath=freq_path).get()
 
         satellites = [
             replace(

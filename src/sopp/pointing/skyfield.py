@@ -5,8 +5,11 @@ from skyfield.api import load
 from skyfield.starlib import Star
 from skyfield.toposlib import wgs84
 
-from sopp.models import AntennaTrajectory, Facility, ObservationTarget, TimeWindow
-from sopp.path_finders.base import ObservationPathFinder
+from sopp.models.ground.trajectory import AntennaTrajectory
+from sopp.models.ground.target import ObservationTarget
+from sopp.models.ground.facility import Facility
+from sopp.models.core import TimeWindow
+from sopp.pointing.base import ObservationPathFinder
 from sopp.utils.time import generate_time_grid
 
 

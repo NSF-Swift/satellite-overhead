@@ -1,7 +1,7 @@
 import re
 from collections.abc import Callable
 
-from sopp.models.frequency_range import FrequencyRange
+from sopp.models.core import FrequencyRange
 from sopp.models.satellite.satellite import Satellite
 
 

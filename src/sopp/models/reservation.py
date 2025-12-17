@@ -1,8 +1,8 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
-from sopp.models.facility import Facility
-from sopp.models.frequency_range import FrequencyRange
-from sopp.models.time_window import TimeWindow
+from sopp.models.ground.facility import Facility
+from sopp.models.core import FrequencyRange
+from sopp.models.core import TimeWindow
 
 """
 The Reservation class stores the Facility, as well as some additional reservation-specific information, such as reservation start and end times.
@@ -16,7 +16,7 @@ The Reservation class stores the Facility, as well as some additional reservatio
 class Reservation:
     facility: Facility
     time: TimeWindow
-    frequency: FrequencyRange = field(default_factory=FrequencyRange)
+    frequency: FrequencyRange
 
     def __str__(self):
         return (

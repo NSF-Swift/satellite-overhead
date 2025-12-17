@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from functools import cached_property
 
-from sopp.models.coordinates import Coordinates
+from sopp.models.core import Coordinates
 
 
 @dataclass

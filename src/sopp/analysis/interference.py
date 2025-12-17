@@ -1,11 +1,11 @@
 import numpy as np
 
 from sopp.ephemeris.base import EphemerisCalculator
-from sopp.models.antenna_trajectory import AntennaTrajectory
+from sopp.models.ground.trajectory import AntennaTrajectory
 from sopp.models.reservation import Reservation
 from sopp.models.satellite.satellite import Satellite
-from sopp.models.satellite_trajectory import SatelliteTrajectory
-from sopp.utils.geometry import calculate_angular_separation_sq
+from sopp.models.satellite.trajectory import SatelliteTrajectory
+from sopp.analysis.geometry import calculate_angular_separation_sq
 
 
 def find_satellites_above_horizon(

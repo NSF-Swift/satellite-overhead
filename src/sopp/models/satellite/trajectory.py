@@ -4,7 +4,7 @@ import numpy as np
 import numpy.typing as npt
 
 from sopp.models.satellite.satellite import Satellite
-from sopp.models.time_window import TimeWindow
+from sopp.models.core import TimeWindow
 
 
 @dataclass

@@ -1,9 +1,11 @@
-from .international_designator import InternationalDesignator
-from .mean_motion import MeanMotion
-from .tle_information import TleInformation
+from .satellite import Satellite
+from .tle import TleInformation, MeanMotion, InternationalDesignator
+from .trajectory import SatelliteTrajectory
 
 __all__ = [
-    "InternationalDesignator",
-    "MeanMotion",
+    "Satellite",
     "TleInformation",
+    "SatelliteTrajectory",
+    "MeanMotion",
+    "InternationalDesignator",
 ]

@@ -2,7 +2,10 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
-from sopp.models import AntennaTrajectory, Facility, ObservationTarget, TimeWindow
+from sopp.models.ground.trajectory import AntennaTrajectory
+from sopp.models.ground.facility import Facility
+from sopp.models.ground.target import ObservationTarget
+from sopp.models.core import TimeWindow
 
 
 class ObservationPathFinder(ABC):
