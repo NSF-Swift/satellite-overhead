@@ -1,10 +1,10 @@
 from sopp.models.core import FrequencyRange
+from sopp.models.satellite.satellite import Satellite
 from sopp.models.satellite.tle import (
     InternationalDesignator,
+    MeanMotion,
+    TleInformation,
 )
-from sopp.models.satellite.tle import MeanMotion
-from sopp.models.satellite.satellite import Satellite
-from sopp.models.satellite.tle import TleInformation
 
 
 def expected_international_space_station_tle_as_satellite_cu() -> Satellite:

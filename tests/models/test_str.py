@@ -1,14 +1,10 @@
 import pytest
 
+from sopp.models.configuration import Configuration, RuntimeSettings
+from sopp.models.core import Coordinates, FrequencyRange, TimeWindow
 from sopp.models.ground.config import CustomTrajectoryConfig
-from sopp.models.configuration import Configuration
-from sopp.models.core import Coordinates
 from sopp.models.ground.facility import Facility
-from sopp.models.core import FrequencyRange
 from sopp.models.reservation import Reservation
-from sopp.models.configuration import RuntimeSettings
-from sopp.models.satellite.satellite import Satellite
-from sopp.models.core import TimeWindow
 
 
 def test_time_window(time_window):

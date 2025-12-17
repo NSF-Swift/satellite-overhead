@@ -1,6 +1,6 @@
-import os
 import pytest
 import requests
+
 from sopp.io.tle import fetch_tles
 
 

@@ -1,8 +1,7 @@
 import pytest
 
-from sopp.models.satellite.tle import MeanMotion
 from sopp.models.satellite.satellite import Satellite
-from sopp.models.satellite.tle import TleInformation
+from sopp.models.satellite.tle import MeanMotion, TleInformation
 
 
 class TestSatellite:

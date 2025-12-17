@@ -4,10 +4,12 @@ import pytest
 from skyfield.api import load, wgs84
 
 from sopp.models.core import FrequencyRange
-from sopp.models.satellite.tle import InternationalDesignator
-from sopp.models.satellite.tle import MeanMotion
 from sopp.models.satellite.satellite import Satellite
-from sopp.models.satellite.tle import TleInformation
+from sopp.models.satellite.tle import (
+    InternationalDesignator,
+    MeanMotion,
+    TleInformation,
+)
 
 # Constants
 MINUTE_BEFORE_ENTERS = 34

@@ -2,12 +2,12 @@ import os
 
 from sopp.io.tle import load_satellites
 from sopp.models.core import FrequencyRange
+from sopp.models.satellite.satellite import Satellite
 from sopp.models.satellite.tle import (
-    TleInformation,
     InternationalDesignator,
     MeanMotion,
+    TleInformation,
 )
-from sopp.models.satellite.satellite import Satellite
 
 
 class TestSatellitesLoaderFromFiles:

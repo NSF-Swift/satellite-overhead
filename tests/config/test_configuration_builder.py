@@ -6,22 +6,19 @@ import pytest
 
 from sopp.config.builder import ConfigurationBuilder
 from sopp.config.loaders import ConfigFileLoaderBase
-from sopp.models.core import Coordinates
-from sopp.models.ground.facility import Facility
-from sopp.models.core import FrequencyRange
-from sopp.models.core import Position
-from sopp.models.reservation import Reservation
+from sopp.filtering.filterer import Filterer
 from sopp.models.configuration import RuntimeSettings
-from sopp.models.satellite.satellite import Satellite
-from sopp.models.core import TimeWindow
+from sopp.models.core import Coordinates, FrequencyRange, Position, TimeWindow
 from sopp.models.ground.config import (
     CelestialTrackingConfig,
     CustomTrajectoryConfig,
     StaticPointingConfig,
 )
-from sopp.models.ground.trajectory import AntennaTrajectory
+from sopp.models.ground.facility import Facility
 from sopp.models.ground.target import ObservationTarget
-from sopp.filtering.filterer import Filterer
+from sopp.models.ground.trajectory import AntennaTrajectory
+from sopp.models.reservation import Reservation
+from sopp.models.satellite.satellite import Satellite
 
 # --- Helpers & Stubs ---
 

@@ -1,8 +1,5 @@
 import pytest
 
-from sopp.models.satellite.tle import MeanMotion
-from sopp.models.satellite.satellite import Satellite
-from sopp.models.satellite.tle import TleInformation
 from sopp.filtering.presets import (
     filter_name_contains,
     filter_name_does_not_contain,
@@ -10,6 +7,8 @@ from sopp.filtering.presets import (
     filter_name_regex,
     filter_orbit_is,
 )
+from sopp.models.satellite.satellite import Satellite
+from sopp.models.satellite.tle import MeanMotion, TleInformation
 
 
 class TestFilters:

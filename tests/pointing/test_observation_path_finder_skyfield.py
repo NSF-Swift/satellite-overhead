@@ -2,10 +2,9 @@ from datetime import datetime, timezone
 
 import pytest
 
-from sopp.models.core import Coordinates
+from sopp.models.core import Coordinates, TimeWindow
 from sopp.models.ground.facility import Facility
 from sopp.models.ground.target import ObservationTarget
-from sopp.models.core import TimeWindow
 from sopp.pointing.skyfield import ObservationPathFinderSkyfield
 
 

@@ -1,8 +1,8 @@
 import pytest
-from sopp.models.core import FrequencyRange
-from sopp.models.satellite.satellite import Satellite
 
 from sopp.filtering.presets import filter_frequency
+from sopp.models.core import FrequencyRange
+from sopp.models.satellite.satellite import Satellite
 
 
 @pytest.fixture
