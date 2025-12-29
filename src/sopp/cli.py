@@ -1,30 +1,29 @@
 import json
 import time
-from pathlib import Path
-from typing import Annotated, Optional
-from enum import Enum
-from datetime import datetime, timedelta, timezone
 from contextlib import nullcontext
+from datetime import datetime, timedelta, timezone
+from enum import Enum
+from pathlib import Path
+from typing import Annotated
 
-import typer
 import numpy as np
+import typer
 from rich.console import Console
 from rich.panel import Panel
-from rich.table import Table
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.table import Table
 
+from sopp.__about__ import __version__ as APP_VERSION
 from sopp.config.builder import ConfigurationBuilder
 from sopp.filtering.presets import (
     filter_frequency,
     filter_name_contains,
-    filter_orbit_is,
     filter_name_does_not_contain,
+    filter_orbit_is,
 )
-
 from sopp.io.tle import fetch_tles
-from sopp.sopp import Sopp
 from sopp.models.satellite.trajectory import SatelliteTrajectory
-from sopp.__about__ import __version__ as APP_VERSION
+from sopp.sopp import Sopp
 
 
 # Enums
@@ -77,7 +76,7 @@ def run(
         ),
     ] = Path("satellites.tle"),
     frequency_file: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Option(
             "--freq",
             "-f",
@@ -94,7 +93,7 @@ def run(
         ),
     ] = AnalysisMode.all,
     limit: Annotated[
-        Optional[int],
+        int | None,
         typer.Option("--limit", "-n", help="Limit number of rows displayed in output."),
     ] = None,
     local_time: Annotated[
@@ -112,21 +111,21 @@ def run(
     ] = OutputFormat.table,
     # Time Overrides
     start_time: Annotated[
-        Optional[datetime],
+        datetime | None,
         typer.Option(
             "--start",
             help="Override start time (ISO format, e.g. '2025-12-15T12:00:00'). Assumes UTC.",
         ),
     ] = None,
     end_time: Annotated[
-        Optional[datetime],
+        datetime | None,
         typer.Option(
             "--end",
             help="Override end time (ISO format, e.g. '2025-12-15T13:00:00'). Assumes UTC.",
         ),
     ] = None,
     duration_minutes: Annotated[
-        Optional[float],
+        float | None,
         typer.Option(
             "--duration",
             help="Override duration in minutes (used with --start to calculate end time).",
@@ -134,22 +133,22 @@ def run(
     ] = None,
     # Filters
     search: Annotated[
-        Optional[str],
+        str | None,
         typer.Option("--search", help="Filter satellites by name (substring match)."),
     ] = None,
     exclude: Annotated[
-        Optional[list[str]],
+        list[str] | None,
         typer.Option(
             "--exclude", help="Exclude satellites (can be used multiple times)."
         ),
     ] = None,
     orbit_type: Annotated[
-        Optional[OrbitType],
+        OrbitType | None,
         typer.Option("--orbit", help="Filter by orbit type (LEO/MEO/GEO)."),
     ] = None,
     # Altitude Override
     override_min_alt: Annotated[
-        Optional[float],
+        float | None,
         typer.Option(
             "--min-alt", help="Override minimum altitude (degrees) from config."
         ),
@@ -171,7 +170,7 @@ def run(
             fetch_tles(output_path=tle_file, source="celestrak")
         except Exception as e:
             console.print(f"[bold red]Failed to download TLEs:[/bold red] {e}")
-            raise typer.Exit(code=1)
+            raise typer.Exit(code=1) from e
 
     # Build Configuration
     try:
@@ -240,7 +239,7 @@ def run(
 
     except ValueError as e:
         console.print(f"[bold red]Configuration Error:[/bold red] {e}")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from e
 
     sopp_engine = Sopp(configuration)
 
@@ -315,7 +314,7 @@ def download_tles(
         console.print(f"[green]Successfully saved TLEs to {path}[/green]")
     except Exception as e:
         console.print(f"[bold red]Error fetching TLEs:[/bold red] {e}")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from e
 
 
 # Helpers
