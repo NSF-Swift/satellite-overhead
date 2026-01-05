@@ -340,9 +340,9 @@ def _print_summary(configuration, sat_count):
     res = configuration.reservation
     console.print(
         Panel(
-            f"[bold]Facility:[/bold] {res.facility.name}\n"
-            f"[bold]Time:[/bold] {res.time.begin} -> {res.time.end}\n"
-            f"[bold]Frequency:[/bold] {res.frequency}\n"
+            f"{res.facility}\n"
+            f"{res.frequency}\n"
+            f"Time: {res.time.begin} -> {res.time.end}\n"
             f"[bold]Satellites Loaded:[/bold] {sat_count}",
             title="Simulation Parameters",
             border_style="blue",
@@ -377,14 +377,20 @@ def _print_horizon_table(
     table.add_column("#", style="dim")
     table.add_column("Satellite", style="cyan")
     table.add_column("Rise Time", style="green")
+    table.add_column("Rise Az", justify="right", style="magenta")
     table.add_column("Set Time", style="yellow")
-    table.add_column("Max Alt", justify="right", style="magenta")
+    table.add_column("Set Az", justify="right", style="magenta")
     table.add_column("Time of Max", justify="right", style="blue")
+    table.add_column("Max Alt", justify="right", style="magenta")
 
     count = 0
     for i, window in enumerate(windows, start=1):
         if len(window) == 0:
             continue
+
+        # Get Rise/Set Azimuths
+        rise_az = window.azimuth[0]
+        set_az = window.azimuth[-1]
 
         max_idx = np.argmax(window.altitude)
         max_alt = window.altitude[max_idx]
@@ -394,9 +400,11 @@ def _print_horizon_table(
             str(i),
             window.satellite.name,
             _format_dt(window.times[0], local_time),
+            f"{rise_az:.1f}",
             _format_dt(window.times[-1], local_time),
-            f"{max_alt:.1f}°",
+            f"{set_az:.1f}",
             _format_dt(max_time, local_time),
+            f"{max_alt:.1f}°",
         )
         count += 1
         if limit and count >= limit:
@@ -457,6 +465,8 @@ def _print_json(horizon, interference):
                     "end": t.times[-1].isoformat(),
                     "duration_sec": (t.times[-1] - t.times[0]).total_seconds(),
                     "max_altitude_deg": float(np.max(t.altitude)),
+                    "rise_azimuth_deg": float(t.azimuth[0]),
+                    "set_azimuth_deg": float(t.azimuth[-1]),
                 }
             )
         return data
