@@ -1,6 +1,5 @@
-from functools import cached_property
 from concurrent.futures import ProcessPoolExecutor
-from typing import Type, List, Tuple
+from functools import cached_property
 
 import numpy as np
 
@@ -24,7 +23,7 @@ from sopp.pointing.skyfield import PointingCalculatorSkyfield
 from sopp.utils.time import generate_time_grid
 
 
-def _parallel_horizon_worker(payload: Tuple) -> List[SatelliteTrajectory]:
+def _parallel_horizon_worker(payload: tuple) -> list[SatelliteTrajectory]:
     """
     Rehydrates the simulation context on a worker process and calculates visibility.
     """
@@ -48,7 +47,7 @@ def _parallel_horizon_worker(payload: Tuple) -> List[SatelliteTrajectory]:
     )
 
 
-def _parallel_beam_worker(payload: Tuple) -> List[SatelliteTrajectory]:
+def _parallel_beam_worker(payload: tuple) -> list[SatelliteTrajectory]:
     """
     Rehydrates context and calculates beam crossings.
     """
@@ -81,10 +80,10 @@ class Sopp:
     def __init__(
         self,
         configuration: Configuration,
-        ephemeris_calculator_class: Type[
+        ephemeris_calculator_class: type[
             EphemerisCalculator
         ] = SkyfieldEphemerisCalculator,
-        pointing_calculator_class: Type[
+        pointing_calculator_class: type[
             PointingCalculator
         ] = PointingCalculatorSkyfield,
     ):
@@ -92,7 +91,7 @@ class Sopp:
         self._pointing_calculator_class = pointing_calculator_class
         self._ephemeris_calculator_class = ephemeris_calculator_class
 
-    def get_satellites_above_horizon(self) -> List[SatelliteTrajectory]:
+    def get_satellites_above_horizon(self) -> list[SatelliteTrajectory]:
         """
         Returns trajectories for all satellites that rise above the minimum altitude.
         """
@@ -115,7 +114,7 @@ class Sopp:
             include_antenna=False,
         )
 
-    def get_satellites_crossing_main_beam(self) -> List[SatelliteTrajectory]:
+    def get_satellites_crossing_main_beam(self) -> list[SatelliteTrajectory]:
         """
         Returns trajectories for satellites that cross the antenna's main beam.
         """
@@ -140,8 +139,8 @@ class Sopp:
         )
 
     def _run_parallel(
-        self, worker_func, satellites: List[Satellite], include_antenna: bool
-    ) -> List[SatelliteTrajectory]:
+        self, worker_func, satellites: list[Satellite], include_antenna: bool
+    ) -> list[SatelliteTrajectory]:
         """
         Orchestrates the distribution of work to the process pool.
         """

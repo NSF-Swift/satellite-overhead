@@ -7,12 +7,12 @@ from sopp.models import (
     Coordinates,
     Facility,
     FrequencyRange,
+    Position,
     Reservation,
     RuntimeSettings,
     Satellite,
     SatelliteTrajectory,
     TimeWindow,
-    Position,
 )
 from sopp.models.ground.config import CustomTrajectoryConfig, StaticPointingConfig
 from sopp.models.ground.trajectory import AntennaTrajectory
@@ -142,7 +142,7 @@ class TestSopp:
         serial_results.sort(key=lambda x: x.satellite.name)
         parallel_results.sort(key=lambda x: x.satellite.name)
 
-        for s_traj, p_traj in zip(serial_results, parallel_results):
+        for s_traj, p_traj in zip(serial_results, parallel_results, strict=True):
             assert_trajectories_eq(s_traj, p_traj)
 
     @property
