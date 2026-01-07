@@ -12,8 +12,9 @@ from sopp.models import (
     Satellite,
     SatelliteTrajectory,
     TimeWindow,
+    Position,
 )
-from sopp.models.ground.config import CustomTrajectoryConfig
+from sopp.models.ground.config import CustomTrajectoryConfig, StaticPointingConfig
 from sopp.models.ground.trajectory import AntennaTrajectory
 from sopp.models.satellite import InternationalDesignator, MeanMotion, TleInformation
 from sopp.sopp import Sopp
@@ -92,6 +93,57 @@ class TestSopp:
 
         # NOAA 15 is visible but at Az ~31, Alt ~0. It is FAR from the beam (320, 32).
         assert "NOAA 15" not in names_interfering
+
+    def test_parallel_execution_consistency(self):
+        """
+        Verifies that running in Parallel Mode (multiprocessing) yields
+        identical results to Serial Mode.
+        """
+        # 1. Setup Data (Use the integration test data)
+        res = self._arbitrary_reservation
+
+        # Force a configuration that triggers parallel execution
+        # (concurrency > 1 AND enough satellites to trigger chunking)
+        # We duplicate the satellites list to simulate a larger load
+        many_satellites = (
+            self._satellites * 20
+        )  # 3 * 20 = 60 sats (triggering chunk logic)
+
+        # 2. Configure for Serial (Control Group)
+        config_serial = Configuration(
+            reservation=res,
+            satellites=many_satellites,
+            antenna_config=StaticPointingConfig(Position(320, 32)),
+            runtime_settings=RuntimeSettings(concurrency_level=1),
+        )
+
+        # 3. Configure for Parallel (Test Group)
+        config_parallel = Configuration(
+            reservation=res,
+            satellites=many_satellites,
+            antenna_config=StaticPointingConfig(Position(320, 32)),
+            runtime_settings=RuntimeSettings(concurrency_level=2),
+        )
+
+        # 4. Execute
+        sopp_serial = Sopp(config_serial)
+        serial_results = sopp_serial.get_satellites_above_horizon()
+
+        sopp_parallel = Sopp(config_parallel)
+        parallel_results = sopp_parallel.get_satellites_above_horizon()
+
+        # 5. Verify
+        # Check counts
+        assert len(serial_results) > 0
+        assert len(serial_results) == len(parallel_results)
+
+        # Check Sort Order (Parallel results might come back out of order)
+        # We sort by satellite name + start time to compare
+        serial_results.sort(key=lambda x: x.satellite.name)
+        parallel_results.sort(key=lambda x: x.satellite.name)
+
+        for s_traj, p_traj in zip(serial_results, parallel_results):
+            assert_trajectories_eq(s_traj, p_traj)
 
     @property
     def _arbitrary_reservation(self) -> Reservation:
