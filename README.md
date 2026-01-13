@@ -1,4 +1,5 @@
-# S.O.P.P. - Satellite Orbit Prediction Processor
+# SOPP - Satellite Orbit Prediction Processor
+
 <div align="left">
 
 | | |
@@ -8,186 +9,161 @@
 
 </div>
 
-SOPP is an open-source tool for calculating satellite interference to radio astronomy observations.
+**SOPP** is a high-performance Python library and CLI tool designed to predict satellite interference for radio astronomy observations.
 
-![alt text](https://github.com/NSF-Swift/satellite-overhead/blob/main/FBD.png)
+It uses vectorized orbital mechanics (via Skyfield/SGP4) to simulate thousands of satellites against observation schedules, identifying when a satellite crosses a telescope's main beam or rises above the horizon.
 
-## Running SOPP
+## Installation
 
-### Install the requirements:
-```bash
->> pip3 install -r requirements.txt
-```
-
-### Setting up the supplemental files
-
-The TLE and frequency data is stored in the `supplements` directory.
-
-#### Active Satellites TLE File
-There should be a [TLE](https://en.wikipedia.org/wiki/Two-line_element_set) file, containing the satellites that you 
-want to search through, at `supplements/satellites.tle` under the root directory. In the SOPP program itself, a list of active satellites are pulled from
-Celestrak. If you want to provide it your own TLE file, you can comment out this line and place your own TLE file in the `supplements` directory.
-
-##### Instructions for pulling files from Space-Track
-If you want to pull TLE files from Space-Track.org, there are a few extra steps you need to take since the site requires user credentials:
-
-First go to [Space-Track.org](https://www.space-track.org) and register for a user account. 
-After you have done this, create a .env file in your root directory:
+Install via pip:
 
 ```bash
->> touch .env
+# Core library only
+pip install sopp
+
+# With CLI tools
+pip install "sopp[cli]"
 ```
 
-Then edit this file using your preferred text editor to contain the following information:
+## CLI Usage
 
-    IDENTITY=<Space-Track.org username>
-    PASSWORD=<Space-Track.org password>
+SOPP provides a command-line interface for running simulations and managing data.
 
-where the identity value is the Space-Track username you just registered with and the password value is your password. You should now be able to use the TleFetcher class as follows:
+### 1. Download Data
+First, download the latest TLE (Two-Line Element) data. By default, this pulls active satellites from Celestrak.
+
+```bash
+sopp download-tles
+```
+
+### 2. Run a Simulation
+Run a simulation using a configuration file (see below).
+
+```bash
+sopp run --config my_config.json
+```
+
+### 3. Ad-Hoc Analysis
+You can override configuration parameters directly from the CLI without editing the file.
+
+```bash
+# Check for Starlink interference in the next 30 minutes
+sopp run --config my_config.json \
+    --search STARLINK \
+    --orbit leo \
+    --start 2025-01-01T12:00:00 \
+    --duration 30
+```
+
+**Common Options:**
+*   `--mode [all|horizon|interference]`: Choose what to calculate.
+*   `--limit 10`: Only show the first 10 results.
+*   `--local-time`: Display timestamps in your system's local timezone.
+*   `--format json`: Output machine-readable JSON.
+
+## Configuration
+
+SOPP uses a JSON configuration file to define the observation parameters.
+
+### Example `config.json`
+
+```json
+{
+  "facility": {
+    "name": "HCRO",
+    "latitude": 40.8178049,
+    "longitude": -121.4695413,
+    "elevation": 986,
+    "beamwidth": 3.0
+  },
+  "frequencyRange": {
+    "frequency": 135.0,
+    "bandwidth": 10.0
+  },
+  "reservationWindow": {
+    "startTimeUtc": "2026-01-13T12:00:00",
+    "endTimeUtc": "2026-01-13T13:00:00"
+  },
+  "observationTarget": {
+    "declination": "-38d6m50.8s",
+    "rightAscension": "4h42m"
+  },
+  "runtimeSettings": {
+    "concurrency_level": 4,
+    "time_resolution_seconds": 1.0,
+    "min_altitude": 0.0
+  }
+}
+```
+
+### Configuration Sections
+
+| Section | Description |
+| :--- | :--- |
+| **facility** | Defines the ground station location (Lat/Lon/Elev) and antenna beamwidth (degrees). |
+| **frequencyRange** | Defines the observation frequency (MHz). Satellites transmitting outside this range are ignored. |
+| **reservationWindow** | The start and end time of the observation. |
+| **runtimeSettings** | Controls simulation fidelity. `time_resolution_seconds` determines the step size (default 1.0s). |
+
+### Antenna Pointing Modes
+You must provide **one** of the following sections to define where the antenna is pointing:
+
+1.  **`observationTarget`**: Tracks a celestial object (RA/Dec).
+    ```json
+    "observationTarget": { "declination": "...", "rightAscension": "..." }
+    ```
+2.  **`staticAntennaPosition`**: Points at a fixed Azimuth/Elevation.
+    ```json
+    "staticAntennaPosition": { "azimuth": 180.0, "altitude": 45.0 }
+    ```
+3.  **`antennaPositionTimes`**: A custom trajectory (list of time/az/el points).
+
+## Python Library Usage
+
+SOPP is designed to be imported and used directly in Python scripts/projects.
+
 ```python
-TleFetcherCelestrak('path/to/save/satellites.tle').fetch_tles()
-# or with Space-Track
-TleFetcherSpacetrack('path/to/save/satellites.tle').fetch_tles()
+from sopp.config.builder import ConfigurationBuilder
+from sopp.filtering.presets import filter_name_does_not_contain
+from sopp.sopp import Sopp
+
+# Build Configuration
+config = (
+    ConfigurationBuilder()
+    .set_facility(
+        latitude=40.8, longitude=-121.4, elevation=986, name="HCRO", beamwidth=3
+    )
+    .set_runtime_settings(concurrency_level=4)
+    .set_time_window(begin="2026-01-13T19:00:00", end="2026-01-13T20:00:00")
+    .set_frequency_range(bandwidth=10, frequency=135)
+    # Cygnus A
+    .set_observation_target(declination="40d44m", right_ascension="19h59m")
+    .load_satellites(tle_file="satellites.tle")
+    .add_filter(filter_name_does_not_contain("STARLINK"))
+    .build()
+)
+
+print(f"Running interference simulation for {len(config.satellites)} satellites:")
+
+# Run Engine
+engine = Sopp(config)
+interference_events = engine.get_satellites_crossing_main_beam()
+
+# Analyze Results
+print(f"Found {len(interference_events)} interference events:")
+
+for event in interference_events:
+    start = event.times[0]
+    end = event.times[-1]
+    duration = (end - start).total_seconds()
+
+    print(f"--- {event.satellite.name} ---")
+    print(f"  Window:   {start} -> {end}")
+    print(f"  Duration: {duration:.1f} seconds")
+    print(f"  Max Elev: {event.altitude.max():.1f} deg")
 ```
 
-#### Formatting Frequency File
+## Data Sources
 
-To use the FrequencyFilter, a frequency CSV file needs to be supplied at `supplements/satellite_frequencies.csv`
-The frequency file should consist of the following columns:
-
-|   ID   |   Name   |   Frequency   |   Bandwidth   |   Status   |   Description   |
-
-Where the `ID` is the satellite's NORAD SATCAT ID, the `Name` is the satellite's name, the `Frequency` is the satellite's downlink 
-center frequency (in MHz), `Bandwidth` is the bandwidth of the downlink frequency, `Status` is if the antenna is active or not (optional), and 
-`Description` contains any antenna characteristics (optional). A satellite frequency scraper is available
-[here](https://github.com/NSF-Swift/sat-frequency-scraper) that can be used to generate this file.
-
-#### Config file
-There should be a file at `supplements/config.json` under the root directory to set default observation values for a reservation. 
-The following is an example of a config file:
-
-    {
-      "facility": {
-        "beamwidth": 3,
-        "elevation": 986,
-        "latitude": 40.8178049,
-        "longitude": -121.4695413,
-        "name": "HCRO"
-      },
-      "frequencyRange": {
-        "bandwidth": 10,
-        "frequency": 135
-      },
-      "observationTarget": {
-        "declination": "-38d6m50.8s",
-        "rightAscension": "4h42m"
-      },
-      "reservationWindow": {
-        "startTimeUtc": "2023-09-27T12:00:00.000000",
-        "endTimeUtc": "2023-09-27T13:00:00.000000"
-      },
-      "runtimeSettings": {
-          "concurrency_level": 4,
-          "time_resolution_seconds": 1,
-          "min_altitude": 5.0
-      }
-    }
-
-+ The `facility` object contains attributes pertaining to the observation facility:
-    + "beamwidth" is the beamwidth of the RA telescope
-    + "elevation" is the ground level elevation of the RA facility in meters
-    + "latitude" is the latitude of the RA facility
-    + "longitude" is the longitude of the RA facility
-    + "name" is the name of the RA facility
-
-+ The `frequencyRange` object contains characteristics of the frequency:
-    + "bandwidth" is the bandwidth of the desired observation
-    + "frequency" is the center frequency of the observation
-
-+ The `observationTarget` is the coordinates of the object to be observed:
-    + "declination" is the declination value of the celestial target the RA telescope is trying to observe
-        + More information can be found in [Astropy's Astronomical Coordinate System](https://docs.astropy.org/en/stable/coordinates/index.html)
-    + "rightAscension" is the right ascension value of the celestial target the RA telescope is trying to observe
-        + More information can be found in [Astropy's Astronomical Coordinate System](https://docs.astropy.org/en/stable/coordinates/index.html)
-
-+ The `reservationWindow` object contains the start and end time of the time window of the observation:
-    + "startTimeUtc" is the desired start time of the observation in UTC
-    + "endTimeUtc" is the desired end time of the observation in UTC
-
-+ The `runtimeSettings` object sets various runtime settings it includes:
-    + "concurrency_level" specifies the number of parallel jobs to run during satellite position computation, which can significantly improve performance.
-    + "time_resolution_seconds" sets the sampling rate for satellite position calculations in seconds. For example, a value of 1 indicates that satellite positions are calculated every second.
-    + "min_altitude" sets the minimum altitude in degrees for the satellites to be considered above the horizon. Useful for locations with obstructed horizons. 
-
-###### Static Antenna Position
-A static antenna position may be given instead of an observation target's declination and right ascension.
-The following is an example config file portion. If both a static antenna position and an observation target is given,
-the static antenna position will take precedence.
-    
-    {
-      ...
-      "staticAntennaPosition": {
-        "altitude": 0.2,
-        "azimuth": 0.3
-      }
-    }
-
-
-###### Multiple Antenna Positions and Times
-A path of antenna positions (altitude and azimuth) with their times (in UTC) may also be given. This takes precedence over both `observationTarget`
-and `staticAntennaPosition.` The following is an example:
-
-    "antennaPositionTimes": [
-      {
-        "altitude": 0.0,
-        "azimuth": 0.1,
-        "time": "2023-03-30T10:01:00.000000"
-      },
-      {
-        "altitude": 0.1,
-        "azimuth": 0.2,
-        "time": "2023-03-30T10:02:00.000000"
-      }
-    ],
-
-
-### Run command
-In the root directory, run the following command:
-
-```bash
-python3 sopp.py
-```
-
-## Docker
-Run the following commands from the root directory
-
-### Build
-
-```bash
-docker build . -t sopp
-```
-
-### Run
-In the following command
-   - `<PATH_TO_LOCAL_SUPPLEMENTAL_DIRECTORY>` should be replaced by the path to a local directory that
-     contains two files with the following names:
-      - `active_satellites.tle`: contents described in section #active-satellites-tle-file.
-      - `.config`: contents described in section #config-file section.
-
-```bash
-docker run 
-  -v "<PATH_TO_LOCAL_SUPPLEMENTAL_DIRECTORY>:/satellite_orbit_prediction/supplements" \
-  sopp
-```
-
-## Downloading TLE Files Using TleFetcher
-
-The TleFetcher can be used to download files from either Space-Track or Celestrak. In the SOPP program itself, a list of active satellites are pulled from
-Celestrak. If you want to provide it your own TLE file, you can comment out
-
-## SOPP Components
-### Third-Party Tools
-- **Space-Track:** [Space-Track.org](https://www.space-track.org) is a site maintained by the U.S. Space Force that allows users to query a database and download satellite TLEs. SOPP contains the functionality to pull satellite TLEs from Space-Track for use in the program, but the site requires users to have an account.
-- **Celestrak:** [Celestrak](https://celestrak.org) is the precursor to space-track and is available without an account. While it has been predicted to be phased out for years, it is still actively maintained. It also has an easily downloadable list of active satellites, which doesn’t include space debris.
-- **Rhodesmill Skyfield:** The [Skyfield API](https://rhodesmill.org/skyfield/) is a comprehensive Python package for computing the positions of stars, planets, and satellites. SOPP uses the Skyfield API to find all the satellites visible above the horizon during an observation search window.
-- **Satellite Frequencies:** a satellite frequency database was created by scraping frequency information from various open sources. The code used to generated the database can be found [here](https://github.com/NSF-Swift/sat-frequency-scraper).
+*   **TLE Data:** Sourced from [Celestrak](https://celestrak.org) (public) or [Space-Track.org](https://www.space-track.org) (requires account/env vars).
+*   **Frequency Data:** Optional CSV file to populate satellite transmission frequency. [SSDB](https://github.com/NSF-Swift/sat-frequency-scraper) Format: `ID, Name, Frequency, Bandwidth`.
