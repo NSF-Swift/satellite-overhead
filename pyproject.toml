@@ -7,6 +7,8 @@ dependencies = [
     "requests~=2.32.4",
     "python-dateutil~=2.8.2",
     "python-dotenv~=0.21.0",
+    "pyarrow>=14.0.0",
+    "pandas>=2.0.0",
 ]
 requires-python = ">=3.8"
 description = "SOPP is an open-source tool for calculating satellite interference to radio astronomy observations."

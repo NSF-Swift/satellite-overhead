@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 from concurrent.futures import ProcessPoolExecutor
 from functools import cached_property
+from pathlib import Path
+from typing import TYPE_CHECKING
 
 import numpy as np
 
@@ -21,6 +25,9 @@ from sopp.models.satellite.trajectory import SatelliteTrajectory
 from sopp.pointing.base import PointingCalculator
 from sopp.pointing.skyfield import PointingCalculatorSkyfield
 from sopp.utils.time import generate_time_grid
+
+if TYPE_CHECKING:
+    from sopp.io.formats.base import TrajectoryFormat
 
 
 def _parallel_horizon_worker(payload: tuple) -> list[SatelliteTrajectory]:
@@ -218,3 +225,42 @@ class Sopp:
 
             case _:
                 raise ValueError(f"Unknown antenna configuration: {config}")
+
+    def save_trajectories(
+        self,
+        trajectories: list[SatelliteTrajectory],
+        path: str | Path,
+        *,
+        format: TrajectoryFormat | None = None,
+    ) -> Path:
+        """Save computed trajectories to a file.
+
+        Convenience method that saves trajectories with observer information
+        from the current configuration.
+
+        Args:
+            trajectories: List of trajectories to save (from get_satellites_above_horizon
+                         or get_satellites_crossing_main_beam).
+            path: Output file path.
+            format: File format handler. Defaults to ArrowFormat.
+
+        Returns:
+            Path to the saved file.
+
+        Example:
+            engine = Sopp(configuration)
+            trajectories = engine.get_satellites_above_horizon()
+            engine.save_trajectories(trajectories, "cache/trajectories.arrow")
+        """
+        facility = self.configuration.reservation.facility
+
+        from sopp.io import save_trajectories
+
+        return save_trajectories(
+            trajectories,
+            path,
+            format=format,
+            observer_name=facility.name,
+            observer_lat=facility.coordinates.latitude,
+            observer_lon=facility.coordinates.longitude,
+        )

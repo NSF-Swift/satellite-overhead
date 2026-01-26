@@ -13,7 +13,7 @@ from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
-from sopp.__about__ import __version__ as APP_VERSION
+from sopp.__about__ import get_version
 from sopp.config.builder import ConfigurationBuilder
 from sopp.filtering.presets import (
     filter_frequency,
@@ -330,7 +330,7 @@ def _print_banner():
     console.print(
         Panel.fit(
             "[bold magenta]SOPP[/bold magenta]\nSatellite Orbit Preprocessor",
-            subtitle=APP_VERSION,
+            subtitle=get_version(),
             border_style="magenta",
         )
     )
@@ -460,7 +460,7 @@ def _print_json(horizon, interference):
             data.append(
                 {
                     "satellite": t.satellite.name,
-                    "satellite_id": t.satellite.tle_information.satellite_number,
+                    "satellite_id": t.satellite.satellite_number,
                     "start": t.times[0].isoformat(),
                     "end": t.times[-1].isoformat(),
                     "duration_sec": (t.times[-1] - t.times[0]).total_seconds(),
