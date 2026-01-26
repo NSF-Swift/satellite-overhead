@@ -1,6 +1,5 @@
 import math
 from dataclasses import dataclass, field
-from typing import Optional
 
 from skyfield.sgp4lib import EarthSatellite
 
@@ -19,7 +18,7 @@ class Satellite:
     """
 
     name: str
-    tle_information: Optional[TleInformation] = None
+    tle_information: TleInformation | None = None
     frequency: list[FrequencyRange] = field(default_factory=list)
 
     @property
