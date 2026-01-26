@@ -177,9 +177,7 @@ class TestArrowFormatMultipleTrajectories:
         with pytest.raises(TrajectoryFormatError):
             arrow_format.save([], tmp_path / "empty.arrow")
 
-    def test_load_with_time_filter(
-        self, multiple_trajectories, arrow_format, tmp_path
-    ):
+    def test_load_with_time_filter(self, multiple_trajectories, arrow_format, tmp_path):
         """Test loading with time range filter."""
         file_path = tmp_path / "batch.arrow"
         arrow_format.save(multiple_trajectories, file_path)

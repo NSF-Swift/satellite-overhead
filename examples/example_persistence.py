@@ -72,7 +72,9 @@ def main():
     print(f"\nLoaded {len(loaded)} trajectory from single file")
     print(f"  Satellite: {loaded[0].satellite.name}")
     print(f"  Points: {len(loaded[0])}")
-    print(f"  Time range: {loaded[0].overhead_time.begin} to {loaded[0].overhead_time.end}")
+    print(
+        f"  Time range: {loaded[0].overhead_time.begin} to {loaded[0].overhead_time.end}"
+    )
 
     loaded_batch = SatelliteTrajectory.load(batch_path)
     print(f"\nLoaded {len(loaded_batch)} trajectories from batch file")
