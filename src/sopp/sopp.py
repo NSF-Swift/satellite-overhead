@@ -7,10 +7,9 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from sopp.analysis.interference import (
-    find_satellites_above_horizon,
-    find_satellites_crossing_main_beam,
-)
+from sopp.analysis.interference import analyze_interference
+from sopp.analysis.strategies import GeometricStrategy, InterferenceResult
+from sopp.analysis.visibility import find_satellites_above_horizon
 from sopp.ephemeris.base import EphemerisCalculator
 from sopp.ephemeris.skyfield import SkyfieldEphemerisCalculator
 from sopp.models.configuration import Configuration
@@ -27,6 +26,7 @@ from sopp.pointing.skyfield import PointingCalculatorSkyfield
 from sopp.utils.time import generate_time_grid
 
 if TYPE_CHECKING:
+    from sopp.analysis.strategies import InterferenceStrategy
     from sopp.io.formats.base import TrajectoryFormat
 
 
@@ -50,31 +50,6 @@ def _parallel_horizon_worker(payload: tuple) -> list[SatelliteTrajectory]:
         reservation=reservation,
         satellites=satellites,
         ephemeris_calculator=calculator,
-        min_altitude=runtime_settings.min_altitude,
-    )
-
-
-def _parallel_beam_worker(payload: tuple) -> list[SatelliteTrajectory]:
-    """
-    Rehydrates context and calculates beam crossings.
-    """
-    satellites, reservation, runtime_settings, calc_class, antenna_traj = payload
-
-    # Regenerate Time Grid
-    datetimes = generate_time_grid(
-        start=reservation.time.begin,
-        end=reservation.time.end,
-        resolution_seconds=runtime_settings.time_resolution_seconds,
-    )
-
-    # Initialize Calculator
-    calculator = calc_class(facility=reservation.facility, datetimes=datetimes)
-
-    return find_satellites_crossing_main_beam(
-        reservation=reservation,
-        satellites=satellites,
-        ephemeris_calculator=calculator,
-        antenna_trajectory=antenna_traj,
         min_altitude=runtime_settings.min_altitude,
     )
 
@@ -105,7 +80,6 @@ class Sopp:
         satellites = self.configuration.satellites
         concurrency = self.configuration.runtime_settings.concurrency_level
 
-        # Serial Fallback
         if concurrency <= 1:
             return find_satellites_above_horizon(
                 reservation=self.configuration.reservation,
@@ -114,46 +88,59 @@ class Sopp:
                 min_altitude=self.configuration.runtime_settings.min_altitude,
             )
 
-        # Parallel Execution
-        return self._run_parallel(
-            worker_func=_parallel_horizon_worker,
-            satellites=satellites,
-            include_antenna=False,
-        )
+        return self._compute_trajectories_parallel(satellites=satellites)
 
     def get_satellites_crossing_main_beam(self) -> list[SatelliteTrajectory]:
         """
         Returns trajectories for satellites that cross the antenna's main beam.
         """
-        satellites = self.configuration.satellites
-        concurrency = self.configuration.runtime_settings.concurrency_level
+        trajectories = self.get_satellites_above_horizon()
+        results = self.analyze(trajectories, GeometricStrategy())
+        return [r.trajectory for r in results]
 
-        # Serial Fallback
-        if concurrency <= 1:
-            return find_satellites_crossing_main_beam(
-                reservation=self.configuration.reservation,
-                satellites=satellites,
-                ephemeris_calculator=self.ephemeris_calculator,
-                antenna_trajectory=self.antenna_trajectory,
-                min_altitude=self.configuration.runtime_settings.min_altitude,
-            )
+    def analyze(
+        self,
+        trajectories: list[SatelliteTrajectory],
+        strategy: InterferenceStrategy,
+    ) -> list[InterferenceResult]:
+        """Apply an interference strategy to pre-computed trajectories.
 
-        # Parallel Execution
-        return self._run_parallel(
-            worker_func=_parallel_beam_worker,
-            satellites=satellites,
-            include_antenna=True,
+        Use this when trajectories have already been computed or loaded from
+        disk and you want to run interference analysis without recalculating
+        orbital positions.
+
+        Args:
+            trajectories: Pre-computed satellite trajectories.
+            strategy: The interference detection strategy to apply.
+
+        Returns:
+            List of InterferenceResult for trajectories where interference
+            was detected.
+
+        Example:
+            from sopp.analysis.strategies import GeometricStrategy
+            from sopp.io import load_trajectories
+
+            engine = Sopp(configuration)
+            cached = load_trajectories("trajectories.arrow")
+            results = engine.analyze(cached, GeometricStrategy())
+        """
+        return analyze_interference(
+            trajectories=trajectories,
+            antenna_trajectory=self.antenna_trajectory,
+            strategy=strategy,
+            facility=self.configuration.reservation.facility,
+            frequency=self.configuration.reservation.frequency,
         )
 
-    def _run_parallel(
-        self, worker_func, satellites: list[Satellite], include_antenna: bool
+    def _compute_trajectories_parallel(
+        self, satellites: list[Satellite]
     ) -> list[SatelliteTrajectory]:
         """
-        Orchestrates the distribution of work to the process pool.
+        Distributes trajectory computation across a process pool.
         """
         concurrency = self.configuration.runtime_settings.concurrency_level
 
-        # Divide satellites into N chunks
         chunk_size = int(np.ceil(len(satellites) / concurrency))
         if chunk_size == 0:
             return []
@@ -163,21 +150,17 @@ class Sopp:
             for i in range(0, len(satellites), chunk_size)
         ]
 
-        # Pass base data classes
         base_args = [
             self.configuration.reservation,
             self.configuration.runtime_settings,
             self._ephemeris_calculator_class,
         ]
 
-        if include_antenna:
-            base_args.append(self.antenna_trajectory)
-
         tasks = [(chunk, *base_args) for chunk in chunks]
 
         results = []
         with ProcessPoolExecutor(max_workers=concurrency) as executor:
-            for batch_result in executor.map(worker_func, tasks):
+            for batch_result in executor.map(_parallel_horizon_worker, tasks):
                 results.extend(batch_result)
 
         return results
