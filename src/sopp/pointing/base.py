@@ -1,11 +1,15 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
 import numpy as np
 
-from sopp.models.core import TimeWindow
-from sopp.models.ground.facility import Facility
-from sopp.models.ground.target import ObservationTarget
-from sopp.models.ground.trajectory import AntennaTrajectory
+if TYPE_CHECKING:
+    from sopp.models.core import TimeWindow
+    from sopp.models.ground.facility import Facility
+    from sopp.models.ground.target import ObservationTarget
+    from sopp.models.ground.trajectory import AntennaTrajectory
 
 
 class PointingCalculator(ABC):

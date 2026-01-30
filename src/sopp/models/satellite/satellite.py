@@ -1,10 +1,14 @@
+from __future__ import annotations
+
 import math
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from skyfield.sgp4lib import EarthSatellite
 
-from sopp.models.core import FrequencyRange
-from sopp.models.satellite.tle import TleInformation
+if TYPE_CHECKING:
+    from sopp.models.core import FrequencyRange
+    from sopp.models.satellite.tle import TleInformation
 
 NUMBER_OF_LINES_PER_TLE_OBJECT = 3
 

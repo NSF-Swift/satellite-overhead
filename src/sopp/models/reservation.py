@@ -1,7 +1,11 @@
-from dataclasses import dataclass
+from __future__ import annotations
 
-from sopp.models.core import FrequencyRange, TimeWindow
-from sopp.models.ground.facility import Facility
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sopp.models.core import FrequencyRange, TimeWindow
+    from sopp.models.ground.facility import Facility
 
 """
 The Reservation class stores the Facility, as well as some additional reservation-specific information, such as reservation start and end times.
