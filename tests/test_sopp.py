@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 import numpy as np
 
+from sopp.analysis.strategies import GeometricStrategy, InterferenceResult
 from sopp.models import (
     Configuration,
     Coordinates,
@@ -351,3 +352,54 @@ def test_antenna_positions_that_end_before_reservation_starts_are_not_included(
 
     # 5. Verify
     assert len(trajectories) == 0
+
+
+def test_analyze_with_preloaded_trajectories(
+    arbitrary_datetime,
+    satellite,
+    make_reservation,
+    ephemeris_stub,
+):
+    """
+    Scenario: Trajectories loaded externally are passed to engine.analyze().
+    Expected: Interference detection works without ephemeris computation.
+    """
+    reservation = make_reservation(start_time=arbitrary_datetime, duration_seconds=2)
+
+    times = generate_time_grid(
+        arbitrary_datetime,
+        arbitrary_datetime + timedelta(seconds=1),
+        resolution_seconds=1,
+    )
+
+    # Pre-built trajectory at ARBITRARY position (simulates loading from file)
+    preloaded = [
+        SatelliteTrajectory(
+            satellite=satellite,
+            times=times,
+            azimuth=np.full(len(times), ARBITRARY_AZIMUTH),
+            altitude=np.full(len(times), ARBITRARY_ALTITUDE),
+            distance_km=np.full(len(times), 500.0),
+        )
+    ]
+
+    # Antenna matches satellite
+    antenna_traj = AntennaTrajectory(
+        times=times,
+        azimuth=np.full(len(times), ARBITRARY_AZIMUTH),
+        altitude=np.full(len(times), ARBITRARY_ALTITUDE),
+    )
+
+    config = Configuration(
+        reservation=reservation,
+        satellites=[satellite],
+        antenna_config=CustomTrajectoryConfig(antenna_traj),
+    )
+
+    sopp = Sopp(configuration=config, ephemeris_calculator_class=ephemeris_stub)
+
+    results = sopp.analyze(preloaded, GeometricStrategy())
+
+    assert len(results) == 1
+    assert isinstance(results[0], InterferenceResult)
+    assert results[0].trajectory.satellite.name == satellite.name

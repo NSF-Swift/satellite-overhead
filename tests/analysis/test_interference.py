@@ -3,11 +3,12 @@ from datetime import timedelta
 import numpy as np
 from tests.conftest import ARBITRARY_ALTITUDE, ARBITRARY_AZIMUTH
 
-from sopp.analysis.interference import (
-    find_satellites_above_horizon,
-    find_satellites_crossing_main_beam,
-)
+from sopp.analysis.interference import analyze_interference
+from sopp.analysis.strategies import GeometricStrategy
+from sopp.analysis.visibility import find_satellites_above_horizon
+from sopp.models.core import FrequencyRange
 from sopp.models.ground.trajectory import AntennaTrajectory
+from sopp.models.satellite.trajectory import SatelliteTrajectory
 from sopp.utils.time import generate_time_grid
 
 
@@ -16,23 +17,30 @@ def test_satellite_inside_beam_is_detected(
 ):
     """
     Scenario: Satellite is positioned exactly where the antenna is pointing.
-    Expected: A trajectory should be returned containing the interference data.
+    Expected: An InterferenceResult should be returned.
     """
     reservation = make_reservation(start_time=arbitrary_datetime, duration_seconds=1)
 
-    # Setup: Antenna matches Satellite exactly
     times = generate_time_grid(arbitrary_datetime, arbitrary_datetime, 1)
-    traj = AntennaTrajectory(
+    ant_traj = AntennaTrajectory(
         times=times,
         azimuth=np.full(len(times), ARBITRARY_AZIMUTH),
         altitude=np.full(len(times), ARBITRARY_ALTITUDE),
     )
 
-    windows = find_satellites_crossing_main_beam(
-        reservation, [satellite], ephemeris_stub(), traj
+    trajectories = find_satellites_above_horizon(
+        reservation, [satellite], ephemeris_stub()
     )
-    assert len(windows) == 1
-    assert windows[0].satellite.name == satellite.name
+    results = analyze_interference(
+        trajectories=trajectories,
+        antenna_trajectory=ant_traj,
+        strategy=GeometricStrategy(),
+        facility=reservation.facility,
+        frequency=reservation.frequency,
+    )
+
+    assert len(results) == 1
+    assert results[0].trajectory.satellite.name == satellite.name
 
 
 def test_satellite_outside_beam_is_ignored(
@@ -44,24 +52,31 @@ def test_satellite_outside_beam_is_ignored(
 ):
     """
     Scenario: Satellite is just outside the beamwidth.
-    Expected: No trajectories returned.
+    Expected: No results returned.
     """
     reservation = make_reservation(start_time=arbitrary_datetime, duration_seconds=1)
 
-    # Setup: Antenna pointed far away (beamwidth + 1 degree)
     offset = facility.beamwidth + 1.0
     times = generate_time_grid(arbitrary_datetime, arbitrary_datetime, 1)
 
-    traj = AntennaTrajectory(
+    ant_traj = AntennaTrajectory(
         times=times,
         azimuth=np.full(len(times), ARBITRARY_AZIMUTH + offset),
         altitude=np.full(len(times), ARBITRARY_ALTITUDE),
     )
 
-    windows = find_satellites_crossing_main_beam(
-        reservation, [satellite], ephemeris_stub(), traj
+    trajectories = find_satellites_above_horizon(
+        reservation, [satellite], ephemeris_stub()
     )
-    assert len(windows) == 0
+    results = analyze_interference(
+        trajectories=trajectories,
+        antenna_trajectory=ant_traj,
+        strategy=GeometricStrategy(),
+        facility=reservation.facility,
+        frequency=reservation.frequency,
+    )
+
+    assert len(results) == 0
 
 
 def test_satellite_enters_and_exits_beam(
@@ -72,16 +87,13 @@ def test_satellite_enters_and_exits_beam(
         T=0: Satellite Outside
         T=1: Satellite Inside
         T=2: Satellite Outside
-    Expected: One trajectory returned containing only the data at T=1.
+    Expected: One result returned containing only the data at T=1.
     """
     reservation = make_reservation(start_time=arbitrary_datetime, duration_seconds=3)
 
-    # Grid: T0, T1, T2
     t_end = arbitrary_datetime + timedelta(seconds=2)
     times = generate_time_grid(arbitrary_datetime, t_end, resolution_seconds=1)
 
-    # Antenna moves: [Far, Hit, Far]
-    # We simulate this by moving the antenna, assuming the satellite stays at ARBITRARY_AZIMUTH.
     offset = facility.beamwidth + 1.0
     azimuths = np.array(
         [
@@ -91,18 +103,24 @@ def test_satellite_enters_and_exits_beam(
         ]
     )
 
-    traj = AntennaTrajectory(
+    ant_traj = AntennaTrajectory(
         times=times, azimuth=azimuths, altitude=np.full(len(times), ARBITRARY_ALTITUDE)
     )
 
-    windows = find_satellites_crossing_main_beam(
-        reservation, [satellite], ephemeris_stub(), traj
+    trajectories = find_satellites_above_horizon(
+        reservation, [satellite], ephemeris_stub()
+    )
+    results = analyze_interference(
+        trajectories=trajectories,
+        antenna_trajectory=ant_traj,
+        strategy=GeometricStrategy(),
+        facility=reservation.facility,
+        frequency=reservation.frequency,
     )
 
-    assert len(windows) == 1
+    assert len(results) == 1
 
-    # The resulting trajectory should only contain the point where interference occurred
-    interfering_traj = windows[0]
+    interfering_traj = results[0].trajectory
     assert len(interfering_traj) == 1
     assert interfering_traj.times[0] == arbitrary_datetime + timedelta(seconds=1)
 
@@ -122,3 +140,40 @@ def test_satellite_always_above_horizon_is_returned(
     assert trajectories[0].satellite.name == satellite.name
     # Verify we got data points
     assert len(trajectories[0]) > 0
+
+
+# --- analyze_interference tests ---
+
+
+def test_analyze_interference_applies_strategy(arbitrary_datetime, satellite, facility):
+    """
+    Verify that analyze_interference applies the strategy to each trajectory
+    and collects results.
+    """
+    times = generate_time_grid(arbitrary_datetime, arbitrary_datetime, 1)
+    frequency = FrequencyRange(frequency=10, bandwidth=10)
+
+    sat_traj = SatelliteTrajectory(
+        satellite=satellite,
+        times=times,
+        azimuth=np.full(len(times), ARBITRARY_AZIMUTH),
+        altitude=np.full(len(times), ARBITRARY_ALTITUDE),
+        distance_km=np.full(len(times), 500.0),
+    )
+
+    ant_traj = AntennaTrajectory(
+        times=times,
+        azimuth=np.full(len(times), ARBITRARY_AZIMUTH),
+        altitude=np.full(len(times), ARBITRARY_ALTITUDE),
+    )
+
+    results = analyze_interference(
+        trajectories=[sat_traj],
+        antenna_trajectory=ant_traj,
+        strategy=GeometricStrategy(),
+        facility=facility,
+        frequency=frequency,
+    )
+
+    assert len(results) == 1
+    assert results[0].trajectory.satellite.name == satellite.name
