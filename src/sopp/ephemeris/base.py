@@ -1,13 +1,17 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
 
-from sopp.models.core import Position, TimeWindow
-from sopp.models.ground.facility import Facility
-from sopp.models.satellite.satellite import Satellite
-from sopp.models.satellite.trajectory import SatelliteTrajectory
+if TYPE_CHECKING:
+    from sopp.models.core import Position, TimeWindow
+    from sopp.models.ground.facility import Facility
+    from sopp.models.satellite.satellite import Satellite
+    from sopp.models.satellite.trajectory import SatelliteTrajectory
 
 
 class EphemerisCalculator(ABC):

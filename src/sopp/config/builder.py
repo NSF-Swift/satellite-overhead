@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from sopp.config.loaders import ConfigFileLoaderBase, ConfigFileLoaderJson
 from sopp.filtering.filterer import Filterer
@@ -15,10 +18,12 @@ from sopp.models.ground.config import (
 )
 from sopp.models.ground.facility import Facility
 from sopp.models.ground.target import ObservationTarget
-from sopp.models.ground.trajectory import AntennaTrajectory
 from sopp.models.reservation import Reservation
-from sopp.models.satellite.satellite import Satellite
 from sopp.utils.helpers import parse_time_and_convert_to_utc
+
+if TYPE_CHECKING:
+    from sopp.models.ground.trajectory import AntennaTrajectory
+    from sopp.models.satellite.satellite import Satellite
 
 
 class ConfigurationBuilder:
@@ -43,7 +48,7 @@ class ConfigurationBuilder:
         elevation: float,
         name: str,
         beamwidth: float,
-    ) -> "ConfigurationBuilder":
+    ) -> ConfigurationBuilder:
         self.facility = Facility(
             Coordinates(latitude=latitude, longitude=longitude),
             elevation=elevation,
@@ -63,7 +68,7 @@ class ConfigurationBuilder:
         self,
         begin: str | datetime,
         end: str | datetime,
-    ) -> "ConfigurationBuilder":
+    ) -> ConfigurationBuilder:
         self.time_window = TimeWindow(
             begin=parse_time_and_convert_to_utc(begin),
             end=parse_time_and_convert_to_utc(end),
@@ -77,7 +82,7 @@ class ConfigurationBuilder:
         altitude: float | None = None,
         azimuth: float | None = None,
         custom_antenna_trajectory: AntennaTrajectory | None = None,
-    ) -> "ConfigurationBuilder":
+    ) -> ConfigurationBuilder:
         # Option 1: Custom
         if custom_antenna_trajectory:
             self.antenna_config = CustomTrajectoryConfig(custom_antenna_trajectory)
@@ -102,13 +107,13 @@ class ConfigurationBuilder:
             )
         return self
 
-    def set_satellites(self, satellites: list[Satellite]) -> "ConfigurationBuilder":
+    def set_satellites(self, satellites: list[Satellite]) -> ConfigurationBuilder:
         self.satellites = satellites
         return self
 
     def load_satellites(
         self, tle_file: str | Path, frequency_file: str | Path | None = None
-    ) -> "ConfigurationBuilder":
+    ) -> ConfigurationBuilder:
         self.satellites = load_satellites(
             tle_file=Path(tle_file),
             frequency_file=Path(frequency_file) if frequency_file else None,
@@ -120,7 +125,7 @@ class ConfigurationBuilder:
         time_resolution_seconds: float = 1,
         concurrency_level: int = 1,
         min_altitude: float = 0.0,
-    ) -> "ConfigurationBuilder":
+    ) -> ConfigurationBuilder:
         self.runtime_settings = RuntimeSettings(
             concurrency_level=concurrency_level,
             time_resolution_seconds=time_resolution_seconds,
@@ -132,7 +137,7 @@ class ConfigurationBuilder:
         self,
         config_file: Path,
         loader_class: type[ConfigFileLoaderBase] = ConfigFileLoaderJson,
-    ) -> "ConfigurationBuilder":
+    ) -> ConfigurationBuilder:
         loader = loader_class(filepath=config_file)
 
         self.frequency_range = loader.frequency_range
@@ -143,7 +148,7 @@ class ConfigurationBuilder:
 
         return self
 
-    def set_satellites_filter(self, filterer: Filterer) -> "ConfigurationBuilder":
+    def set_satellites_filter(self, filterer: Filterer) -> ConfigurationBuilder:
         self._filterer = filterer
         return self
 

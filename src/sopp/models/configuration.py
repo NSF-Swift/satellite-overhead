@@ -1,8 +1,13 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from sopp.models.ground.config import AntennaConfig
-from sopp.models.reservation import Reservation
-from sopp.models.satellite.satellite import Satellite
+
+if TYPE_CHECKING:
+    from sopp.models.reservation import Reservation
+    from sopp.models.satellite.satellite import Satellite
 
 
 @dataclass

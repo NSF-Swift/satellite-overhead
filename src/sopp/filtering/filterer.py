@@ -1,6 +1,10 @@
-from collections.abc import Callable
+from __future__ import annotations
 
-from sopp.models.satellite.satellite import Satellite
+from collections.abc import Callable
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sopp.models.satellite.satellite import Satellite
 
 
 class Filterer:
