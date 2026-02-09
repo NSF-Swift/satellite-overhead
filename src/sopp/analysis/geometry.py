@@ -33,3 +33,23 @@ def calculate_angular_separation_sq(
 
     # Pythagorean Distance Squared
     return (delta_el**2) + (delta_az * az_scaling) ** 2
+
+
+def calculate_angular_separation(
+    az1: npt.NDArray[np.float64],
+    alt1: npt.NDArray[np.float64],
+    az2: npt.NDArray[np.float64],
+    alt2: npt.NDArray[np.float64],
+) -> npt.NDArray[np.float64]:
+    """
+    Calculates the angular separation between two sets of coordinates.
+
+    Args:
+        az1, alt1: Coordinates of the first object (e.g., Satellite) in degrees.
+        az2, alt2: Coordinates of the second object (e.g., Antenna pointing) in degrees.
+
+    Returns:
+        The angular separation in degrees.
+    """
+    sep_sq = calculate_angular_separation_sq(az1, alt1, az2, alt2)
+    return np.sqrt(sep_sq)
