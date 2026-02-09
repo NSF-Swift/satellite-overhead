@@ -160,9 +160,8 @@ class SimpleLinkBudgetStrategy(InterferenceStrategy):
             )
         gain_dbi = facility.peak_gain_dbi
 
-        # Satellite EIRP: try transmitter, then default. If neither is
-        # available, skip this satellite — expected when running against
-        # large TLE files where most satellites lack RF data.
+        # Satellite EIRP: try transmitter, then default.
+        # If neither is available, skip this satellite
         satellite = satellite_trajectory.satellite
         if (
             satellite.transmitter is not None
