@@ -1,5 +1,6 @@
 # Core Primitives
 # High-Level Simulation Objects
+from .antenna import AntennaPattern
 from .configuration import Configuration, RuntimeSettings
 from .core import Coordinates, FrequencyRange, Position, TimeWindow
 from .ground import (
@@ -18,9 +19,12 @@ from .satellite import (
     Satellite,
     SatelliteTrajectory,
     TleInformation,
+    Transmitter,
 )
 
 __all__ = [
+    # Antenna
+    "AntennaPattern",
     # Core
     "Coordinates",
     "FrequencyRange",
@@ -42,6 +46,7 @@ __all__ = [
     "Satellite",
     "SatelliteTrajectory",
     "TleInformation",
+    "Transmitter",
     "MeanMotion",
     "InternationalDesignator",
 ]
