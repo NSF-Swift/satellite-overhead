@@ -9,6 +9,7 @@ from skyfield.sgp4lib import EarthSatellite
 if TYPE_CHECKING:
     from sopp.models.core import FrequencyRange
     from sopp.models.satellite.tle import TleInformation
+    from sopp.models.satellite.transmitter import Transmitter
 
 NUMBER_OF_LINES_PER_TLE_OBJECT = 3
 
@@ -24,6 +25,7 @@ class Satellite:
     name: str
     tle_information: TleInformation | None = None
     frequency: list[FrequencyRange] = field(default_factory=list)
+    transmitter: Transmitter | None = None
 
     @property
     def satellite_number(self) -> int | None:

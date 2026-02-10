@@ -48,12 +48,14 @@ class ConfigurationBuilder:
         elevation: float,
         name: str,
         beamwidth: float,
+        peak_gain_dbi: float | None = None,
     ) -> ConfigurationBuilder:
         self.facility = Facility(
             Coordinates(latitude=latitude, longitude=longitude),
             elevation=elevation,
             beamwidth=beamwidth,
             name=name,
+            peak_gain_dbi=peak_gain_dbi,
         )
         return self
 

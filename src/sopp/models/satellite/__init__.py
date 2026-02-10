@@ -1,6 +1,7 @@
 from .satellite import Satellite
 from .tle import InternationalDesignator, MeanMotion, TleInformation
 from .trajectory import SatelliteTrajectory
+from .transmitter import Transmitter
 
 __all__ = [
     "Satellite",
@@ -8,4 +9,5 @@ __all__ = [
     "SatelliteTrajectory",
     "MeanMotion",
     "InternationalDesignator",
+    "Transmitter",
 ]
