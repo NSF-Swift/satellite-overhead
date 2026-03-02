@@ -1,5 +1,6 @@
 from .link_budget import free_space_path_loss_db, received_power_dbw
 from .strategies import (
+    NadirLinkBudgetStrategy,
     GeometricStrategy,
     InterferenceResult,
     InterferenceStrategy,
@@ -10,6 +11,7 @@ from .strategies import (
 __all__ = [
     "free_space_path_loss_db",
     "received_power_dbw",
+    "NadirLinkBudgetStrategy",
     "GeometricStrategy",
     "InterferenceResult",
     "InterferenceStrategy",
