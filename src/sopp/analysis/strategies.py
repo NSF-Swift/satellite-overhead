@@ -164,11 +164,8 @@ class SimpleLinkBudgetStrategy(InterferenceStrategy):
         # Satellite EIRP: try transmitter, then default.
         # If neither is available, skip this satellite
         satellite = satellite_trajectory.satellite
-        if (
-            satellite.transmitter is not None
-            and satellite.transmitter.eirp_dbw is not None
-        ):
-            eirp_dbw = satellite.transmitter.eirp_dbw
+        if satellite.transmitter is not None:
+            eirp_dbw = satellite.transmitter.peak_eirp_dbw
         elif self.default_eirp_dbw is not None:
             eirp_dbw = self.default_eirp_dbw
         else:
@@ -249,11 +246,8 @@ class PatternLinkBudgetStrategy(InterferenceStrategy):
         # Satellite EIRP: try transmitter, then default.
         # If neither is available, skip this satellite
         satellite = satellite_trajectory.satellite
-        if (
-            satellite.transmitter is not None
-            and satellite.transmitter.eirp_dbw is not None
-        ):
-            eirp_dbw = satellite.transmitter.eirp_dbw
+        if satellite.transmitter is not None:
+            eirp_dbw = satellite.transmitter.peak_eirp_dbw
         elif self.default_eirp_dbw is not None:
             eirp_dbw = self.default_eirp_dbw
         else:
