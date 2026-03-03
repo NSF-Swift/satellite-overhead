@@ -720,10 +720,10 @@ def test_full_link_budget_uses_default_eirp(arbitrary_datetime, satellite, facil
     assert "nadir_angle_deg" in result.metadata
 
 
-def test_full_link_budget_handles_tier2_that_pattern_strategy_skips(
+def test_all_strategies_handle_tier2_transmitter(
     arbitrary_datetime, satellite, facility
 ):
-    """Tier 2 transmitter (no eirp_dbw) is skipped by PatternLinkBudget but not Full."""
+    """All strategies return a result for Tier 2 transmitters (no eirp_dbw)."""
     times = generate_time_grid(arbitrary_datetime, arbitrary_datetime, 1)
     frequency = FrequencyRange(frequency=10000, bandwidth=100)
 
@@ -753,13 +753,14 @@ def test_full_link_budget_handles_tier2_that_pattern_strategy_skips(
         altitude=np.full(len(times), 45.0),
     )
 
-    # PatternLinkBudget skips this satellite
+    # PatternLinkBudget uses peak EIRP for Tier 2
     pattern_result = PatternLinkBudgetStrategy().calculate(
         sat_traj, ant_traj, facility, frequency
     )
-    assert pattern_result is None
+    assert pattern_result is not None
+    assert pattern_result.metadata["eirp_dbw"] == satellite.transmitter.peak_eirp_dbw
 
-    # FullLinkBudget handles it
+    # NadirLinkBudget uses angle-dependent EIRP
     full_result = NadirLinkBudgetStrategy().calculate(
         sat_traj, ant_traj, facility, frequency
     )
