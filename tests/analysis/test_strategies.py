@@ -798,6 +798,10 @@ def test_full_link_budget_metadata_keys(arbitrary_datetime, satellite, facility)
 
     assert result is not None
     expected_keys = {
-        "eirp_dbw", "nadir_angle_deg", "off_axis_deg", "gain_rx_dbi", "frequency_mhz"
+        "eirp_dbw",
+        "nadir_angle_deg",
+        "off_axis_deg",
+        "gain_rx_dbi",
+        "frequency_mhz",
     }
     assert set(result.metadata.keys()) == expected_keys

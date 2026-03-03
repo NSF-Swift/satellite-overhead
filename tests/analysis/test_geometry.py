@@ -1,6 +1,9 @@
 import numpy as np
 
-from sopp.analysis.geometry import calculate_angular_separation_sq, calculate_nadir_angle
+from sopp.analysis.geometry import (
+    calculate_angular_separation_sq,
+    calculate_nadir_angle,
+)
 
 
 def test_separation_is_zero_for_identical_points():

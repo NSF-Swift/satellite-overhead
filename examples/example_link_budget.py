@@ -142,14 +142,18 @@ def main():
 
     # Satellite rises from low elevation to overhead and back down.
     # This changes the nadir angle (and distance) along the pass.
-    elevations = np.concatenate([
-        np.linspace(10.0, 80.0, n_points // 2),
-        np.linspace(80.0, 10.0, n_points - n_points // 2),
-    ])
-    distances = np.concatenate([
-        np.linspace(1500.0, 560.0, n_points // 2),
-        np.linspace(560.0, 1500.0, n_points - n_points // 2),
-    ])
+    elevations = np.concatenate(
+        [
+            np.linspace(10.0, 80.0, n_points // 2),
+            np.linspace(80.0, 10.0, n_points - n_points // 2),
+        ]
+    )
+    distances = np.concatenate(
+        [
+            np.linspace(1500.0, 560.0, n_points // 2),
+            np.linspace(560.0, 1500.0, n_points - n_points // 2),
+        ]
+    )
 
     sat_traj_t2 = SatelliteTrajectory(
         satellite=Satellite(
@@ -198,7 +202,9 @@ def main():
         print(f"    Power:       {power[0]:.1f} dBW")
 
         diff = power[mid] - power[0]
-        print(f"\n  Difference: {diff:.1f} dB (combines TX pattern + RX pattern + distance)")
+        print(
+            f"\n  Difference: {diff:.1f} dB (combines TX pattern + RX pattern + distance)"
+        )
 
 
 if __name__ == "__main__":
