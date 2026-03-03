@@ -171,7 +171,7 @@ def main():
 
     print("\n\n=== Tier 2: NadirLinkBudgetStrategy ===")
     print(f"Satellite TX pattern: {sat_tx_pattern.peak_gain_dbi} dBi peak,")
-    print(f"  TX power: 10.0 dBW, peak EIRP: 40.0 dBW\n")
+    print("  TX power: 10.0 dBW, peak EIRP: 40.0 dBW\n")
 
     if result_t2 is not None:
         power = result_t2.interference_level
@@ -194,7 +194,7 @@ def main():
         print(f"    RX gain:     {gain[mid]:.1f} dBi")
         print(f"    Power:       {power[mid]:.1f} dBW")
 
-        print(f"\n  At start (t=0s, low elevation):")
+        print("\n  At start (t=0s, low elevation):")
         print(f"    Nadir angle: {nadir[0]:.1f} deg (far from boresight)")
         print(f"    EIRP:        {eirp[0]:.1f} dBW")
         print(f"    RX off-axis: {off_axis[0]:.2f} deg")

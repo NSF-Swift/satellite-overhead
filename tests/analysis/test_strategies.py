@@ -5,9 +5,9 @@ import pytest
 from tests.conftest import ARBITRARY_ALTITUDE, ARBITRARY_AZIMUTH
 
 from sopp.analysis.strategies import (
-    NadirLinkBudgetStrategy,
     GeometricStrategy,
     InterferenceResult,
+    NadirLinkBudgetStrategy,
     PatternLinkBudgetStrategy,
     SimpleLinkBudgetStrategy,
 )

@@ -1,9 +1,9 @@
 from .link_budget import free_space_path_loss_db, received_power_dbw
 from .strategies import (
-    NadirLinkBudgetStrategy,
     GeometricStrategy,
     InterferenceResult,
     InterferenceStrategy,
+    NadirLinkBudgetStrategy,
     PatternLinkBudgetStrategy,
     SimpleLinkBudgetStrategy,
 )
