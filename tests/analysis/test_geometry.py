@@ -1,6 +1,9 @@
 import numpy as np
 
-from sopp.analysis.geometry import calculate_angular_separation_sq
+from sopp.analysis.geometry import (
+    calculate_angular_separation_sq,
+    calculate_nadir_angle,
+)
 
 
 def test_separation_is_zero_for_identical_points():
@@ -89,3 +92,41 @@ def test_vectorization_works():
     )
 
     np.testing.assert_allclose(dist_sq, expected)
+
+
+# --- calculate_nadir_angle Tests ---
+
+
+def test_nadir_angle_at_zenith():
+    """Satellite directly overhead: nadir angle is 0."""
+    result = calculate_nadir_angle(
+        elevation_deg=np.array([90.0]),
+        distance_km=np.array([550.0]),
+    )
+    np.testing.assert_allclose(result, 0.0, atol=1e-10)
+
+
+def test_nadir_angle_at_horizon():
+    """Satellite on horizon: nadir angle is large (~68 deg for LEO)."""
+    result = calculate_nadir_angle(
+        elevation_deg=np.array([0.0]),
+        distance_km=np.array([2500.0]),
+    )
+    assert result[0] > 60.0
+    assert result[0] < 75.0
+
+
+def test_nadir_angle_increases_as_elevation_decreases():
+    """Lower elevation means larger nadir angle."""
+    elevations = np.array([80.0, 50.0, 20.0, 5.0])
+    distances = np.array([560.0, 650.0, 1000.0, 1800.0])
+    result = calculate_nadir_angle(elevations, distances)
+    assert np.all(np.diff(result) > 0)
+
+
+def test_nadir_angle_vectorized_shape():
+    """Output shape matches input shape."""
+    el = np.array([90.0, 45.0, 0.0])
+    d = np.array([550.0, 700.0, 2500.0])
+    result = calculate_nadir_angle(el, d)
+    assert result.shape == (3,)

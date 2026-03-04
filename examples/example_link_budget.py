@@ -1,6 +1,6 @@
 """Example: link budget strategies for satellite interference analysis.
 
-Demonstrates the two link budget strategies using synthetic trajectory data:
+Demonstrates the three link budget strategies using synthetic trajectory data:
 
 1. SimpleLinkBudgetStrategy (Tier 1): Worst-case estimate using peak EIRP
    and peak telescope gain. Every trajectory point gets the same gain.
@@ -8,13 +8,21 @@ Demonstrates the two link budget strategies using synthetic trajectory data:
 2. PatternLinkBudgetStrategy (Tier 1.5): Uses the telescope's antenna
    pattern to look up realistic gain based on the satellite's off-axis
    angle. Satellites far from boresight get much lower received power.
+
+3. NadirLinkBudgetStrategy (Tier 2): Uses both the satellite's transmitter
+   antenna pattern and the telescope's receive pattern. EIRP varies with
+   the nadir angle at the satellite.
 """
 
 from datetime import datetime, timedelta
 
 import numpy as np
 
-from sopp.analysis.strategies import PatternLinkBudgetStrategy, SimpleLinkBudgetStrategy
+from sopp.analysis.strategies import (
+    NadirLinkBudgetStrategy,
+    PatternLinkBudgetStrategy,
+    SimpleLinkBudgetStrategy,
+)
 from sopp.models.antenna import AntennaPattern
 from sopp.models.core import Coordinates, FrequencyRange
 from sopp.models.ground.facility import Facility
@@ -122,6 +130,81 @@ def main():
 
         diff = power[mid] - power[0]
         print(f"\n  Difference: {diff:.1f} dB more power when on-axis")
+
+    # --- Tier 2: NadirLinkBudgetStrategy ---
+    # Uses both satellite transmitter pattern AND telescope receive pattern.
+    # EIRP varies with the nadir angle (how far off-nadir the telescope is
+    # from the satellite's perspective).
+    sat_tx_pattern = AntennaPattern(
+        angles_deg=np.array([0.0, 5.0, 10.0, 30.0, 60.0, 90.0]),
+        gains_dbi=np.array([30.0, 28.0, 25.0, 15.0, 5.0, -5.0]),
+    )
+
+    # Satellite rises from low elevation to overhead and back down.
+    # This changes the nadir angle (and distance) along the pass.
+    elevations = np.concatenate(
+        [
+            np.linspace(10.0, 80.0, n_points // 2),
+            np.linspace(80.0, 10.0, n_points - n_points // 2),
+        ]
+    )
+    distances = np.concatenate(
+        [
+            np.linspace(1500.0, 560.0, n_points // 2),
+            np.linspace(560.0, 1500.0, n_points - n_points // 2),
+        ]
+    )
+
+    sat_traj_t2 = SatelliteTrajectory(
+        satellite=Satellite(
+            name="EXAMPLE-SAT-T2",
+            transmitter=Transmitter(power_dbw=10.0, antenna_pattern=sat_tx_pattern),
+        ),
+        times=times,
+        azimuth=np.linspace(170.0, 190.0, n_points),
+        altitude=elevations,
+        distance_km=distances,
+    )
+
+    strategy_t2 = NadirLinkBudgetStrategy()
+    result_t2 = strategy_t2.calculate(sat_traj_t2, ant_traj, facility_tier15, frequency)
+
+    print("\n\n=== Tier 2: NadirLinkBudgetStrategy ===")
+    print(f"Satellite TX pattern: {sat_tx_pattern.peak_gain_dbi} dBi peak,")
+    print("  TX power: 10.0 dBW, peak EIRP: 40.0 dBW\n")
+
+    if result_t2 is not None:
+        power = result_t2.interference_level
+        eirp = result_t2.metadata["eirp_dbw"]
+        nadir = result_t2.metadata["nadir_angle_deg"]
+        off_axis = result_t2.metadata["off_axis_deg"]
+        gain = result_t2.metadata["gain_rx_dbi"]
+
+        print(f"  Points analyzed: {len(power)}")
+        print(f"  Nadir angle range: {nadir.min():.1f} to {nadir.max():.1f} deg")
+        print(f"  EIRP range: {eirp.min():.1f} to {eirp.max():.1f} dBW")
+        print(f"  RX gain range: {gain.min():.1f} to {gain.max():.1f} dBi")
+        print(f"  Power range: {power.min():.1f} to {power.max():.1f} dBW")
+
+        mid = n_points // 2
+        print(f"\n  At closest approach (t={mid}s, overhead):")
+        print(f"    Nadir angle: {nadir[mid]:.1f} deg (near boresight)")
+        print(f"    EIRP:        {eirp[mid]:.1f} dBW")
+        print(f"    RX off-axis: {off_axis[mid]:.2f} deg")
+        print(f"    RX gain:     {gain[mid]:.1f} dBi")
+        print(f"    Power:       {power[mid]:.1f} dBW")
+
+        print("\n  At start (t=0s, low elevation):")
+        print(f"    Nadir angle: {nadir[0]:.1f} deg (far from boresight)")
+        print(f"    EIRP:        {eirp[0]:.1f} dBW")
+        print(f"    RX off-axis: {off_axis[0]:.2f} deg")
+        print(f"    RX gain:     {gain[0]:.1f} dBi")
+        print(f"    Power:       {power[0]:.1f} dBW")
+
+        diff = power[mid] - power[0]
+        print(
+            f"\n  Difference: {diff:.1f} dB (combines TX pattern + RX pattern + distance)"
+        )
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@ from tests.conftest import ARBITRARY_ALTITUDE, ARBITRARY_AZIMUTH
 from sopp.analysis.strategies import (
     GeometricStrategy,
     InterferenceResult,
+    NadirLinkBudgetStrategy,
     PatternLinkBudgetStrategy,
     SimpleLinkBudgetStrategy,
 )
@@ -518,3 +519,289 @@ def test_pattern_link_budget_uses_default_eirp(arbitrary_datetime, satellite, fa
 
     assert result is not None
     assert result.metadata["eirp_dbw"] == 30.0
+
+
+# --- NadirLinkBudgetStrategy Tests (Tier 2) ---
+
+
+def test_full_link_budget_returns_none_without_transmitter(
+    arbitrary_datetime, satellite, facility
+):
+    """Strategy returns None when satellite has no transmitter and no default."""
+    times = generate_time_grid(arbitrary_datetime, arbitrary_datetime, 1)
+    frequency = FrequencyRange(frequency=10000, bandwidth=100)
+
+    facility.antenna_pattern = AntennaPattern(
+        angles_deg=np.array([0.0, 1.0, 5.0, 10.0, 90.0]),
+        gains_dbi=np.array([60.0, 50.0, 30.0, 10.0, -10.0]),
+    )
+
+    sat_traj = SatelliteTrajectory(
+        satellite=satellite,
+        times=times,
+        azimuth=np.full(len(times), ARBITRARY_AZIMUTH),
+        altitude=np.full(len(times), 45.0),
+        distance_km=np.full(len(times), 700.0),
+    )
+
+    ant_traj = AntennaTrajectory(
+        times=times,
+        azimuth=np.full(len(times), ARBITRARY_AZIMUTH),
+        altitude=np.full(len(times), 45.0),
+    )
+
+    strategy = NadirLinkBudgetStrategy()
+    result = strategy.calculate(sat_traj, ant_traj, facility, frequency)
+
+    assert result is None
+
+
+def test_full_link_budget_raises_without_pattern(
+    arbitrary_datetime, satellite, facility
+):
+    """Strategy raises ValueError when facility has no antenna pattern."""
+    times = generate_time_grid(arbitrary_datetime, arbitrary_datetime, 1)
+    frequency = FrequencyRange(frequency=10000, bandwidth=100)
+
+    satellite.transmitter = Transmitter(eirp_dbw=35.0)
+
+    sat_traj = SatelliteTrajectory(
+        satellite=satellite,
+        times=times,
+        azimuth=np.full(len(times), ARBITRARY_AZIMUTH),
+        altitude=np.full(len(times), 45.0),
+        distance_km=np.full(len(times), 700.0),
+    )
+
+    ant_traj = AntennaTrajectory(
+        times=times,
+        azimuth=np.full(len(times), ARBITRARY_AZIMUTH),
+        altitude=np.full(len(times), 45.0),
+    )
+
+    strategy = NadirLinkBudgetStrategy()
+    with pytest.raises(ValueError, match="antenna_pattern"):
+        strategy.calculate(sat_traj, ant_traj, facility, frequency)
+
+
+def test_full_link_budget_matches_pattern_strategy_for_tier1(
+    arbitrary_datetime, satellite, facility
+):
+    """With a Tier 1 transmitter, output matches PatternLinkBudgetStrategy."""
+    times = generate_time_grid(
+        arbitrary_datetime, arbitrary_datetime + timedelta(seconds=2), 1
+    )
+    frequency = FrequencyRange(frequency=10000, bandwidth=100)
+
+    satellite.transmitter = Transmitter(eirp_dbw=35.0)
+    facility.antenna_pattern = AntennaPattern(
+        angles_deg=np.array([0.0, 1.0, 5.0, 10.0, 90.0]),
+        gains_dbi=np.array([60.0, 50.0, 30.0, 10.0, -10.0]),
+    )
+
+    sat_az = np.array(
+        [ARBITRARY_AZIMUTH, ARBITRARY_AZIMUTH + 1.0, ARBITRARY_AZIMUTH + 2.0]
+    )
+
+    sat_traj = SatelliteTrajectory(
+        satellite=satellite,
+        times=times,
+        azimuth=sat_az,
+        altitude=np.full(len(times), 45.0),
+        distance_km=np.full(len(times), 700.0),
+    )
+
+    ant_traj = AntennaTrajectory(
+        times=times,
+        azimuth=np.full(len(times), ARBITRARY_AZIMUTH),
+        altitude=np.full(len(times), 45.0),
+    )
+
+    pattern_result = PatternLinkBudgetStrategy().calculate(
+        sat_traj, ant_traj, facility, frequency
+    )
+    full_result = NadirLinkBudgetStrategy().calculate(
+        sat_traj, ant_traj, facility, frequency
+    )
+
+    assert pattern_result is not None
+    assert full_result is not None
+    np.testing.assert_allclose(
+        full_result.interference_level, pattern_result.interference_level
+    )
+
+
+def test_full_link_budget_with_tier2_transmitter(
+    arbitrary_datetime, satellite, facility
+):
+    """Tier 2 transmitter produces angle-dependent EIRP."""
+    times = generate_time_grid(
+        arbitrary_datetime, arbitrary_datetime + timedelta(seconds=2), 1
+    )
+    frequency = FrequencyRange(frequency=10000, bandwidth=100)
+
+    # Tier 2 transmitter: power + satellite antenna pattern
+    sat_pattern = AntennaPattern(
+        angles_deg=np.array([0.0, 10.0, 30.0, 60.0, 90.0]),
+        gains_dbi=np.array([30.0, 25.0, 15.0, 5.0, -5.0]),
+    )
+    satellite.transmitter = Transmitter(power_dbw=10.0, antenna_pattern=sat_pattern)
+
+    facility.antenna_pattern = AntennaPattern(
+        angles_deg=np.array([0.0, 1.0, 5.0, 10.0, 90.0]),
+        gains_dbi=np.array([60.0, 50.0, 30.0, 10.0, -10.0]),
+    )
+
+    # Satellite at different elevations to get different nadir angles
+    sat_traj = SatelliteTrajectory(
+        satellite=satellite,
+        times=times,
+        azimuth=np.full(len(times), ARBITRARY_AZIMUTH),
+        altitude=np.array([80.0, 45.0, 15.0]),
+        distance_km=np.array([560.0, 700.0, 1400.0]),
+    )
+
+    ant_traj = AntennaTrajectory(
+        times=times,
+        azimuth=np.full(len(times), ARBITRARY_AZIMUTH),
+        altitude=np.full(len(times), 45.0),
+    )
+
+    strategy = NadirLinkBudgetStrategy()
+    result = strategy.calculate(sat_traj, ant_traj, facility, frequency)
+
+    assert result is not None
+    assert result.level_units == "dBW"
+
+    # EIRP should be an array (not scalar) for Tier 2
+    eirp = result.metadata["eirp_dbw"]
+    assert isinstance(eirp, np.ndarray)
+    assert len(eirp) == 3
+
+    # Nadir angle should be in metadata
+    nadir = result.metadata["nadir_angle_deg"]
+    assert isinstance(nadir, np.ndarray)
+    # Higher elevation → smaller nadir angle
+    assert nadir[0] < nadir[1] < nadir[2]
+
+    # EIRP should decrease as nadir angle increases (satellite beam off-axis)
+    assert eirp[0] > eirp[1] > eirp[2]
+
+
+def test_full_link_budget_uses_default_eirp(arbitrary_datetime, satellite, facility):
+    """Strategy uses default EIRP when satellite has no transmitter."""
+    times = generate_time_grid(arbitrary_datetime, arbitrary_datetime, 1)
+    frequency = FrequencyRange(frequency=10000, bandwidth=100)
+
+    facility.antenna_pattern = AntennaPattern(
+        angles_deg=np.array([0.0, 1.0, 5.0, 10.0, 90.0]),
+        gains_dbi=np.array([60.0, 50.0, 30.0, 10.0, -10.0]),
+    )
+
+    sat_traj = SatelliteTrajectory(
+        satellite=satellite,
+        times=times,
+        azimuth=np.full(len(times), ARBITRARY_AZIMUTH),
+        altitude=np.full(len(times), 45.0),
+        distance_km=np.full(len(times), 700.0),
+    )
+
+    ant_traj = AntennaTrajectory(
+        times=times,
+        azimuth=np.full(len(times), ARBITRARY_AZIMUTH),
+        altitude=np.full(len(times), 45.0),
+    )
+
+    strategy = NadirLinkBudgetStrategy(default_eirp_dbw=30.0)
+    result = strategy.calculate(sat_traj, ant_traj, facility, frequency)
+
+    assert result is not None
+    assert result.metadata["eirp_dbw"] == 30.0
+    assert "nadir_angle_deg" in result.metadata
+
+
+def test_all_strategies_handle_tier2_transmitter(
+    arbitrary_datetime, satellite, facility
+):
+    """All strategies return a result for Tier 2 transmitters (no eirp_dbw)."""
+    times = generate_time_grid(arbitrary_datetime, arbitrary_datetime, 1)
+    frequency = FrequencyRange(frequency=10000, bandwidth=100)
+
+    sat_pattern = AntennaPattern(
+        angles_deg=np.array([0.0, 10.0, 30.0, 90.0]),
+        gains_dbi=np.array([30.0, 25.0, 15.0, -5.0]),
+    )
+    satellite.transmitter = Transmitter(power_dbw=10.0, antenna_pattern=sat_pattern)
+    assert satellite.transmitter.eirp_dbw is None
+
+    facility.antenna_pattern = AntennaPattern(
+        angles_deg=np.array([0.0, 1.0, 5.0, 10.0, 90.0]),
+        gains_dbi=np.array([60.0, 50.0, 30.0, 10.0, -10.0]),
+    )
+
+    sat_traj = SatelliteTrajectory(
+        satellite=satellite,
+        times=times,
+        azimuth=np.full(len(times), ARBITRARY_AZIMUTH),
+        altitude=np.full(len(times), 45.0),
+        distance_km=np.full(len(times), 700.0),
+    )
+
+    ant_traj = AntennaTrajectory(
+        times=times,
+        azimuth=np.full(len(times), ARBITRARY_AZIMUTH),
+        altitude=np.full(len(times), 45.0),
+    )
+
+    # PatternLinkBudget uses peak EIRP for Tier 2
+    pattern_result = PatternLinkBudgetStrategy().calculate(
+        sat_traj, ant_traj, facility, frequency
+    )
+    assert pattern_result is not None
+    assert pattern_result.metadata["eirp_dbw"] == satellite.transmitter.peak_eirp_dbw
+
+    # NadirLinkBudget uses angle-dependent EIRP
+    full_result = NadirLinkBudgetStrategy().calculate(
+        sat_traj, ant_traj, facility, frequency
+    )
+    assert full_result is not None
+    assert full_result.interference_level is not None
+
+
+def test_full_link_budget_metadata_keys(arbitrary_datetime, satellite, facility):
+    """Metadata contains all expected keys."""
+    times = generate_time_grid(arbitrary_datetime, arbitrary_datetime, 1)
+    frequency = FrequencyRange(frequency=10000, bandwidth=100)
+
+    satellite.transmitter = Transmitter(eirp_dbw=35.0)
+    facility.antenna_pattern = AntennaPattern(
+        angles_deg=np.array([0.0, 1.0, 5.0, 10.0, 90.0]),
+        gains_dbi=np.array([60.0, 50.0, 30.0, 10.0, -10.0]),
+    )
+
+    sat_traj = SatelliteTrajectory(
+        satellite=satellite,
+        times=times,
+        azimuth=np.full(len(times), ARBITRARY_AZIMUTH),
+        altitude=np.full(len(times), 45.0),
+        distance_km=np.full(len(times), 700.0),
+    )
+
+    ant_traj = AntennaTrajectory(
+        times=times,
+        azimuth=np.full(len(times), ARBITRARY_AZIMUTH),
+        altitude=np.full(len(times), 45.0),
+    )
+
+    strategy = NadirLinkBudgetStrategy()
+    result = strategy.calculate(sat_traj, ant_traj, facility, frequency)
+
+    assert result is not None
+    expected_keys = {
+        "eirp_dbw",
+        "nadir_angle_deg",
+        "off_axis_deg",
+        "gain_rx_dbi",
+        "frequency_mhz",
+    }
+    assert set(result.metadata.keys()) == expected_keys

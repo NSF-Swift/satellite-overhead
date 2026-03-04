@@ -3,6 +3,7 @@ from .strategies import (
     GeometricStrategy,
     InterferenceResult,
     InterferenceStrategy,
+    NadirLinkBudgetStrategy,
     PatternLinkBudgetStrategy,
     SimpleLinkBudgetStrategy,
 )
@@ -10,6 +11,7 @@ from .strategies import (
 __all__ = [
     "free_space_path_loss_db",
     "received_power_dbw",
+    "NadirLinkBudgetStrategy",
     "GeometricStrategy",
     "InterferenceResult",
     "InterferenceStrategy",

@@ -9,6 +9,7 @@ import numpy as np
 from sopp.analysis.geometry import (
     calculate_angular_separation,
     calculate_angular_separation_sq,
+    calculate_nadir_angle,
 )
 from sopp.analysis.link_budget import free_space_path_loss_db, received_power_dbw
 from sopp.models.satellite.trajectory import SatelliteTrajectory
@@ -163,11 +164,8 @@ class SimpleLinkBudgetStrategy(InterferenceStrategy):
         # Satellite EIRP: try transmitter, then default.
         # If neither is available, skip this satellite
         satellite = satellite_trajectory.satellite
-        if (
-            satellite.transmitter is not None
-            and satellite.transmitter.eirp_dbw is not None
-        ):
-            eirp_dbw = satellite.transmitter.eirp_dbw
+        if satellite.transmitter is not None:
+            eirp_dbw = satellite.transmitter.peak_eirp_dbw
         elif self.default_eirp_dbw is not None:
             eirp_dbw = self.default_eirp_dbw
         else:
@@ -248,11 +246,8 @@ class PatternLinkBudgetStrategy(InterferenceStrategy):
         # Satellite EIRP: try transmitter, then default.
         # If neither is available, skip this satellite
         satellite = satellite_trajectory.satellite
-        if (
-            satellite.transmitter is not None
-            and satellite.transmitter.eirp_dbw is not None
-        ):
-            eirp_dbw = satellite.transmitter.eirp_dbw
+        if satellite.transmitter is not None:
+            eirp_dbw = satellite.transmitter.peak_eirp_dbw
         elif self.default_eirp_dbw is not None:
             eirp_dbw = self.default_eirp_dbw
         else:
@@ -292,5 +287,103 @@ class PatternLinkBudgetStrategy(InterferenceStrategy):
                 "frequency_mhz": frequency.frequency,
                 "off_axis_deg": off_axis_deg,
                 "gain_dbi": gain_dbi,
+            },
+        )
+
+
+class NadirLinkBudgetStrategy(InterferenceStrategy):
+    """Full link budget with angle-dependent transmitter EIRP and receive gain.
+
+    This is a "Tier 2" calculation:
+        P_rx(dBW) = EIRP(θ_tx) - FSPL(dB) + G_rx(θ_rx)
+
+    where θ_tx is the nadir angle at the satellite (assuming nadir-pointing
+    antenna) and θ_rx is the receiver off-axis angle.
+
+    For Tier 1 transmitters (constant eirp_dbw), the EIRP term is constant
+    and this produces the same result as PatternLinkBudgetStrategy.
+    For Tier 2 transmitters (power_dbw + antenna_pattern), the EIRP varies
+    with the nadir angle.
+
+    Requires:
+        facility.antenna_pattern must be set.
+
+    Args:
+        default_eirp_dbw: Default EIRP to use for satellites that have no
+            transmitter configured. If not provided, satellites without a
+            transmitter will be silently skipped (returns None).
+
+    Raises:
+        ValueError: If facility.antenna_pattern is not set.
+    """
+
+    def __init__(self, default_eirp_dbw: float | None = None):
+        self.default_eirp_dbw = default_eirp_dbw
+
+    def calculate(
+        self,
+        satellite_trajectory: SatelliteTrajectory,
+        antenna_trajectory: AntennaTrajectory,
+        facility: Facility,
+        frequency: FrequencyRange,
+    ) -> InterferenceResult | None:
+        if facility.antenna_pattern is None:
+            raise ValueError(
+                "NadirLinkBudgetStrategy requires facility.antenna_pattern to be set."
+            )
+
+        # Resolve transmitter — check existence only, not eirp_dbw,
+        # because Tier 2 transmitters have eirp_dbw=None.
+        satellite = satellite_trajectory.satellite
+        transmitter = satellite.transmitter
+        use_default = False
+
+        if transmitter is not None:
+            pass
+        elif self.default_eirp_dbw is not None:
+            use_default = True
+        else:
+            return None
+
+        # Receiver side: off-axis angle and gain
+        ant_az, ant_alt = antenna_trajectory.get_state_at(satellite_trajectory.times)
+
+        off_axis_deg = calculate_angular_separation(
+            az1=satellite_trajectory.azimuth,
+            alt1=satellite_trajectory.altitude,
+            az2=ant_az,
+            alt2=ant_alt,
+        )
+        gain_rx_dbi = facility.antenna_pattern.get_gain(off_axis_deg)
+
+        # Transmitter side: nadir angle and EIRP
+        nadir_angle_deg = calculate_nadir_angle(
+            elevation_deg=satellite_trajectory.altitude,
+            distance_km=satellite_trajectory.distance_km,
+        )
+
+        if use_default:
+            eirp_dbw: float | np.ndarray = self.default_eirp_dbw
+        else:
+            assert transmitter is not None  # guaranteed by control flow above
+            eirp_dbw = transmitter.get_eirp_dbw(nadir_angle_deg)
+
+        # Link budget
+        frequency_hz = frequency.frequency * 1e6
+        distance_m = satellite_trajectory.distance_km * 1000.0
+
+        fspl_db = free_space_path_loss_db(distance_m, frequency_hz)
+        power_dbw = eirp_dbw - fspl_db + gain_rx_dbi
+
+        return InterferenceResult(
+            trajectory=satellite_trajectory,
+            interference_level=np.asarray(power_dbw),
+            level_units="dBW",
+            metadata={
+                "eirp_dbw": eirp_dbw,
+                "nadir_angle_deg": nadir_angle_deg,
+                "off_axis_deg": off_axis_deg,
+                "gain_rx_dbi": gain_rx_dbi,
+                "frequency_mhz": frequency.frequency,
             },
         )
