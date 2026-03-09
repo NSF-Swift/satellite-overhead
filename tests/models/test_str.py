@@ -4,6 +4,7 @@ from sopp.models.configuration import Configuration, RuntimeSettings
 from sopp.models.core import Coordinates, FrequencyRange, TimeWindow
 from sopp.models.ground.config import CustomTrajectoryConfig
 from sopp.models.ground.facility import Facility
+from sopp.models.ground.receiver import Receiver
 from sopp.models.reservation import Reservation
 
 
@@ -77,7 +78,12 @@ def runtime_settings():
 
 @pytest.fixture
 def facility():
-    return Facility(Coordinates(10, 10), 3, 1000, "TestFacility")
+    return Facility(
+        coordinates=Coordinates(10, 10),
+        receiver=Receiver(beamwidth=3),
+        elevation=1000,
+        name="TestFacility",
+    )
 
 
 @pytest.fixture

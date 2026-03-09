@@ -70,7 +70,7 @@ def test_geometric_strategy_returns_none_outside_beam(
         distance_km=np.full(len(times), 500.0),
     )
 
-    offset = facility.beamwidth + 1.0
+    offset = facility.receiver.beamwidth + 1.0
     ant_traj = AntennaTrajectory(
         times=times,
         azimuth=np.full(len(times), ARBITRARY_AZIMUTH + offset),
@@ -106,7 +106,7 @@ def test_geometric_strategy_masks_partial_crossing(
     )
 
     # Antenna: far at T=0, aligned at T=1, far at T=2
-    offset = facility.beamwidth + 1.0
+    offset = facility.receiver.beamwidth + 1.0
     ant_traj = AntennaTrajectory(
         times=times,
         azimuth=np.array(
@@ -178,7 +178,7 @@ def test_simple_link_budget_returns_none_without_eirp(
     frequency = FrequencyRange(frequency=10000, bandwidth=100)  # 10 GHz
 
     # Facility has gain but satellite has no transmitter
-    facility.peak_gain_dbi = 60.0
+    facility.receiver.peak_gain_dbi = 60.0
 
     sat_traj = SatelliteTrajectory(
         satellite=satellite,
@@ -235,7 +235,7 @@ def test_simple_link_budget_calculates_power(arbitrary_datetime, satellite, faci
     frequency = FrequencyRange(frequency=10000, bandwidth=100)  # 10 GHz
 
     satellite.transmitter = Transmitter(eirp_dbw=35.0)
-    facility.peak_gain_dbi = 60.0
+    facility.receiver.peak_gain_dbi = 60.0
 
     sat_traj = SatelliteTrajectory(
         satellite=satellite,
@@ -268,7 +268,7 @@ def test_simple_link_budget_uses_default_eirp(arbitrary_datetime, satellite, fac
     frequency = FrequencyRange(frequency=10000, bandwidth=100)
 
     # Satellite has no transmitter, but facility has gain set
-    facility.peak_gain_dbi = 55.0
+    facility.receiver.peak_gain_dbi = 55.0
 
     sat_traj = SatelliteTrajectory(
         satellite=satellite,
@@ -302,7 +302,7 @@ def test_simple_link_budget_power_varies_with_distance(
     frequency = FrequencyRange(frequency=10000, bandwidth=100)
 
     satellite.transmitter = Transmitter(eirp_dbw=35.0)
-    facility.peak_gain_dbi = 60.0
+    facility.receiver.peak_gain_dbi = 60.0
 
     # Distance increases over time: 500, 600, 700 km
     distances = np.array([500.0, 600.0, 700.0])
@@ -341,7 +341,7 @@ def test_pattern_link_budget_returns_none_without_eirp(
     frequency = FrequencyRange(frequency=10000, bandwidth=100)
 
     # Facility has antenna pattern but satellite has no transmitter
-    facility.antenna_pattern = AntennaPattern(
+    facility.receiver.antenna_pattern = AntennaPattern(
         angles_deg=np.array([0.0, 1.0, 5.0, 10.0, 90.0]),
         gains_dbi=np.array([60.0, 50.0, 30.0, 10.0, -10.0]),
     )
@@ -403,7 +403,7 @@ def test_pattern_link_budget_calculates_power_on_axis(
     frequency = FrequencyRange(frequency=10000, bandwidth=100)
 
     satellite.transmitter = Transmitter(eirp_dbw=35.0)
-    facility.antenna_pattern = AntennaPattern(
+    facility.receiver.antenna_pattern = AntennaPattern(
         angles_deg=np.array([0.0, 1.0, 5.0, 10.0, 90.0]),
         gains_dbi=np.array([60.0, 50.0, 30.0, 10.0, -10.0]),
     )
@@ -445,7 +445,7 @@ def test_pattern_link_budget_gain_decreases_off_axis(
     frequency = FrequencyRange(frequency=10000, bandwidth=100)
 
     satellite.transmitter = Transmitter(eirp_dbw=35.0)
-    facility.antenna_pattern = AntennaPattern(
+    facility.receiver.antenna_pattern = AntennaPattern(
         angles_deg=np.array([0.0, 1.0, 5.0, 10.0, 90.0]),
         gains_dbi=np.array([60.0, 50.0, 30.0, 10.0, -10.0]),
     )
@@ -495,7 +495,7 @@ def test_pattern_link_budget_uses_default_eirp(arbitrary_datetime, satellite, fa
     frequency = FrequencyRange(frequency=10000, bandwidth=100)
 
     # Satellite has no transmitter
-    facility.antenna_pattern = AntennaPattern(
+    facility.receiver.antenna_pattern = AntennaPattern(
         angles_deg=np.array([0.0, 1.0, 5.0, 10.0, 90.0]),
         gains_dbi=np.array([60.0, 50.0, 30.0, 10.0, -10.0]),
     )
@@ -531,7 +531,7 @@ def test_full_link_budget_returns_none_without_transmitter(
     times = generate_time_grid(arbitrary_datetime, arbitrary_datetime, 1)
     frequency = FrequencyRange(frequency=10000, bandwidth=100)
 
-    facility.antenna_pattern = AntennaPattern(
+    facility.receiver.antenna_pattern = AntennaPattern(
         angles_deg=np.array([0.0, 1.0, 5.0, 10.0, 90.0]),
         gains_dbi=np.array([60.0, 50.0, 30.0, 10.0, -10.0]),
     )
@@ -594,7 +594,7 @@ def test_full_link_budget_matches_pattern_strategy_for_tier1(
     frequency = FrequencyRange(frequency=10000, bandwidth=100)
 
     satellite.transmitter = Transmitter(eirp_dbw=35.0)
-    facility.antenna_pattern = AntennaPattern(
+    facility.receiver.antenna_pattern = AntennaPattern(
         angles_deg=np.array([0.0, 1.0, 5.0, 10.0, 90.0]),
         gains_dbi=np.array([60.0, 50.0, 30.0, 10.0, -10.0]),
     )
@@ -647,7 +647,7 @@ def test_full_link_budget_with_tier2_transmitter(
     )
     satellite.transmitter = Transmitter(power_dbw=10.0, antenna_pattern=sat_pattern)
 
-    facility.antenna_pattern = AntennaPattern(
+    facility.receiver.antenna_pattern = AntennaPattern(
         angles_deg=np.array([0.0, 1.0, 5.0, 10.0, 90.0]),
         gains_dbi=np.array([60.0, 50.0, 30.0, 10.0, -10.0]),
     )
@@ -693,7 +693,7 @@ def test_full_link_budget_uses_default_eirp(arbitrary_datetime, satellite, facil
     times = generate_time_grid(arbitrary_datetime, arbitrary_datetime, 1)
     frequency = FrequencyRange(frequency=10000, bandwidth=100)
 
-    facility.antenna_pattern = AntennaPattern(
+    facility.receiver.antenna_pattern = AntennaPattern(
         angles_deg=np.array([0.0, 1.0, 5.0, 10.0, 90.0]),
         gains_dbi=np.array([60.0, 50.0, 30.0, 10.0, -10.0]),
     )
@@ -734,7 +734,7 @@ def test_all_strategies_handle_tier2_transmitter(
     satellite.transmitter = Transmitter(power_dbw=10.0, antenna_pattern=sat_pattern)
     assert satellite.transmitter.eirp_dbw is None
 
-    facility.antenna_pattern = AntennaPattern(
+    facility.receiver.antenna_pattern = AntennaPattern(
         angles_deg=np.array([0.0, 1.0, 5.0, 10.0, 90.0]),
         gains_dbi=np.array([60.0, 50.0, 30.0, 10.0, -10.0]),
     )
@@ -774,7 +774,7 @@ def test_full_link_budget_metadata_keys(arbitrary_datetime, satellite, facility)
     frequency = FrequencyRange(frequency=10000, bandwidth=100)
 
     satellite.transmitter = Transmitter(eirp_dbw=35.0)
-    facility.antenna_pattern = AntennaPattern(
+    facility.receiver.antenna_pattern = AntennaPattern(
         angles_deg=np.array([0.0, 1.0, 5.0, 10.0, 90.0]),
         gains_dbi=np.array([60.0, 50.0, 30.0, 10.0, -10.0]),
     )

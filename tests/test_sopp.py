@@ -9,6 +9,7 @@ from sopp.models import (
     Facility,
     FrequencyRange,
     Position,
+    Receiver,
     Reservation,
     RuntimeSettings,
     Satellite,
@@ -154,8 +155,8 @@ class TestSopp:
         )
         return Reservation(
             facility=Facility(
-                beamwidth=3.5,
                 coordinates=Coordinates(latitude=40.8178049, longitude=-121.4695413),
+                receiver=Receiver(beamwidth=3.5),
                 name="ARBITRARY_1",
             ),
             time=time_window,
@@ -330,7 +331,7 @@ def test_antenna_positions_that_end_before_reservation_starts_are_not_included(
     # T-1: Hits Satellite
     # T=0+: Misses Satellite (Shifted by beamwidth + epsilon)
     alt_hit = ARBITRARY_ALTITUDE
-    alt_miss = ARBITRARY_ALTITUDE + facility.beamwidth
+    alt_miss = ARBITRARY_ALTITUDE + facility.receiver.beamwidth
 
     # Create array: [Hit, Miss, Miss]
     altitudes = np.array([alt_hit, alt_miss, alt_miss])
