@@ -5,6 +5,7 @@ from .config import (
     StaticPointingConfig,
 )
 from .facility import Facility
+from .receiver import Receiver
 from .target import ObservationTarget
 from .trajectory import AntennaTrajectory
 
@@ -14,6 +15,7 @@ __all__ = [
     "CustomTrajectoryConfig",
     "StaticPointingConfig",
     "Facility",
+    "Receiver",
     "ObservationTarget",
     "AntennaTrajectory",
 ]
