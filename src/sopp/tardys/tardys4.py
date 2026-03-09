@@ -35,7 +35,7 @@ class Tardys4Generator:
         self._loc_lat: float = reservation.facility.coordinates.latitude
         self._loc_long: float = reservation.facility.coordinates.longitude
         self._elevation: float = reservation.facility.elevation
-        self._region_size: int = reservation.facility.beamwidth
+        self._region_size: int = reservation.facility.receiver.beamwidth
         self._dpa_id: str | None = dpa_id
 
     def write_to_file(self, filename: str = "tardys4_reservation.json"):
