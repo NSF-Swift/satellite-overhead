@@ -17,6 +17,7 @@ from sopp.models.ground.config import (
     StaticPointingConfig,
 )
 from sopp.models.ground.facility import Facility
+from sopp.models.ground.receiver import Receiver
 from sopp.models.ground.target import ObservationTarget
 from sopp.models.reservation import Reservation
 from sopp.utils.helpers import parse_time_and_convert_to_utc
@@ -47,15 +48,13 @@ class ConfigurationBuilder:
         longitude: float,
         elevation: float,
         name: str,
-        beamwidth: float,
-        peak_gain_dbi: float | None = None,
+        receiver: Receiver,
     ) -> ConfigurationBuilder:
         self.facility = Facility(
-            Coordinates(latitude=latitude, longitude=longitude),
+            coordinates=Coordinates(latitude=latitude, longitude=longitude),
+            receiver=receiver,
             elevation=elevation,
-            beamwidth=beamwidth,
             name=name,
-            peak_gain_dbi=peak_gain_dbi,
         )
         return self
 

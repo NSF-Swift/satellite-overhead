@@ -14,6 +14,7 @@ from sopp.models.ground.config import (
     StaticPointingConfig,
 )
 from sopp.models.ground.facility import Facility
+from sopp.models.ground.receiver import Receiver
 from sopp.models.ground.target import ObservationTarget
 from sopp.models.ground.trajectory import AntennaTrajectory
 from sopp.utils.helpers import read_datetime_string_as_utc
@@ -65,9 +66,9 @@ class ConfigFileLoaderJson(ConfigFileLoaderBase):
 
         return Facility(
             coordinates=Coordinates(latitude=lat, longitude=lon),
+            receiver=Receiver(beamwidth=conf.get("beamwidth", 3.0)),
             name=name,
             elevation=conf.get("elevation", 0.0),
-            beamwidth=conf.get("beamwidth", 3.0),
         )
 
     @property
