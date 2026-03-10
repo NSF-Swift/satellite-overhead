@@ -26,6 +26,7 @@ from sopp.analysis.strategies import (
 from sopp.models.antenna import AntennaPattern
 from sopp.models.core import Coordinates, FrequencyRange
 from sopp.models.ground.facility import Facility
+from sopp.models.ground.receiver import Receiver
 from sopp.models.ground.trajectory import AntennaTrajectory
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.satellite.trajectory import SatelliteTrajectory
@@ -68,16 +69,17 @@ def main():
     # Uses peak gain everywhere (worst case)
     facility_tier1 = Facility(
         coordinates=Coordinates(latitude=40.8, longitude=-121.5),
-        beamwidth=1.0,
+        receiver=Receiver(beamwidth=1.0, peak_gain_dbi=60.0),
         name="Example Observatory",
-        peak_gain_dbi=60.0,
     )
 
     strategy_t1 = SimpleLinkBudgetStrategy()
     result_t1 = strategy_t1.calculate(sat_traj, ant_traj, facility_tier1, frequency)
 
     print("=== Tier 1: SimpleLinkBudgetStrategy ===")
-    print(f"Uses peak gain: {facility_tier1.peak_gain_dbi} dBi for all points\n")
+    print(
+        f"Uses peak gain: {facility_tier1.receiver.peak_gain_dbi} dBi for all points\n"
+    )
 
     if result_t1 is not None:
         power = result_t1.interference_level
@@ -95,9 +97,8 @@ def main():
 
     facility_tier15 = Facility(
         coordinates=Coordinates(latitude=40.8, longitude=-121.5),
-        beamwidth=1.0,
+        receiver=Receiver(beamwidth=1.0, antenna_pattern=antenna_pattern),
         name="Example Observatory",
-        antenna_pattern=antenna_pattern,
     )
 
     strategy_t15 = PatternLinkBudgetStrategy()

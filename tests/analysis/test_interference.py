@@ -56,7 +56,7 @@ def test_satellite_outside_beam_is_ignored(
     """
     reservation = make_reservation(start_time=arbitrary_datetime, duration_seconds=1)
 
-    offset = facility.beamwidth + 1.0
+    offset = facility.receiver.beamwidth + 1.0
     times = generate_time_grid(arbitrary_datetime, arbitrary_datetime, 1)
 
     ant_traj = AntennaTrajectory(
@@ -94,7 +94,7 @@ def test_satellite_enters_and_exits_beam(
     t_end = arbitrary_datetime + timedelta(seconds=2)
     times = generate_time_grid(arbitrary_datetime, t_end, resolution_seconds=1)
 
-    offset = facility.beamwidth + 1.0
+    offset = facility.receiver.beamwidth + 1.0
     azimuths = np.array(
         [
             ARBITRARY_AZIMUTH + offset,  # T=0

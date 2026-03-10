@@ -1,6 +1,7 @@
 import pytest
 
 from sopp.models import Configuration, RuntimeSettings
+from sopp.models.ground.receiver import Receiver
 
 
 def test_validate_empty_satellites_list(antenna_config, reservation):
@@ -59,15 +60,10 @@ def test_validate_reservation_time_window(satellite, antenna_config, reservation
         )
 
 
-def test_validate_reservation_beamwidth(satellite, antenna_config, reservation):
-    reservation.facility.beamwidth = 0
-    with pytest.raises(ValueError) as _:
-        _ = Configuration(
-            satellites=[satellite],
-            antenna_config=antenna_config,
-            reservation=reservation,
-            runtime_settings=RuntimeSettings(),
-        )
+def test_validate_reservation_beamwidth():
+    """Receiver validates beamwidth > 0 at construction time."""
+    with pytest.raises(ValueError, match="Beamwidth must be > 0"):
+        Receiver(beamwidth=0)
 
 
 def test_validate_invalid_antenna_config(satellite, reservation):

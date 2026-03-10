@@ -99,7 +99,7 @@ class GeometricStrategy(InterferenceStrategy):
             alt2=ant_alt,
         )
 
-        mask = sep_sq <= facility.beam_radius**2
+        mask = sep_sq <= facility.receiver.beam_radius**2
 
         if not np.any(mask):
             return None
@@ -131,7 +131,7 @@ class SimpleLinkBudgetStrategy(InterferenceStrategy):
     or use in conjunction with geometric filtering.
 
     Requires:
-        facility.peak_gain_dbi must be set.
+        facility.receiver.peak_gain_dbi must be set.
 
     Args:
         default_eirp_dbw: Default EIRP to use for satellites that have no
@@ -140,7 +140,7 @@ class SimpleLinkBudgetStrategy(InterferenceStrategy):
             interference detected).
 
     Raises:
-        ValueError: If facility.peak_gain_dbi is not set.
+        ValueError: If facility.receiver.peak_gain_dbi is not set.
     """
 
     def __init__(self, default_eirp_dbw: float | None = None):
@@ -155,11 +155,11 @@ class SimpleLinkBudgetStrategy(InterferenceStrategy):
     ) -> InterferenceResult | None:
         # Facility gain is required — this is a configuration error, not
         # a "no interference" case.
-        if facility.peak_gain_dbi is None:
+        if facility.receiver.peak_gain_dbi is None:
             raise ValueError(
-                "SimpleLinkBudgetStrategy requires facility.peak_gain_dbi to be set."
+                "SimpleLinkBudgetStrategy requires facility.receiver.peak_gain_dbi to be set."
             )
-        gain_dbi = facility.peak_gain_dbi
+        gain_dbi = facility.receiver.peak_gain_dbi
 
         # Satellite EIRP: try transmitter, then default.
         # If neither is available, skip this satellite
@@ -215,7 +215,7 @@ class PatternLinkBudgetStrategy(InterferenceStrategy):
     vs main beam.
 
     Requires:
-        facility.antenna_pattern must be set.
+        facility.receiver.antenna_pattern must be set.
 
     Args:
         default_eirp_dbw: Default EIRP to use for satellites that have no
@@ -224,7 +224,7 @@ class PatternLinkBudgetStrategy(InterferenceStrategy):
             interference detected).
 
     Raises:
-        ValueError: If facility.antenna_pattern is not set.
+        ValueError: If facility.receiver.antenna_pattern is not set.
     """
 
     def __init__(self, default_eirp_dbw: float | None = None):
@@ -238,9 +238,9 @@ class PatternLinkBudgetStrategy(InterferenceStrategy):
         frequency: FrequencyRange,
     ) -> InterferenceResult | None:
         # Facility antenna pattern is required
-        if facility.antenna_pattern is None:
+        if facility.receiver.antenna_pattern is None:
             raise ValueError(
-                "PatternLinkBudgetStrategy requires facility.antenna_pattern to be set."
+                "PatternLinkBudgetStrategy requires facility.receiver.antenna_pattern to be set."
             )
 
         # Satellite EIRP: try transmitter, then default.
@@ -265,7 +265,7 @@ class PatternLinkBudgetStrategy(InterferenceStrategy):
         )
 
         # Look up gain at each off-axis angle from the antenna pattern
-        gain_dbi = facility.antenna_pattern.get_gain(off_axis_deg)
+        gain_dbi = facility.receiver.antenna_pattern.get_gain(off_axis_deg)
 
         # Convert frequency from MHz to Hz
         frequency_hz = frequency.frequency * 1e6
@@ -306,7 +306,7 @@ class NadirLinkBudgetStrategy(InterferenceStrategy):
     with the nadir angle.
 
     Requires:
-        facility.antenna_pattern must be set.
+        facility.receiver.antenna_pattern must be set.
 
     Args:
         default_eirp_dbw: Default EIRP to use for satellites that have no
@@ -314,7 +314,7 @@ class NadirLinkBudgetStrategy(InterferenceStrategy):
             transmitter will be silently skipped (returns None).
 
     Raises:
-        ValueError: If facility.antenna_pattern is not set.
+        ValueError: If facility.receiver.antenna_pattern is not set.
     """
 
     def __init__(self, default_eirp_dbw: float | None = None):
@@ -327,9 +327,9 @@ class NadirLinkBudgetStrategy(InterferenceStrategy):
         facility: Facility,
         frequency: FrequencyRange,
     ) -> InterferenceResult | None:
-        if facility.antenna_pattern is None:
+        if facility.receiver.antenna_pattern is None:
             raise ValueError(
-                "NadirLinkBudgetStrategy requires facility.antenna_pattern to be set."
+                "NadirLinkBudgetStrategy requires facility.receiver.antenna_pattern to be set."
             )
 
         # Resolve transmitter — check existence only, not eirp_dbw,
@@ -354,7 +354,7 @@ class NadirLinkBudgetStrategy(InterferenceStrategy):
             az2=ant_az,
             alt2=ant_alt,
         )
-        gain_rx_dbi = facility.antenna_pattern.get_gain(off_axis_deg)
+        gain_rx_dbi = facility.receiver.antenna_pattern.get_gain(off_axis_deg)
 
         # Transmitter side: nadir angle and EIRP
         nadir_angle_deg = calculate_nadir_angle(

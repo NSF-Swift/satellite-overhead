@@ -10,6 +10,7 @@ from .ground import (
     CustomTrajectoryConfig,
     Facility,
     ObservationTarget,
+    Receiver,
     StaticPointingConfig,
 )
 from .reservation import Reservation
@@ -41,6 +42,7 @@ __all__ = [
     "CustomTrajectoryConfig",
     "Facility",
     "ObservationTarget",
+    "Receiver",
     "StaticPointingConfig",
     # Satellite
     "Satellite",

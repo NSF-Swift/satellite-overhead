@@ -15,6 +15,7 @@ from sopp.models.ground.config import (
     StaticPointingConfig,
 )
 from sopp.models.ground.facility import Facility
+from sopp.models.ground.receiver import Receiver
 from sopp.models.ground.target import ObservationTarget
 from sopp.models.ground.trajectory import AntennaTrajectory
 from sopp.models.reservation import Reservation
@@ -34,7 +35,7 @@ def expected_reservation():
     return Reservation(
         facility=Facility(
             coordinates=Coordinates(longitude=-1, latitude=1),
-            beamwidth=3,
+            receiver=Receiver(beamwidth=3),
             elevation=1,
             name="HCRO",
         ),
@@ -111,12 +112,12 @@ def test_set_facility():
         longitude=-121,
         elevation=100,
         name="HCRO",
-        beamwidth=3,
+        receiver=Receiver(beamwidth=3),
     )
     assert builder.facility == Facility(
-        Coordinates(latitude=40, longitude=-121),
+        coordinates=Coordinates(latitude=40, longitude=-121),
+        receiver=Receiver(beamwidth=3),
         elevation=100,
-        beamwidth=3,
         name="HCRO",
     )
 
@@ -253,7 +254,11 @@ def test_build_full_flow(mock_satellite_loader, satellite):
 
     builder = ConfigurationBuilder()
     builder.set_facility(
-        latitude=1, longitude=-1, elevation=1, name="HCRO", beamwidth=3
+        latitude=1,
+        longitude=-1,
+        elevation=1,
+        name="HCRO",
+        receiver=Receiver(beamwidth=3),
     )
     builder.set_frequency_range(bandwidth=10, frequency=135)
     builder.set_time_window(begin="2023-11-15T08:00:00.0", end="2023-11-15T08:30:00.0")

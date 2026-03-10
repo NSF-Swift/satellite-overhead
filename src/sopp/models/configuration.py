@@ -67,10 +67,6 @@ class Configuration:
                 f"Reservation start ({self.reservation.time.begin}) "
                 f"must be before end ({self.reservation.time.end})"
             )
-        if self.reservation.facility.beamwidth <= 0:
-            raise ValueError(
-                f"Beamwidth must be > 0, provided: {self.reservation.facility.beamwidth}"
-            )
 
     def _validate_settings(self):
         if self.runtime_settings.time_resolution_seconds <= 0:
