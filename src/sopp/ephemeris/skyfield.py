@@ -1,3 +1,5 @@
+"""Skyfield/SGP4-based ephemeris calculator."""
+
 import bisect
 from datetime import datetime
 
@@ -21,6 +23,13 @@ SET_EVENT = 2
 
 
 class SkyfieldEphemerisCalculator(EphemerisCalculator):
+    """Ephemeris calculator using Skyfield and SGP4 propagation.
+
+    Pre-computes Earth rotation matrices on a master time grid and
+    injects cached values into subset time objects to avoid redundant
+    calculations across multiple satellites.
+    """
+
     def __init__(self, facility: Facility, datetimes: list[datetime] | np.ndarray):
         self._facility = facility
         self._facility_latlon = self._calculate_facility_latlon()

@@ -1,3 +1,5 @@
+"""Geometric calculations for satellite interference analysis."""
+
 import numpy as np
 import numpy.typing as npt
 

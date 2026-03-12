@@ -1,3 +1,5 @@
+"""Skyfield-based antenna pointing calculator."""
+
 import re
 
 import numpy as np
@@ -14,6 +16,8 @@ from sopp.utils.time import generate_time_grid
 
 
 class PointingCalculatorSkyfield(PointingCalculator):
+    """Computes antenna trajectory using Skyfield for celestial tracking."""
+
     def __init__(
         self,
         facility: Facility,

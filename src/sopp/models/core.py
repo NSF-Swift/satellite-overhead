@@ -1,3 +1,5 @@
+"""Core data types shared across the SOPP library."""
+
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
@@ -5,19 +7,14 @@ from enum import Enum
 
 @dataclass
 class Position:
-    """
-    Represents a position relative to an observer on Earth.
+    """A position in the local horizontal coordinate system.
 
     Attributes:
-    + altitude (float): The altitude angle of the object in degrees. It ranges
-      from 0° at the horizon to 90° directly overhead at the zenith. A negative
-      altitude means the satellite is below the horizon.
-    + azimuth (float): The azimuth angle of the object in degrees, measured
-      clockwise around the horizon. It runs from 0° (geographic north) through
-      east (90°), south (180°), and west (270°) before returning to the north.
-    + distance (Optional[float]): The straight-line distance between the
-      object and the observer in kilometers. If not provided, it is set to
-      None.
+        altitude: Elevation angle in degrees. 0 is the horizon, 90 is zenith.
+            Negative values mean the object is below the horizon.
+        azimuth: Azimuth angle in degrees, measured clockwise from geographic
+            north (0) through east (90), south (180), and west (270).
+        distance_km: Slant range to the object in kilometers, or None.
     """
 
     altitude: float
@@ -27,9 +24,11 @@ class Position:
 
 @dataclass
 class TimeWindow:
-    """
-    The TimeWindow class is used to store the beginning and end time of events. The duration function returns a time delta for the
-    duration of the event and the overlaps function determines if the TimeWindow overlaps with another TimeWindow
+    """A time interval defined by a start and end time (UTC).
+
+    Attributes:
+        begin: Start of the window.
+        end: End of the window.
     """
 
     begin: datetime
@@ -57,6 +56,13 @@ class CoordinatesJsonKey(Enum):
 
 @dataclass
 class Coordinates:
+    """Geographic coordinates in decimal degrees.
+
+    Attributes:
+        latitude: Latitude in decimal degrees (positive north).
+        longitude: Longitude in decimal degrees (positive east).
+    """
+
     latitude: float
     longitude: float
 
@@ -70,14 +76,19 @@ class Coordinates:
 
 @dataclass
 class FrequencyRange:
-    """
-    Represents a frequency band (center frequency + bandwidth).
-    Used for both Telescope Observations and Satellite Transmissions.
+    """A frequency band defined by center frequency and bandwidth.
+
+    Used for both telescope observations and satellite transmissions.
+
+    Attributes:
+        frequency: Center frequency in MHz.
+        bandwidth: Total bandwidth in MHz.
+        status: Optional metadata (e.g. 'active', 'inactive').
     """
 
-    frequency: float  # Center frequency in MHz
-    bandwidth: float  # Total bandwidth in MHz
-    status: str | None = None  # Metadata (e.g. 'active', 'inactive')
+    frequency: float
+    bandwidth: float
+    status: str | None = None
 
     @property
     def low_mhz(self) -> float:
@@ -88,10 +99,7 @@ class FrequencyRange:
         return self.frequency + (self.bandwidth / 2.0)
 
     def overlaps(self, other: "FrequencyRange") -> bool:
-        """
-        Determines if this frequency range overlaps with another.
-        Logic: startA < endB AND endA > startB
-        """
+        """Return True if this frequency range overlaps with another."""
         return (self.low_mhz < other.high_mhz) and (self.high_mhz > other.low_mhz)
 
     def __str__(self):

@@ -1,3 +1,5 @@
+"""Configuration file loaders for reading observation parameters from disk."""
+
 import json
 from abc import ABC, abstractmethod
 from functools import cached_property
@@ -21,6 +23,8 @@ from sopp.utils.helpers import read_datetime_string_as_utc
 
 
 class ConfigFileLoaderBase(ABC):
+    """Abstract base for configuration file loaders."""
+
     def __init__(self, filepath: Path):
         self._filepath = filepath
 
@@ -56,6 +60,8 @@ class ConfigFileLoaderBase(ABC):
 
 
 class ConfigFileLoaderJson(ConfigFileLoaderBase):
+    """Loads configuration from a JSON file."""
+
     @property
     def facility(self) -> Facility:
         conf = self._get_required_section("facility")

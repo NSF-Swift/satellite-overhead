@@ -1,3 +1,5 @@
+"""TLE (Two-Line Element) data model and parsing."""
+
 from dataclasses import dataclass
 
 from sgp4.exporter import export_tle
@@ -8,13 +10,12 @@ from sgp4.vallado_cpp import WGS72
 
 @dataclass
 class MeanMotion:
-    """
-    Represents the mean motion of a satellite in radians per minute.
+    """Mean motion of a satellite in radians per minute.
 
     Attributes:
-    - first_derivative (float): The first derivative of the mean motion.
-    - second_derivative (float): The second derivative of the mean motion.
-    - value (float): The actual mean motion value in radians per minute.
+        first_derivative: First derivative of mean motion (rad/min^2).
+        second_derivative: Second derivative of mean motion (rad/min^3).
+        value: Mean motion value (rad/min).
     """
 
     first_derivative: float
@@ -24,6 +25,14 @@ class MeanMotion:
 
 @dataclass
 class InternationalDesignator:
+    """International designator (COSPAR ID) identifying a launch and piece.
+
+    Attributes:
+        year: Two-digit launch year.
+        launch_number: Sequential launch number within the year.
+        launch_piece: Piece identifier (e.g. 'A', 'B').
+    """
+
     year: int
     launch_number: int
     launch_piece: str
@@ -42,6 +51,11 @@ class InternationalDesignator:
 
 @dataclass
 class TleInformation:
+    """Parsed orbital elements from a Two-Line Element set.
+
+    All angular values are in radians (SGP4 convention).
+    """
+
     argument_of_perigee: float
     drag_coefficient: float
     eccentricity: float
@@ -98,7 +112,7 @@ class TleInformation:
             eccentricity=satrec.ecco,
             epoch_days=satrec.jdsatepoch
             - 2433281.5
-            + satrec.jdsatepochF,  # what is this number??
+            + satrec.jdsatepochF,  # JD of 1949-Dec-31 00:00 UT (SGP4 epoch reference)
             inclination=satrec.inclo,
             international_designator=international_designator,
             mean_anomaly=satrec.mo,

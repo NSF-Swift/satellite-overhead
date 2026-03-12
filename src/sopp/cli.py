@@ -1,3 +1,5 @@
+"""SOPP command-line interface."""
+
 import json
 import time
 from contextlib import nullcontext

@@ -1,3 +1,5 @@
+"""Satellite visibility computation."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -16,6 +18,17 @@ def find_satellites_above_horizon(
     ephemeris_calculator: EphemerisCalculator,
     min_altitude: float = 0.0,
 ) -> list[SatelliteTrajectory]:
+    """Find all satellites that rise above min_altitude during the reservation.
+
+    Args:
+        reservation: Observation facility, time, and frequency.
+        satellites: Satellites to check.
+        ephemeris_calculator: Physics engine for orbital calculations.
+        min_altitude: Minimum elevation in degrees.
+
+    Returns:
+        List of trajectories for visible satellites.
+    """
     trajectories = []
 
     for satellite in satellites:

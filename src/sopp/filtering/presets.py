@@ -1,3 +1,9 @@
+"""Built-in satellite filter functions.
+
+Each function returns a predicate ``(Satellite) -> bool`` suitable for
+use with :class:`~sopp.filtering.filterer.Filterer`.
+"""
+
 import re
 from collections.abc import Callable
 
@@ -8,18 +14,13 @@ from sopp.models.satellite.satellite import Satellite
 def filter_frequency(
     observation_frequency: FrequencyRange,
 ) -> Callable[[Satellite], bool]:
-    """
-    filter_frequency returns True if a satellite's downlink transmission frequency
-    overlaps with the desired observation frequency. If there is no information
-    on the satellite frequency, it will return True to err on the side of caution
-    for potential interference.
+    """Include satellites whose downlink frequency overlaps the observation band.
 
-    Parameters:
-    - observation_frequency: An object representing the desired observation frequency.
+    Satellites with no frequency data are included (erring on the side of
+    caution). Inactive transmissions are excluded.
 
-    Returns:
-    - A lambda function that takes a Satellite object and returns True if the conditions
-      for frequency filtering are met, False otherwise.
+    Args:
+        observation_frequency: The observation frequency range.
     """
 
     def filter_function(satellite: Satellite) -> bool:
@@ -39,16 +40,10 @@ def filter_frequency(
 
 
 def filter_name_regex(regex: str) -> Callable[[Satellite], bool]:
-    """
-    filter_name_contains returns a lambda function that checks if a given regex
-    is present in the name of a Satellite.
+    """Include satellites whose name matches a regex pattern.
 
-    Parameters:
-    - regex: The regex to check for in the satellite names.
-
-    Returns:
-    - A lambda function that takes a Satellite object and returns True if the name
-      matches the specified regex, False otherwise.
+    Args:
+        regex: Regular expression to match against satellite names.
     """
     pattern = re.compile(regex)
 
@@ -59,16 +54,10 @@ def filter_name_regex(regex: str) -> Callable[[Satellite], bool]:
 
 
 def filter_name_contains(substring: str) -> Callable[[Satellite], bool]:
-    """
-    filter_name_contains returns a lambda function that checks if a given substring
-    is present in the name of a Satellite.
+    """Include satellites whose name contains the given substring.
 
-    Parameters:
-    - substring: The substring to check for in the satellite names.
-
-    Returns:
-    - A lambda function that takes a Satellite object and returns True if the name
-      contains the specified substring, False otherwise.
+    Args:
+        substring: Substring to search for in satellite names.
     """
 
     def filter_function(satellite: Satellite) -> bool:
@@ -78,16 +67,10 @@ def filter_name_contains(substring: str) -> Callable[[Satellite], bool]:
 
 
 def filter_name_does_not_contain(substring: str) -> Callable[[Satellite], bool]:
-    """
-    filter_name_does_not_contain returns a lambda function that checks if a given substring
-    is not present in the name of a Satellite.
+    """Exclude satellites whose name contains the given substring.
 
-    Parameters:
-    - substring: The substring to check for absence in the satellite names.
-
-    Returns:
-    - A lambda function that takes a Satellite object and returns True if the name
-      does not contain the specified substring, False otherwise.
+    Args:
+        substring: Substring to exclude from satellite names.
     """
 
     def filter_function(satellite: Satellite) -> bool:
@@ -97,16 +80,10 @@ def filter_name_does_not_contain(substring: str) -> Callable[[Satellite], bool]:
 
 
 def filter_name_is(substring: str) -> Callable[[Satellite], bool]:
-    """
-    filter_name_is returns a lambda function that checks if a given substring
-    matches exactly the name of a Satellite.
+    """Include only satellites whose name matches exactly.
 
-    Parameters:
-    - substring: The substring to match exactly in the satellite names.
-
-    Returns:
-    - A lambda function that takes a Satellite object and returns True if the name
-      matches the specified substring exactly, False otherwise.
+    Args:
+        substring: Exact name to match.
     """
 
     def filter_function(satellite: Satellite) -> bool:
@@ -116,14 +93,13 @@ def filter_name_is(substring: str) -> Callable[[Satellite], bool]:
 
 
 def filter_orbit_is(orbit_type: str) -> Callable[[Satellite], bool]:
-    """
-    filter_orbit_type returns a lambda function to filter satellites based on their orbital type.
+    """Include satellites in a specific orbit regime.
 
-    Parameters:
-    - orbit_type (str): The type of orbit ('leo', 'meo', or 'geo').
+    Args:
+        orbit_type: One of 'leo', 'meo', or 'geo'.
 
-    Returns:
-    - A lambda function that takes a Satellite object and returns True if it is in the specified orbit type, False otherwise.
+    Raises:
+        ValueError: If orbit_type is not recognized.
     """
 
     def filter_function(satellite: Satellite) -> bool:

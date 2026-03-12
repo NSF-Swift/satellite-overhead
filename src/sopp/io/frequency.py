@@ -1,3 +1,5 @@
+"""Satellite frequency data loading from CSV files."""
+
 import csv
 from collections import defaultdict
 from enum import Enum
@@ -18,13 +20,11 @@ class FrequencyCsvKeys(Enum):
 
 
 class GetFrequencyDataFromCsv:
-    """
-    Reads frequency data from a supplied CSV. The CSV should be placed in the `supplements` folder under the name `satellite_frequencies.csv` and should be
-    formatted with the following columns:
-    ________________________________________________________________________________________________________
-    | LineNo |   ID   |   Name   |   Frequency   |   Bandwidth   |   Status   |   Description   |  Source  |
+    """Reads satellite frequency data from a CSV file.
 
-    With all values in the frequency column of the same order of magnitude (typically MHz). The same goes for bandwidth. These columns should have the integer value alone.
+    Returns a dict mapping NORAD catalog IDs to lists of FrequencyRange.
+    The CSV must have columns: ID, Name, Frequency [MHz],
+    Bandwidth [kHz]/Baud, Status, Description, Source.
     """
 
     def __init__(self, filepath: Path):
