@@ -1,3 +1,5 @@
+"""SOPP simulation engine."""
+
 from __future__ import annotations
 
 from concurrent.futures import ProcessPoolExecutor
@@ -8,7 +10,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from sopp.analysis.interference import analyze_interference
-from sopp.analysis.strategies import GeometricStrategy, InterferenceResult
+from sopp.analysis.strategies import GeometricStrategy
 from sopp.analysis.visibility import find_satellites_above_horizon
 from sopp.ephemeris.base import EphemerisCalculator
 from sopp.ephemeris.skyfield import SkyfieldEphemerisCalculator
@@ -19,6 +21,7 @@ from sopp.models.ground.config import (
     StaticPointingConfig,
 )
 from sopp.models.ground.trajectory import AntennaTrajectory
+from sopp.models.interference import InterferenceResult
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.satellite.trajectory import SatelliteTrajectory
 from sopp.pointing.base import PointingCalculator
@@ -55,8 +58,10 @@ def _parallel_horizon_worker(payload: tuple) -> list[SatelliteTrajectory]:
 
 
 class Sopp:
-    """
-    The main entry point for the SOPP simulation engine.
+    """Main entry point for satellite interference analysis.
+
+    Orchestrates trajectory computation, antenna pointing, and interference
+    detection. Supports parallel execution for large satellite catalogs.
     """
 
     def __init__(

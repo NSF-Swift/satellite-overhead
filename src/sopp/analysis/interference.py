@@ -1,8 +1,10 @@
+"""Core interference analysis loop."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from sopp.analysis.strategies import InterferenceResult
+from sopp.models.interference import InterferenceResult
 from sopp.models.satellite.trajectory import SatelliteTrajectory
 
 if TYPE_CHECKING:

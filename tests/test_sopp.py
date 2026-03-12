@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 import numpy as np
 
-from sopp.analysis.strategies import GeometricStrategy, InterferenceResult
+from sopp.analysis.strategies import GeometricStrategy
 from sopp.models import (
     Configuration,
     Coordinates,
@@ -18,6 +18,7 @@ from sopp.models import (
 )
 from sopp.models.ground.config import CustomTrajectoryConfig, StaticPointingConfig
 from sopp.models.ground.trajectory import AntennaTrajectory
+from sopp.models.interference import InterferenceResult
 from sopp.models.satellite import InternationalDesignator, MeanMotion, TleInformation
 from sopp.sopp import Sopp
 from sopp.utils.time import generate_time_grid
