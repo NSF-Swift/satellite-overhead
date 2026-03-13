@@ -1,0 +1,65 @@
+site_name: SOPP
+site_description: Satellite Orbit Prediction Processor
+site_url: https://nsf-swift.github.io/satellite-overhead
+repo_url: https://github.com/NSF-Swift/satellite-overhead
+repo_name: NSF-Swift/satellite-overhead
+
+theme:
+  name: material
+  features:
+    - content.code.copy
+    - navigation.sections
+    - navigation.expand
+    - toc.follow
+  palette:
+    - scheme: default
+      primary: indigo
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: google
+            docstring_section_style: table
+            show_source: true
+            show_root_heading: true
+            show_root_full_path: false
+            heading_level: 2
+            members_order: source
+            group_by_category: true
+            show_category_heading: true
+            show_bases: true
+            merge_init_into_class: true
+            show_if_no_docstring: false
+            separate_signature: true
+            show_signature_annotations: true
+            signature_crossrefs: true
+            unwrap_annotated: true
+            filters:
+              - "!^_"
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+
+nav:
+  - Home: index.md
+  - API Reference:
+      - Overview: reference/index.md
+      - Sopp Engine: reference/sopp.md
+      - Models: reference/models.md
+      - Analysis: reference/analysis.md
+      - Configuration: reference/config.md
+      - Filtering: reference/filtering.md
+      - Ephemeris: reference/ephemeris.md
+      - Pointing: reference/pointing.md
+      - I/O: reference/io.md

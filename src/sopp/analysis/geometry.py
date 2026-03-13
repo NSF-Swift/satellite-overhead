@@ -102,8 +102,10 @@ def calculate_angular_separation(
     Calculates the angular separation between two sets of coordinates.
 
     Args:
-        az1, alt1: Coordinates of the first object (e.g., Satellite) in degrees.
-        az2, alt2: Coordinates of the second object (e.g., Antenna pointing) in degrees.
+        az1: Azimuth of the first object in degrees.
+        alt1: Altitude of the first object in degrees.
+        az2: Azimuth of the second object in degrees.
+        alt2: Altitude of the second object in degrees.
 
     Returns:
         The angular separation in degrees.
