@@ -1,3 +1,5 @@
+"""Receiver antenna characteristics for a ground facility."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

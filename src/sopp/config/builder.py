@@ -1,3 +1,5 @@
+"""Fluent builder for constructing simulation configurations."""
+
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -28,6 +30,24 @@ if TYPE_CHECKING:
 
 
 class ConfigurationBuilder:
+    """Fluent API for constructing a Configuration.
+
+    Call setter methods in any order, then call ``build()`` to produce
+    a validated Configuration. All setter methods return ``self`` for chaining.
+
+    Example::
+
+        config = (
+            ConfigurationBuilder()
+            .set_facility(lat, lon, elev, name, Receiver(beamwidth=3))
+            .set_frequency_range(bandwidth=10, frequency=135)
+            .set_time_window(begin="2024-01-01T00:00:00", end="2024-01-01T01:00:00")
+            .set_observation_target(declination="7d24m25s", right_ascension="5h55m10s")
+            .load_satellites(tle_file="satellites.tle")
+            .build()
+        )
+    """
+
     def __init__(
         self,
     ):
@@ -50,6 +70,7 @@ class ConfigurationBuilder:
         name: str,
         receiver: Receiver,
     ) -> ConfigurationBuilder:
+        """Set the observation facility location and receiver characteristics."""
         self.facility = Facility(
             coordinates=Coordinates(latitude=latitude, longitude=longitude),
             receiver=receiver,
@@ -59,6 +80,7 @@ class ConfigurationBuilder:
         return self
 
     def set_frequency_range(self, bandwidth: float, frequency: float):
+        """Set the observation frequency band in MHz."""
         self.frequency_range = FrequencyRange(
             bandwidth=bandwidth,
             frequency=frequency,
@@ -70,6 +92,7 @@ class ConfigurationBuilder:
         begin: str | datetime,
         end: str | datetime,
     ) -> ConfigurationBuilder:
+        """Set the observation time window. Strings are parsed as ISO 8601 UTC."""
         self.time_window = TimeWindow(
             begin=parse_time_and_convert_to_utc(begin),
             end=parse_time_and_convert_to_utc(end),
@@ -84,6 +107,13 @@ class ConfigurationBuilder:
         azimuth: float | None = None,
         custom_antenna_trajectory: AntennaTrajectory | None = None,
     ) -> ConfigurationBuilder:
+        """Set the antenna pointing mode.
+
+        Provide exactly one of:
+            - ``custom_antenna_trajectory``: explicit az/alt path over time.
+            - ``altitude`` and ``azimuth``: fixed pointing direction.
+            - ``declination`` and ``right_ascension``: celestial target to track.
+        """
         # Option 1: Custom
         if custom_antenna_trajectory:
             self.antenna_config = CustomTrajectoryConfig(custom_antenna_trajectory)
@@ -109,12 +139,14 @@ class ConfigurationBuilder:
         return self
 
     def set_satellites(self, satellites: list[Satellite]) -> ConfigurationBuilder:
+        """Set the satellite list directly."""
         self.satellites = satellites
         return self
 
     def load_satellites(
         self, tle_file: str | Path, frequency_file: str | Path | None = None
     ) -> ConfigurationBuilder:
+        """Load satellites from a TLE file, optionally attaching frequency data."""
         self.satellites = load_satellites(
             tle_file=Path(tle_file),
             frequency_file=Path(frequency_file) if frequency_file else None,
@@ -127,6 +159,7 @@ class ConfigurationBuilder:
         concurrency_level: int = 1,
         min_altitude: float = 0.0,
     ) -> ConfigurationBuilder:
+        """Set simulation resolution, parallelism, and minimum altitude."""
         self.runtime_settings = RuntimeSettings(
             concurrency_level=concurrency_level,
             time_resolution_seconds=time_resolution_seconds,
@@ -139,6 +172,7 @@ class ConfigurationBuilder:
         config_file: Path,
         loader_class: type[ConfigFileLoaderBase] = ConfigFileLoaderJson,
     ) -> ConfigurationBuilder:
+        """Load facility, frequency, time, and antenna settings from a config file."""
         loader = loader_class(filepath=config_file)
 
         self.frequency_range = loader.frequency_range
@@ -150,14 +184,21 @@ class ConfigurationBuilder:
         return self
 
     def set_satellites_filter(self, filterer: Filterer) -> ConfigurationBuilder:
+        """Replace the satellite filter with a pre-built Filterer."""
         self._filterer = filterer
         return self
 
     def add_filter(self, filter_fn: Callable[[Satellite], bool]):
+        """Add a single satellite filter function."""
         self._filterer.add_filter(filter_fn)
         return self
 
     def build(self) -> Configuration:
+        """Validate all settings and produce a Configuration.
+
+        Raises:
+            ValueError: If any required setting is missing.
+        """
         facility = self.facility
         time_window = self.time_window
         frequency = self.frequency_range

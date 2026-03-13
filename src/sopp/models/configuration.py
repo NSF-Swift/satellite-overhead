@@ -1,3 +1,5 @@
+"""Simulation configuration and runtime settings."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -12,19 +14,13 @@ if TYPE_CHECKING:
 
 @dataclass
 class RuntimeSettings:
-    """
-    Configuration settings for controlling the execution and precision of the EventFinder.
+    """Controls execution and precision of the simulation.
 
     Attributes:
-        time_resolution_seconds (float): The step size (granularity) of the simulation
-            grid in seconds.
-            (Default: 1.0)
-        concurrency_level (int): The number of parallel processes to spawn for
-            calculating satellite windows.
-            (Default: 1)
-        min_altitude (float): The minimum elevation angle (in degrees) required for
-            a satellite to be considered visible or "above the horizon".
-            (Default: 0.0)
+        time_resolution_seconds: Step size of the simulation grid in seconds.
+        concurrency_level: Number of parallel processes for satellite calculations.
+        min_altitude: Minimum elevation angle in degrees for a satellite to be
+            considered above the horizon.
     """
 
     time_resolution_seconds: float = field(default=1)
@@ -42,16 +38,24 @@ class RuntimeSettings:
 
 @dataclass
 class Configuration:
+    """Complete simulation configuration.
+
+    Combines the observation reservation, satellite list, antenna pointing
+    mode, and runtime settings. Validates all fields on construction.
+
+    Attributes:
+        reservation: Facility, time window, and frequency.
+        satellites: List of satellites to analyze.
+        antenna_config: How the antenna is pointed during the observation.
+        runtime_settings: Execution parameters (resolution, concurrency, etc.).
+    """
+
     reservation: Reservation
     satellites: list[Satellite]
     antenna_config: AntennaConfig
     runtime_settings: RuntimeSettings = field(default_factory=RuntimeSettings)
 
     def __post_init__(self):
-        """
-        Validates the configuration.
-        Raises ValueError if state is invalid.
-        """
         self._validate_satellites()
         self._validate_reservation()
         self._validate_settings()

@@ -1,7 +1,12 @@
+"""Interference detection strategies at varying fidelity levels.
+
+Strategies range from binary geometric detection (Tier 0) to full
+link budget calculations with angle-dependent gains (Tier 2).
+"""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -12,32 +17,13 @@ from sopp.analysis.geometry import (
     calculate_nadir_angle,
 )
 from sopp.analysis.link_budget import free_space_path_loss_db, received_power_dbw
+from sopp.models.interference import InterferenceResult
 from sopp.models.satellite.trajectory import SatelliteTrajectory
 
 if TYPE_CHECKING:
     from sopp.models.core import FrequencyRange
     from sopp.models.ground.facility import Facility
     from sopp.models.ground.trajectory import AntennaTrajectory
-
-
-@dataclass
-class InterferenceResult:
-    """The output of any interference strategy.
-
-    Wraps a SatelliteTrajectory (the interfering segment) with optional
-    quantitative interference data. All strategies produce this same
-    structure, making them interchangeable.
-    """
-
-    trajectory: SatelliteTrajectory
-
-    # Quantitative interference level (strategy-dependent, may be None).
-    # For geometric: None (binary detection only).
-    # For gain-based: antenna gain in dB.
-    # For link budget: received power in dBW.
-    interference_level: np.ndarray | None = None
-    level_units: str | None = None
-    metadata: dict | None = None
 
 
 class InterferenceStrategy(ABC):

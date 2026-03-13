@@ -1,3 +1,5 @@
+"""Antenna pointing trajectory over time."""
+
 from dataclasses import dataclass
 from functools import cached_property
 
@@ -7,6 +9,14 @@ import numpy.typing as npt
 
 @dataclass
 class AntennaTrajectory:
+    """Time series of antenna azimuth/altitude positions.
+
+    Attributes:
+        times: 1D array of datetime objects (UTC).
+        azimuth: 1D array of azimuth angles in degrees.
+        altitude: 1D array of elevation angles in degrees.
+    """
+
     times: npt.NDArray[np.object_]
     azimuth: npt.NDArray[np.float64]
     altitude: npt.NDArray[np.float64]
@@ -15,8 +25,13 @@ class AntennaTrajectory:
         return len(self.times)
 
     def get_state_at(self, query_times: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-        """
-        Interpolates the antenna position for the requested query_times.
+        """Interpolate antenna az/alt at the given times.
+
+        Args:
+            query_times: Array of datetime objects to interpolate at.
+
+        Returns:
+            Tuple of (azimuth, altitude) arrays in degrees.
         """
         # Convert datetimes to float timestamps for interpolation
         query_timestamps = np.array([t.timestamp() for t in query_times])

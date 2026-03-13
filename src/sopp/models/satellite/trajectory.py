@@ -1,3 +1,5 @@
+"""Satellite trajectory data model and I/O."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

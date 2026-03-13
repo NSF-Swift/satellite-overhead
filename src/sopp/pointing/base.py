@@ -1,3 +1,5 @@
+"""Abstract base for antenna pointing calculators."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -13,9 +15,7 @@ if TYPE_CHECKING:
 
 
 class PointingCalculator(ABC):
-    """
-    Abstract base for engines that calculate where the antenna is pointing over time.
-    """
+    """Computes where the antenna points over time for a given celestial target."""
 
     def __init__(
         self,
@@ -31,7 +31,14 @@ class PointingCalculator(ABC):
     def calculate_trajectory(
         self, resolution_seconds: float = 1.0, time_grid: np.ndarray | None = None
     ) -> AntennaTrajectory:
-        """
-        Generates the vector of Az/Alt positions for the antenna.
+        """Compute the antenna az/alt trajectory.
+
+        Args:
+            resolution_seconds: Time step if generating a new grid.
+            time_grid: Pre-computed time grid. If provided, resolution_seconds
+                is ignored.
+
+        Returns:
+            AntennaTrajectory with positions at each time step.
         """
         pass

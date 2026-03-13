@@ -13,6 +13,7 @@ from .ground import (
     Receiver,
     StaticPointingConfig,
 )
+from .interference import InterferenceResult
 from .reservation import Reservation
 from .satellite import (
     InternationalDesignator,
@@ -44,6 +45,8 @@ __all__ = [
     "ObservationTarget",
     "Receiver",
     "StaticPointingConfig",
+    # Analysis
+    "InterferenceResult",
     # Satellite
     "Satellite",
     "SatelliteTrajectory",

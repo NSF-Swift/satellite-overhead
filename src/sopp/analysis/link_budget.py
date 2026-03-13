@@ -1,3 +1,5 @@
+"""Free space path loss and Friis equation calculations."""
+
 from __future__ import annotations
 
 import numpy as np

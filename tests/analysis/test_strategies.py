@@ -6,7 +6,6 @@ from tests.conftest import ARBITRARY_ALTITUDE, ARBITRARY_AZIMUTH
 
 from sopp.analysis.strategies import (
     GeometricStrategy,
-    InterferenceResult,
     NadirLinkBudgetStrategy,
     PatternLinkBudgetStrategy,
     SimpleLinkBudgetStrategy,
@@ -14,6 +13,7 @@ from sopp.analysis.strategies import (
 from sopp.models.antenna import AntennaPattern
 from sopp.models.core import FrequencyRange
 from sopp.models.ground.trajectory import AntennaTrajectory
+from sopp.models.interference import InterferenceResult
 from sopp.models.satellite.trajectory import SatelliteTrajectory
 from sopp.models.satellite.transmitter import Transmitter
 from sopp.utils.time import generate_time_grid

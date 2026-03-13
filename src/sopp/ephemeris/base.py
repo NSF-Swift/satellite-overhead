@@ -1,3 +1,5 @@
+"""Abstract base for ephemeris (orbital position) calculators."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -15,8 +17,10 @@ if TYPE_CHECKING:
 
 
 class EphemerisCalculator(ABC):
-    """
-    Abstract contract for the physics engine.
+    """Computes satellite positions relative to a ground facility.
+
+    Implementations use a specific physics engine (e.g. Skyfield/SGP4)
+    to calculate satellite visibility windows and trajectories.
     """
 
     @abstractmethod

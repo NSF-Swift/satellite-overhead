@@ -12,7 +12,7 @@ dependencies = [
 ]
 requires-python = ">=3.8"
 description = "SOPP is an open-source tool for calculating satellite interference to radio astronomy observations."
-readme = "quickstart.md"
+readme = "README.md"
 license = "AGPL-3.0-or-later"
 keywords = ["satellites", "astronomy"]
 classifiers = [
@@ -28,8 +28,14 @@ cli = [
     "rich>=13.0.0",
     "typer>=0.9.0",
 ]
+docs = [
+    "mkdocs-material",
+    "mkdocstrings[python]",
+    "ruff",
+]
 
 [project.urls]
+Documentation = "https://nsf-swift.github.io/satellite-overhead"
 Repository = "https://github.com/NSF-Swift/satellite-overhead"
 "Bug Tracker" = "https://github.com/NSF-Swift/satellite-overhead/issues"
 
@@ -69,6 +75,15 @@ python = ["3.10", "3.11", "3.12"]
 [tool.hatch.envs.ci]
 template = "test"
 dev-mode = false
+
+[tool.hatch.envs.docs]
+features = ["docs"]
+dependencies = []
+
+[tool.hatch.envs.docs.scripts]
+serve = "mkdocs serve"
+build = "mkdocs build --strict"
+deploy = "mkdocs gh-deploy --force"
 
 [tool.hatch.envs.lint]
 detached = true

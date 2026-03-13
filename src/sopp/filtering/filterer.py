@@ -1,3 +1,5 @@
+"""Composable satellite filter chain."""
+
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -8,41 +10,32 @@ if TYPE_CHECKING:
 
 
 class Filterer:
-    """
-    A utility class for applying filters to a list of elements.
+    """Applies a chain of filter functions to a satellite list.
 
-    Attributes:
-    - _filters (List[Callable[[T], bool]]): List of filter functions to be applied.
+    Filters are combined with AND logic: a satellite must pass every
+    filter to be included in the output. Supports method chaining.
 
-    Methods:
-    - add_filter(filter_lambda: Callable[[T], bool]) -> Filterer:
-        Adds a filter function to the list of filters.
+    Example::
 
-        Parameters:
-        - filter_lambda (Callable[[T], bool]): The filter function to be added.
-
-        Returns:
-        - Filterer: Returns the Filterer instance for method chaining.
-
-    - apply_filters(elements: List[T]) -> List[T]:
-        Applies the stored filters to the provided list of elements.
-
-        Parameters:
-        - elements (list[T]): The list of elements to be filtered.
-
-        Returns:
-        - List[T]: A new list containing only the elements that pass all applied filters.
+        filterer = (
+            Filterer()
+            .add_filter(filter_name_contains("STARLINK"))
+            .add_filter(filter_orbit_is("leo"))
+        )
+        filtered = filterer.apply_filters(satellites)
     """
 
     def __init__(self):
         self._filters: list[Callable[[Satellite], bool]] = []
 
     def add_filter(self, filter_lambda: Callable[[Satellite], bool]):
+        """Add a filter function. Returns self for chaining."""
         if filter_lambda:
             self._filters.append(filter_lambda)
         return self
 
-    def apply_filters(self, elements: list[Satellite]):
+    def apply_filters(self, elements: list[Satellite]) -> list[Satellite]:
+        """Return only satellites that pass all filters."""
         return [
             element for element in elements if all(f(element) for f in self._filters)
         ]
