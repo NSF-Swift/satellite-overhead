@@ -3,6 +3,7 @@ from sopp.filtering.presets import (
     filter_name_does_not_contain,
     filter_orbit_is,
 )
+from sopp.models.ground.receiver import Receiver
 from sopp.sopp import Sopp
 
 
@@ -14,7 +15,7 @@ def main():
             longitude=-121.4695413,
             elevation=986,
             name="HCRO",
-            beamwidth=3,
+            receiver=Receiver(beamwidth=3),
         )
         .set_frequency_range(bandwidth=10, frequency=135)
         .set_time_window(begin="2025-12-10T08:00:00.0", end="2025-12-10T08:30:00.0")

@@ -16,11 +16,15 @@ pip install "sopp[cli]"
 
 ```python
 from sopp.config.builder import ConfigurationBuilder
+from sopp.models.ground.receiver import Receiver
 from sopp.sopp import Sopp
 
 config = (
     ConfigurationBuilder()
-    .set_facility(name="HCRO", latitude=40.8178, longitude=-121.4695, beamwidth=3)
+    .set_facility(
+        latitude=40.8178, longitude=-121.4695, elevation=986, name="HCRO",
+        receiver=Receiver(beamwidth=3),
+    )
     .set_time_window(begin="2026-01-13T19:00:00", end="2026-01-13T20:00:00")
     .set_frequency_range(frequency=135, bandwidth=10)
     .set_observation_target(declination="40d44m", right_ascension="19h59m")
@@ -32,7 +36,7 @@ engine = Sopp(config)
 interference = engine.get_satellites_crossing_main_beam()
 
 for event in interference:
-    print(f"{event.satellite.name}: max elev {event.altitude.max():.1f} deg")
+    print(f"{event.satellite.name}: peak elev {event.peak_elevation:.1f} deg")
 ```
 
 See the [examples/](https://github.com/NSF-Swift/satellite-overhead/tree/main/examples) directory for more complete usage.
