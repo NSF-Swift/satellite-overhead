@@ -1,10 +1,13 @@
 """Smoke tests for example scripts to ensure they stay in sync with the API."""
 
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 EXAMPLES_DIR = Path(__file__).parent.parent / "examples"
+REPO_ROOT = EXAMPLES_DIR.parent
+TEST_TLE = Path(__file__).parent / "io" / "load_satellites" / "satellites.tle"
 
 
 def _run_example(name: str):
@@ -15,7 +18,7 @@ def _run_example(name: str):
         capture_output=True,
         text=True,
         timeout=120,
-        cwd=str(EXAMPLES_DIR.parent),
+        cwd=str(REPO_ROOT),
     )
     assert result.returncode == 0, (
         f"{name} failed with exit code {result.returncode}:\n"
@@ -25,7 +28,17 @@ def _run_example(name: str):
 
 
 def test_example_runs():
-    _run_example("example.py")
+    """Copies a test TLE to the repo root if needed, then runs the example."""
+    tle_dest = REPO_ROOT / "satellites.tle"
+    created = False
+    if not tle_dest.exists():
+        shutil.copy(TEST_TLE, tle_dest)
+        created = True
+    try:
+        _run_example("example.py")
+    finally:
+        if created:
+            tle_dest.unlink()
 
 
 def test_example_persistence_runs():
