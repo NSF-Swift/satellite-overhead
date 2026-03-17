@@ -1,5 +1,3 @@
-import numpy as np
-
 from sopp.config.builder import ConfigurationBuilder
 from sopp.filtering.presets import (
     filter_name_does_not_contain,
@@ -55,8 +53,6 @@ def main():
     print("==============================================================\n")
 
     for i, satellite_traj in enumerate(interference_events, start=1):
-        max_alt = np.max(satellite_traj.altitude)
-
         print(f"Satellite interference event #{i}:")
         print(f"Satellite: {satellite_traj.satellite.name}")
         print(
@@ -69,7 +65,9 @@ def main():
             f"{satellite_traj.azimuth[-1]:.2f} "
             f"Distance: {satellite_traj.distance_km[-1]:.2f} km"
         )
-        print(f"Satellite maximum altitude: {max_alt:.2f}")
+        print(f"Peak elevation: {satellite_traj.peak_elevation:.2f} deg")
+        print(f"Duration: {satellite_traj.duration_seconds:.1f} seconds")
+        print(f"Complete pass: {satellite_traj.is_complete}")
         print("__________________________________________________\n")
 
 

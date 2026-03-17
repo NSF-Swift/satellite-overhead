@@ -154,14 +154,10 @@ interference_events = engine.get_satellites_crossing_main_beam()
 print(f"Found {len(interference_events)} interference events:")
 
 for event in interference_events:
-    start = event.times[0]
-    end = event.times[-1]
-    duration = (end - start).total_seconds()
-
     print(f"--- {event.satellite.name} ---")
-    print(f"  Window:   {start} -> {end}")
-    print(f"  Duration: {duration:.1f} seconds")
-    print(f"  Max Elev: {event.altitude.max():.1f} deg")
+    print(f"  Window:   {event.overhead_time.begin} -> {event.overhead_time.end}")
+    print(f"  Duration: {event.duration_seconds:.1f} seconds")
+    print(f"  Peak Elev: {event.peak_elevation:.1f} deg")
 ```
 
 ## Data Sources
