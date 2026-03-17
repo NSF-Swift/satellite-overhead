@@ -131,10 +131,12 @@ class SatelliteTrajectory:
         """Compute the rate of change in degrees/second."""
         if len(values) < 2:
             return np.array([], dtype=np.float64)
-        dt = np.array([
-            (self.times[i + 1] - self.times[i]).total_seconds()
-            for i in range(len(self.times) - 1)
-        ])
+        dt = np.array(
+            [
+                (self.times[i + 1] - self.times[i]).total_seconds()
+                for i in range(len(self.times) - 1)
+            ]
+        )
         dt = np.where(dt == 0, 1e-9, dt)
         return np.diff(values) / dt
 

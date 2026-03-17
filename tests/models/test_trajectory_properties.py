@@ -3,7 +3,6 @@
 from datetime import datetime, timedelta, timezone
 
 import numpy as np
-import pytest
 
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.satellite.trajectory import SatelliteTrajectory

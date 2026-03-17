@@ -42,10 +42,12 @@ class TestAltazToRadec:
 
     def test_vectorized(self):
         facility = _make_facility()
-        times = np.array([
-            datetime(2026, 3, 17, 12, 0, i * 10, tzinfo=timezone.utc)
-            for i in range(5)
-        ])
+        times = np.array(
+            [
+                datetime(2026, 3, 17, 12, 0, i * 10, tzinfo=timezone.utc)
+                for i in range(5)
+            ]
+        )
         az = np.linspace(150, 210, 5)
         el = np.linspace(30, 60, 5)
 
@@ -57,9 +59,7 @@ class TestAltazToRadec:
 
     def test_empty_arrays(self):
         facility = _make_facility()
-        ra, dec = altaz_to_radec(
-            np.array([]), np.array([]), np.array([]), facility
-        )
+        ra, dec = altaz_to_radec(np.array([]), np.array([]), np.array([]), facility)
         assert len(ra) == 0
         assert len(dec) == 0
 
