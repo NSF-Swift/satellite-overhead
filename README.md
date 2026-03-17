@@ -126,13 +126,15 @@ SOPP is designed to be imported and used directly in Python scripts/projects.
 ```python
 from sopp.config.builder import ConfigurationBuilder
 from sopp.filtering.presets import filter_name_does_not_contain
+from sopp.models.ground.receiver import Receiver
 from sopp.sopp import Sopp
 
 # Build Configuration
 config = (
     ConfigurationBuilder()
     .set_facility(
-        latitude=40.8, longitude=-121.4, elevation=986, name="HCRO", beamwidth=3
+        latitude=40.8, longitude=-121.4, elevation=986, name="HCRO",
+        receiver=Receiver(beamwidth=3),
     )
     .set_runtime_settings(concurrency_level=4)
     .set_time_window(begin="2026-01-13T19:00:00", end="2026-01-13T20:00:00")
@@ -154,14 +156,10 @@ interference_events = engine.get_satellites_crossing_main_beam()
 print(f"Found {len(interference_events)} interference events:")
 
 for event in interference_events:
-    start = event.times[0]
-    end = event.times[-1]
-    duration = (end - start).total_seconds()
-
     print(f"--- {event.satellite.name} ---")
-    print(f"  Window:   {start} -> {end}")
-    print(f"  Duration: {duration:.1f} seconds")
-    print(f"  Max Elev: {event.altitude.max():.1f} deg")
+    print(f"  Window:   {event.overhead_time.begin} -> {event.overhead_time.end}")
+    print(f"  Duration: {event.duration_seconds:.1f} seconds")
+    print(f"  Peak Elev: {event.peak_elevation:.1f} deg")
 ```
 
 ## Data Sources

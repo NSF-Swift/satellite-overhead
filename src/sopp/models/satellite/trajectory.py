@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+from functools import cached_property
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -63,6 +64,81 @@ class SatelliteTrajectory:
         begin = self.times[0]
         end = self.times[-1]
         return TimeWindow(begin=begin, end=end)
+
+    # --- Pass characterization properties ---
+
+    @cached_property
+    def peak_index(self) -> int:
+        """Index of the highest elevation point in the pass."""
+        if len(self.altitude) == 0:
+            return 0
+        return int(np.argmax(self.altitude))
+
+    @cached_property
+    def peak_elevation(self) -> float:
+        """Maximum elevation in degrees."""
+        if len(self.altitude) == 0:
+            return 0.0
+        return float(self.altitude[self.peak_index])
+
+    @cached_property
+    def peak_time(self) -> datetime | None:
+        """Time at which the satellite reaches peak elevation."""
+        if len(self.times) == 0:
+            return None
+        return self.times[self.peak_index]
+
+    @cached_property
+    def duration_seconds(self) -> float:
+        """Total duration of the pass in seconds."""
+        if len(self.times) < 2:
+            return 0.0
+        return (self.times[-1] - self.times[0]).total_seconds()
+
+    @cached_property
+    def azimuth_rate(self) -> npt.NDArray[np.float64]:
+        """Azimuth angular rate in degrees/second.
+
+        Returns an array with one fewer element than the input arrays.
+        Each value represents the rate between consecutive time steps.
+        """
+        return self._compute_rate(self.azimuth)
+
+    @cached_property
+    def altitude_rate(self) -> npt.NDArray[np.float64]:
+        """Elevation angular rate in degrees/second.
+
+        Returns an array with one fewer element than the input arrays.
+        Each value represents the rate between consecutive time steps.
+        """
+        return self._compute_rate(self.altitude)
+
+    @property
+    def is_complete(self) -> bool:
+        """True if the pass rose and set within the observation window.
+
+        A complete pass has its peak elevation roughly centered in time,
+        meaning we captured the full rise-peak-set arc rather than catching
+        just the beginning or tail end.
+        """
+        n = len(self.altitude)
+        if n < 3:
+            return False
+        quarter = max(1, n // 4)
+        return quarter < self.peak_index < n - quarter
+
+    def _compute_rate(self, values: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
+        """Compute the rate of change in degrees/second."""
+        if len(values) < 2:
+            return np.array([], dtype=np.float64)
+        dt = np.array(
+            [
+                (self.times[i + 1] - self.times[i]).total_seconds()
+                for i in range(len(self.times) - 1)
+            ]
+        )
+        dt = np.where(dt == 0, 1e-9, dt)
+        return np.diff(values) / dt
 
     def save(
         self,

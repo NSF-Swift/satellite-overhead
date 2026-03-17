@@ -63,3 +63,4 @@ nav:
       - Ephemeris: reference/ephemeris.md
       - Pointing: reference/pointing.md
       - I/O: reference/io.md
+      - Utilities: reference/utils.md
