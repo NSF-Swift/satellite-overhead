@@ -36,6 +36,8 @@ Data structures used throughout SOPP.
 
 ::: sopp.models.satellite.trajectory.SatelliteTrajectory
 
+::: sopp.models.satellite.trajectory_set.TrajectorySet
+
 ::: sopp.models.satellite.tle.TleInformation
 
 ::: sopp.models.satellite.transmitter.Transmitter
