@@ -376,15 +376,17 @@ def test_analyze_with_preloaded_trajectories(
     )
 
     # Pre-built trajectory at ARBITRARY position (simulates loading from file)
-    preloaded = TrajectorySet([
-        SatelliteTrajectory(
-            satellite=satellite,
-            times=times,
-            azimuth=np.full(len(times), ARBITRARY_AZIMUTH),
-            altitude=np.full(len(times), ARBITRARY_ALTITUDE),
-            distance_km=np.full(len(times), 500.0),
-        )
-    ])
+    preloaded = TrajectorySet(
+        [
+            SatelliteTrajectory(
+                satellite=satellite,
+                times=times,
+                azimuth=np.full(len(times), ARBITRARY_AZIMUTH),
+                altitude=np.full(len(times), ARBITRARY_ALTITUDE),
+                distance_km=np.full(len(times), 500.0),
+            )
+        ]
+    )
 
     # Antenna matches satellite
     antenna_traj = AntennaTrajectory(

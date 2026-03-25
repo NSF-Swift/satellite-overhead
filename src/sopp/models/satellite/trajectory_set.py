@@ -91,13 +91,15 @@ class TrajectorySet:
             result = [t for t in result if name.lower() in t.satellite.name.lower()]
         if max_az_rate is not None:
             result = [
-                t for t in result
+                t
+                for t in result
                 if len(t.azimuth_rate) > 0
                 and np.max(np.abs(t.azimuth_rate)) < max_az_rate
             ]
         if max_el_rate is not None:
             result = [
-                t for t in result
+                t
+                for t in result
                 if len(t.altitude_rate) > 0
                 and np.max(np.abs(t.altitude_rate)) < max_el_rate
             ]

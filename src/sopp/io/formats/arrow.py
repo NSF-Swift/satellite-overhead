@@ -165,15 +165,17 @@ class ArrowFormat:
             raise TrajectoryFileNotFoundError(f"File not found: {path}")
 
         table = self._read_arrow_file(path)
-        return TrajectorySet(self._table_to_trajectories(
-            table,
-            time_range=time_range,
-            time_col=time_col,
-            azimuth_col=azimuth_col,
-            elevation_col=elevation_col,
-            distance_col=distance_col,
-            sat_col=sat_col,
-        ))
+        return TrajectorySet(
+            self._table_to_trajectories(
+                table,
+                time_range=time_range,
+                time_col=time_col,
+                azimuth_col=azimuth_col,
+                elevation_col=elevation_col,
+                distance_col=distance_col,
+                sat_col=sat_col,
+            )
+        )
 
     def generate_filename(self, start_time: datetime, end_time: datetime) -> str:
         """Generate a standard filename for a trajectory file."""

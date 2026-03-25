@@ -24,9 +24,7 @@ def plot_trajectories(trajectory_set: TrajectorySet):
         if t.peak_time is not None:
             ax.plot(t.peak_time, t.peak_elevation, "k.", ms=4)
 
-    ax.axvline(
-        datetime.now(timezone.utc), color="g", ls="--", alpha=0.5, label="now"
-    )
+    ax.axvline(datetime.now(timezone.utc), color="g", ls="--", alpha=0.5, label="now")
     ax.set_xlabel("UTC")
     ax.set_ylabel("Elevation (deg)")
     ax.grid(True, alpha=0.3)

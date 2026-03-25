@@ -52,20 +52,24 @@ class TestTrajectorySetBasics:
         assert ts[0].satellite.name == "A"
 
     def test_slice_returns_trajectory_set(self):
-        ts = TrajectorySet([
-            _make_trajectory(name="A"),
-            _make_trajectory(name="B"),
-            _make_trajectory(name="C"),
-        ])
+        ts = TrajectorySet(
+            [
+                _make_trajectory(name="A"),
+                _make_trajectory(name="B"),
+                _make_trajectory(name="C"),
+            ]
+        )
         sliced = ts[0:2]
         assert isinstance(sliced, TrajectorySet)
         assert len(sliced) == 2
 
     def test_sorted_by_peak_time(self):
-        ts = TrajectorySet([
-            _make_trajectory(name="LATER", peak_time_offset_min=20),
-            _make_trajectory(name="EARLIER", peak_time_offset_min=0),
-        ])
+        ts = TrajectorySet(
+            [
+                _make_trajectory(name="LATER", peak_time_offset_min=20),
+                _make_trajectory(name="EARLIER", peak_time_offset_min=0),
+            ]
+        )
         assert ts[0].satellite.name == "EARLIER"
 
     def test_to_list(self):
@@ -87,18 +91,22 @@ class TestTrajectorySetBasics:
 
 class TestTrajectorySetFilter:
     def test_filter_min_el(self):
-        ts = TrajectorySet([
-            _make_trajectory(peak_el=30),
-            _make_trajectory(peak_el=60),
-        ])
+        ts = TrajectorySet(
+            [
+                _make_trajectory(peak_el=30),
+                _make_trajectory(peak_el=60),
+            ]
+        )
         result = ts.filter(min_el=50)
         assert len(result) == 1
 
     def test_filter_max_el(self):
-        ts = TrajectorySet([
-            _make_trajectory(peak_el=30),
-            _make_trajectory(peak_el=60),
-        ])
+        ts = TrajectorySet(
+            [
+                _make_trajectory(peak_el=30),
+                _make_trajectory(peak_el=60),
+            ]
+        )
         result = ts.filter(max_el=50)
         assert len(result) == 1
 
@@ -106,10 +114,12 @@ class TestTrajectorySetFilter:
         complete = _make_trajectory(peak_el=50, duration_points=21)
         incomplete = SatelliteTrajectory(
             satellite=Satellite(name="PARTIAL", tle_information=None, frequency=[]),
-            times=np.array([
-                datetime(2026, 3, 15, 12, 0, i * 10, tzinfo=timezone.utc)
-                for i in range(5)
-            ]),
+            times=np.array(
+                [
+                    datetime(2026, 3, 15, 12, 0, i * 10, tzinfo=timezone.utc)
+                    for i in range(5)
+                ]
+            ),
             azimuth=np.array([100, 120, 140, 160, 180]),
             altitude=np.array([40, 50, 60, 70, 80]),
             distance_km=np.full(5, 550.0),
@@ -119,19 +129,23 @@ class TestTrajectorySetFilter:
         assert len(result) == 1
 
     def test_filter_by_name(self):
-        ts = TrajectorySet([
-            _make_trajectory(name="STARLINK-1234 [DTC]"),
-            _make_trajectory(name="ONEWEB-100"),
-        ])
+        ts = TrajectorySet(
+            [
+                _make_trajectory(name="STARLINK-1234 [DTC]"),
+                _make_trajectory(name="ONEWEB-100"),
+            ]
+        )
         result = ts.filter(name="starlink")
         assert len(result) == 1
 
     def test_filter_chaining(self):
-        ts = TrajectorySet([
-            _make_trajectory(name="A", peak_el=30),
-            _make_trajectory(name="B", peak_el=60),
-            _make_trajectory(name="C", peak_el=80),
-        ])
+        ts = TrajectorySet(
+            [
+                _make_trajectory(name="A", peak_el=30),
+                _make_trajectory(name="B", peak_el=60),
+                _make_trajectory(name="C", peak_el=80),
+            ]
+        )
         result = ts.filter(min_el=25, max_el=70)
         assert len(result) == 2
 
@@ -143,13 +157,15 @@ class TestTrajectorySetFilter:
 
 class TestTrajectorySetSelect:
     def test_selects_with_separation(self):
-        ts = TrajectorySet([
-            _make_trajectory(name="A", peak_time_offset_min=0),
-            _make_trajectory(name="B", peak_time_offset_min=5),
-            _make_trajectory(name="C", peak_time_offset_min=20),
-            _make_trajectory(name="D", peak_time_offset_min=25),
-            _make_trajectory(name="E", peak_time_offset_min=40),
-        ])
+        ts = TrajectorySet(
+            [
+                _make_trajectory(name="A", peak_time_offset_min=0),
+                _make_trajectory(name="B", peak_time_offset_min=5),
+                _make_trajectory(name="C", peak_time_offset_min=20),
+                _make_trajectory(name="D", peak_time_offset_min=25),
+                _make_trajectory(name="E", peak_time_offset_min=40),
+            ]
+        )
         selected = ts.select(min_separation_min=14)
         names = [t.satellite.name for t in selected]
         assert "A" in names
@@ -164,10 +180,12 @@ class TestTrajectorySetSelect:
         assert isinstance(result, TrajectorySet)
 
     def test_filter_then_select(self):
-        ts = TrajectorySet([
-            _make_trajectory(peak_el=20, peak_time_offset_min=0),
-            _make_trajectory(peak_el=50, peak_time_offset_min=20),
-        ])
+        ts = TrajectorySet(
+            [
+                _make_trajectory(peak_el=20, peak_time_offset_min=0),
+                _make_trajectory(peak_el=50, peak_time_offset_min=20),
+            ]
+        )
         selected = ts.filter(min_el=30).select()
         assert len(selected) == 1
 
