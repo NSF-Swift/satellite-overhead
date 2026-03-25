@@ -16,6 +16,7 @@ from sopp.models.satellite.satellite import Satellite
 
 if TYPE_CHECKING:
     from sopp.io.formats.base import TrajectoryFormat
+    from sopp.models.satellite.trajectory_set import TrajectorySet
 
 
 @dataclass
@@ -194,7 +195,7 @@ class SatelliteTrajectory:
         *,
         format: TrajectoryFormat | None = None,
         time_range: tuple[datetime, datetime] | None = None,
-    ):
+    ) -> TrajectorySet:
         """Load trajectories from a file.
 
         Args:
