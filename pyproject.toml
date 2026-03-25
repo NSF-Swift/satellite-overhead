@@ -28,6 +28,14 @@ cli = [
     "rich>=13.0.0",
     "typer>=0.9.0",
 ]
+plotting = [
+    "matplotlib>=3.7.0",
+]
+all = [
+    "rich>=13.0.0",
+    "typer>=0.9.0",
+    "matplotlib>=3.7.0",
+]
 docs = [
     "mkdocs-material",
     "mkdocstrings[python]",
