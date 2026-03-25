@@ -7,11 +7,11 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from sopp.io.formats.base import TrajectoryFormat
-    from sopp.models.satellite.trajectory import SatelliteTrajectory
+    from sopp.models.satellite.trajectory_set import TrajectorySet
 
 
 def save_trajectories(
-    trajectories: list[SatelliteTrajectory],
+    trajectories: TrajectorySet,
     path: str | Path,
     *,
     format: TrajectoryFormat | None = None,

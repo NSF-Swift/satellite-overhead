@@ -194,7 +194,7 @@ class SatelliteTrajectory:
         *,
         format: TrajectoryFormat | None = None,
         time_range: tuple[datetime, datetime] | None = None,
-    ) -> list[SatelliteTrajectory]:
+    ):
         """Load trajectories from a file.
 
         Args:
@@ -203,7 +203,7 @@ class SatelliteTrajectory:
             time_range: Optional tuple of (start, end) to filter trajectory data.
 
         Returns:
-            List of loaded trajectories (even for single-trajectory files).
+            TrajectorySet of loaded trajectories.
         """
         if format is None:
             from sopp.io.formats.arrow import ArrowFormat

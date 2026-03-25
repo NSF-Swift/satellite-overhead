@@ -24,6 +24,7 @@ from sopp.models.ground.trajectory import AntennaTrajectory
 from sopp.models.interference import InterferenceResult
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.satellite.trajectory import SatelliteTrajectory
+from sopp.models.satellite.trajectory_set import TrajectorySet
 from sopp.pointing.base import PointingCalculator
 from sopp.pointing.skyfield import PointingCalculatorSkyfield
 from sopp.utils.time import generate_time_grid
@@ -78,7 +79,7 @@ class Sopp:
         self._pointing_calculator_class = pointing_calculator_class
         self._ephemeris_calculator_class = ephemeris_calculator_class
 
-    def get_satellites_above_horizon(self) -> list[SatelliteTrajectory]:
+    def get_satellites_above_horizon(self) -> TrajectorySet:
         """
         Returns trajectories for all satellites that rise above the minimum altitude.
         """
@@ -86,26 +87,28 @@ class Sopp:
         concurrency = self.configuration.runtime_settings.concurrency_level
 
         if concurrency <= 1:
-            return find_satellites_above_horizon(
+            results = find_satellites_above_horizon(
                 reservation=self.configuration.reservation,
                 satellites=satellites,
                 ephemeris_calculator=self.ephemeris_calculator,
                 min_altitude=self.configuration.runtime_settings.min_altitude,
             )
+        else:
+            results = self._compute_trajectories_parallel(satellites=satellites)
 
-        return self._compute_trajectories_parallel(satellites=satellites)
+        return TrajectorySet(results)
 
-    def get_satellites_crossing_main_beam(self) -> list[SatelliteTrajectory]:
+    def get_satellites_crossing_main_beam(self) -> TrajectorySet:
         """
         Returns trajectories for satellites that cross the antenna's main beam.
         """
         trajectories = self.get_satellites_above_horizon()
         results = self.analyze(trajectories, GeometricStrategy())
-        return [r.trajectory for r in results]
+        return TrajectorySet([r.trajectory for r in results])
 
     def analyze(
         self,
-        trajectories: list[SatelliteTrajectory],
+        trajectories: TrajectorySet,
         strategy: InterferenceStrategy,
     ) -> list[InterferenceResult]:
         """Apply an interference strategy to pre-computed trajectories.
@@ -216,7 +219,7 @@ class Sopp:
 
     def save_trajectories(
         self,
-        trajectories: list[SatelliteTrajectory],
+        trajectories: TrajectorySet,
         path: str | Path,
         *,
         format: TrajectoryFormat | None = None,
