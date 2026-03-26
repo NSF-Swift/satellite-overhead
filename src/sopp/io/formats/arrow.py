@@ -16,6 +16,7 @@ from sopp.io.exceptions import (
 
 if TYPE_CHECKING:
     from sopp.models.satellite.trajectory import SatelliteTrajectory
+    from sopp.models.satellite.trajectory_set import TrajectorySet
 
 # Constants for unit conversion
 KM_TO_METERS = 1000.0
@@ -49,7 +50,7 @@ class ArrowFormat:
 
     def save(
         self,
-        trajectories: SatelliteTrajectory | list[SatelliteTrajectory],
+        trajectories: SatelliteTrajectory | TrajectorySet,
         path: Path,
         *,
         observer_name: str | None = None,
@@ -70,17 +71,21 @@ class ArrowFormat:
             Path to the saved file.
         """
         # Normalize to list
-        if not isinstance(trajectories, list):
-            trajectories = [trajectories]
+        from sopp.models.satellite.trajectory import SatelliteTrajectory
 
-        if not trajectories:
+        if isinstance(trajectories, SatelliteTrajectory):
+            traj_list = [trajectories]
+        else:
+            traj_list = list(trajectories)
+
+        if not traj_list:
             raise TrajectoryFormatError("Cannot save empty trajectory list")
 
         path = Path(path)
 
         # Generate filename if path is a directory
         if path.is_dir():
-            first = trajectories[0]
+            first = traj_list[0]
             overhead = first.overhead_time
             if overhead is None:
                 raise TrajectoryFormatError(
@@ -95,7 +100,7 @@ class ArrowFormat:
         dfs = []
         catalog_ids = []
 
-        for traj in trajectories:
+        for traj in traj_list:
             df = pd.DataFrame(
                 {
                     "times": pd.to_datetime(traj.times, utc=True),
@@ -138,7 +143,7 @@ class ArrowFormat:
         elevation_col: str = "elevations",
         distance_col: str = "distances",
         sat_col: str = "sat",
-    ) -> list[SatelliteTrajectory]:
+    ) -> TrajectorySet:
         """Load trajectories from an Arrow file.
 
         Args:
@@ -151,21 +156,25 @@ class ArrowFormat:
             sat_col: Column name for satellite identifier.
 
         Returns:
-            List of trajectories (may be length 1 for single-satellite files).
+            TrajectorySet of loaded trajectories.
         """
+        from sopp.models.satellite.trajectory_set import TrajectorySet
+
         path = Path(path)
         if not path.exists():
             raise TrajectoryFileNotFoundError(f"File not found: {path}")
 
         table = self._read_arrow_file(path)
-        return self._table_to_trajectories(
-            table,
-            time_range=time_range,
-            time_col=time_col,
-            azimuth_col=azimuth_col,
-            elevation_col=elevation_col,
-            distance_col=distance_col,
-            sat_col=sat_col,
+        return TrajectorySet(
+            self._table_to_trajectories(
+                table,
+                time_range=time_range,
+                time_col=time_col,
+                azimuth_col=azimuth_col,
+                elevation_col=elevation_col,
+                distance_col=distance_col,
+                sat_col=sat_col,
+            )
         )
 
     def generate_filename(self, start_time: datetime, end_time: datetime) -> str:

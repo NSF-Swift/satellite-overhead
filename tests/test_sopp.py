@@ -20,6 +20,7 @@ from sopp.models.ground.config import CustomTrajectoryConfig, StaticPointingConf
 from sopp.models.ground.trajectory import AntennaTrajectory
 from sopp.models.interference import InterferenceResult
 from sopp.models.satellite import InternationalDesignator, MeanMotion, TleInformation
+from sopp.models.satellite.trajectory_set import TrajectorySet
 from sopp.sopp import Sopp
 from sopp.utils.time import generate_time_grid
 from tests.conftest import ARBITRARY_ALTITUDE, ARBITRARY_AZIMUTH
@@ -142,10 +143,10 @@ class TestSopp:
 
         # Check Sort Order (Parallel results might come back out of order)
         # We sort by satellite name + start time to compare
-        serial_results.sort(key=lambda x: x.satellite.name)
-        parallel_results.sort(key=lambda x: x.satellite.name)
+        serial_sorted = sorted(serial_results, key=lambda x: x.satellite.name)
+        parallel_sorted = sorted(parallel_results, key=lambda x: x.satellite.name)
 
-        for s_traj, p_traj in zip(serial_results, parallel_results, strict=True):
+        for s_traj, p_traj in zip(serial_sorted, parallel_sorted, strict=True):
             assert_trajectories_eq(s_traj, p_traj)
 
     @property
@@ -375,15 +376,17 @@ def test_analyze_with_preloaded_trajectories(
     )
 
     # Pre-built trajectory at ARBITRARY position (simulates loading from file)
-    preloaded = [
-        SatelliteTrajectory(
-            satellite=satellite,
-            times=times,
-            azimuth=np.full(len(times), ARBITRARY_AZIMUTH),
-            altitude=np.full(len(times), ARBITRARY_ALTITUDE),
-            distance_km=np.full(len(times), 500.0),
-        )
-    ]
+    preloaded = TrajectorySet(
+        [
+            SatelliteTrajectory(
+                satellite=satellite,
+                times=times,
+                azimuth=np.full(len(times), ARBITRARY_AZIMUTH),
+                altitude=np.full(len(times), ARBITRARY_ALTITUDE),
+                distance_km=np.full(len(times), 500.0),
+            )
+        ]
+    )
 
     # Antenna matches satellite
     antenna_traj = AntennaTrajectory(

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
 from sopp.models.interference import InterferenceResult
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
 
 
 def analyze_interference(
-    trajectories: list[SatelliteTrajectory],
+    trajectories: Iterable[SatelliteTrajectory],
     antenna_trajectory: AntennaTrajectory,
     strategy: InterferenceStrategy,
     facility: Facility,

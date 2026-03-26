@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from datetime import datetime
 
     from sopp.models.satellite.trajectory import SatelliteTrajectory
+    from sopp.models.satellite.trajectory_set import TrajectorySet
 
 
 @runtime_checkable
@@ -26,7 +27,7 @@ class TrajectoryFormat(Protocol):
 
     def save(
         self,
-        trajectories: SatelliteTrajectory | list[SatelliteTrajectory],
+        trajectories: SatelliteTrajectory | TrajectorySet,
         path: Path,
         *,
         observer_name: str | None = None,
@@ -52,7 +53,7 @@ class TrajectoryFormat(Protocol):
         path: Path,
         *,
         time_range: tuple[datetime, datetime] | None = None,
-    ) -> list[SatelliteTrajectory]:
+    ) -> TrajectorySet:
         """Load trajectories from a file.
 
         Args:
@@ -60,7 +61,7 @@ class TrajectoryFormat(Protocol):
             time_range: Optional tuple of (start, end) to filter trajectory data.
 
         Returns:
-            List of loaded trajectories.
+            TrajectorySet of loaded trajectories.
         """
         ...
 
