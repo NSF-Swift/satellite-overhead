@@ -52,11 +52,8 @@ def main():
     print(f"\nSelected {len(selected)} observations:")
     print(selected)
 
-    # Plot (requires matplotlib: pip install "sopp[plotting]")
-    try:
-        plot_elevation(selected)
-    except ImportError:
-        print("(matplotlib not installed, skipping plot)")
+    # Plot (requires: pip install "sopp[plotting]")
+    plot_elevation(selected)
 
 
 if __name__ == "__main__":

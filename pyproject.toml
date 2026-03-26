@@ -68,7 +68,7 @@ python = "3.11"
 features = ["cli"]
 
 [tool.hatch.envs.test]
-features = ["cli"]
+features = ["all"]
 dependencies = [
   "pytest~=7.2.0",
   "pytest-mock~=3.11.1",
