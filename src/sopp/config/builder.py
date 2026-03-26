@@ -209,12 +209,8 @@ class ConfigurationBuilder:
             raise ValueError("Configuration invalid: Facility is not set.")
         if time_window is None:
             raise ValueError("Configuration invalid: Time Window is not set.")
-        if frequency is None:
-            raise ValueError("Configuration invalid: Frequency Range is not set.")
         if satellites is None:
             raise ValueError("Configuration invalid: Satellites are not loaded.")
-        if antenna_config is None:
-            raise ValueError("Configuration invalid: AntennaConfig is not set.")
 
         filtered_satellites = self._filterer.apply_filters(satellites)
 

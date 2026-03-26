@@ -52,14 +52,15 @@ class Configuration:
 
     reservation: Reservation
     satellites: list[Satellite]
-    antenna_config: AntennaConfig
+    antenna_config: AntennaConfig | None = None
     runtime_settings: RuntimeSettings = field(default_factory=RuntimeSettings)
 
     def __post_init__(self):
         self._validate_satellites()
         self._validate_reservation()
         self._validate_settings()
-        self._validate_antenna_config()
+        if self.antenna_config is not None:
+            self._validate_antenna_config()
 
     def _validate_satellites(self):
         if not self.satellites:
