@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from sopp.models.satellite.trajectory_set import TrajectorySet
 
 
-def plot_trajectories(trajectory_set: TrajectorySet):
+def plot_elevation(trajectory_set: TrajectorySet):
     """Plot elevation vs time for a set of satellite trajectories.
 
     Args:

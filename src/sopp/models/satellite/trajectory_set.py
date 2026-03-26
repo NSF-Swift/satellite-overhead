@@ -128,12 +128,3 @@ class TrajectorySet:
             last_time = t.peak_time
 
         return TrajectorySet(selected)
-
-    def plot(self):
-        """Plot elevation vs time for all trajectories.
-
-        Requires matplotlib to be installed.
-        """
-        from sopp.plotting.passes import plot_trajectories
-
-        plot_trajectories(self)
