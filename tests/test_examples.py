@@ -13,12 +13,14 @@ TEST_TLE = Path(__file__).parent / "io" / "load_satellites" / "satellites.tle"
 def _run_example(name: str):
     """Run an example script and assert it exits cleanly."""
     script = EXAMPLES_DIR / name
+    env = {**__import__("os").environ, "MPLBACKEND": "Agg"}
     result = subprocess.run(
         [sys.executable, str(script)],
         capture_output=True,
         text=True,
         timeout=120,
         cwd=str(REPO_ROOT),
+        env=env,
     )
     assert result.returncode == 0, (
         f"{name} failed with exit code {result.returncode}:\n"
@@ -47,3 +49,17 @@ def test_example_persistence_runs():
 
 def test_example_link_budget_runs():
     _run_example("example_link_budget.py")
+
+
+def test_example_planning_runs():
+    """Copies a test TLE to the repo root if needed, then runs the planning example."""
+    tle_dest = REPO_ROOT / "satellites.tle"
+    created = False
+    if not tle_dest.exists():
+        shutil.copy(TEST_TLE, tle_dest)
+        created = True
+    try:
+        _run_example("example_planning.py")
+    finally:
+        if created:
+            tle_dest.unlink()
