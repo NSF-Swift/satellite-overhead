@@ -24,9 +24,7 @@ def main():
             name="HCRO",
             receiver=Receiver(beamwidth=3),
         )
-        .set_frequency_range(bandwidth=10, frequency=135)
         .set_time_window(begin="2025-12-10T08:00:00", end="2025-12-10T09:00:00")
-        .set_observation_target(altitude=90, azimuth=0)
         .set_runtime_settings(concurrency_level=8, time_resolution_seconds=10)
         .load_satellites(tle_file="./satellites.tle")
         .build()
