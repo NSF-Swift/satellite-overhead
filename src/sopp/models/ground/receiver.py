@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from sopp.models.antenna import AntennaPattern
+    from sopp.models.core import FrequencyRange
 
 
 @dataclass
@@ -24,11 +25,13 @@ class Receiver:
         beamwidth: Beamwidth of the telescope in degrees.
         peak_gain_dbi: Peak antenna gain in dBi (Tier 1). Defaults to None.
         antenna_pattern: Full antenna gain pattern (Tier 1.5+). Defaults to None.
+        frequency: Observation frequency range in MHz. Defaults to None.
     """
 
     beamwidth: float = 3.0
     peak_gain_dbi: float | None = None
     antenna_pattern: AntennaPattern | None = None
+    frequency: FrequencyRange | None = None
 
     def __post_init__(self):
         if self.beamwidth <= 0:
@@ -42,6 +45,8 @@ class Receiver:
         lines = [
             f"  Beamwidth:          {self.beamwidth} degrees",
         ]
+        if self.frequency is not None:
+            lines.append(f"  Frequency:          {self.frequency.frequency} MHz")
         if self.antenna_pattern is not None:
             lines.append(
                 f"  Peak Gain:          {self.antenna_pattern.peak_gain_dbi} dBi (from pattern)"

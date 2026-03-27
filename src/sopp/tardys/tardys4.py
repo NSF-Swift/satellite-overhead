@@ -84,11 +84,11 @@ class Tardys4Generator:
 
     @property
     def _freq_start_hz(self) -> int:
-        return int(self._reservation.frequency.low_mhz * 10**6)
+        return int(self._reservation.facility.receiver.frequency.low_mhz * 10**6)
 
     @property
     def _freq_end_hz(self) -> int:
-        return int(self._reservation.frequency.high_mhz * 10**6)
+        return int(self._reservation.facility.receiver.frequency.high_mhz * 10**6)
 
     @cached_property
     def _time(self) -> str:

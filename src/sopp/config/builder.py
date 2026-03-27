@@ -201,7 +201,6 @@ class ConfigurationBuilder:
         """
         facility = self.facility
         time_window = self.time_window
-        frequency = self.frequency_range
         satellites = self.satellites
         antenna_config = self.antenna_config
 
@@ -212,12 +211,15 @@ class ConfigurationBuilder:
         if satellites is None:
             raise ValueError("Configuration invalid: Satellites are not loaded.")
 
+        # Apply frequency to receiver if set via set_frequency_range()
+        if self.frequency_range is not None:
+            facility.receiver.frequency = self.frequency_range
+
         filtered_satellites = self._filterer.apply_filters(satellites)
 
         reservation = Reservation(
             facility=facility,
             time=time_window,
-            frequency=frequency,
         )
 
         return Configuration(

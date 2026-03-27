@@ -343,7 +343,7 @@ def _print_summary(configuration, sat_count):
     console.print(
         Panel(
             f"{res.facility}\n"
-            f"{res.frequency}\n"
+            f"{res.facility.receiver.frequency or 'No frequency set'}\n"
             f"Time: {res.time.begin} -> {res.time.end}\n"
             f"[bold]Satellites Loaded:[/bold] {sat_count}",
             title="Simulation Parameters",
