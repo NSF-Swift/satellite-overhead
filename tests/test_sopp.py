@@ -158,11 +158,12 @@ class TestSopp:
         return Reservation(
             facility=Facility(
                 coordinates=Coordinates(latitude=40.8178049, longitude=-121.4695413),
-                receiver=Receiver(beamwidth=3.5),
+                receiver=Receiver(
+                    beamwidth=3.5, frequency=FrequencyRange(frequency=135, bandwidth=10)
+                ),
                 name="ARBITRARY_1",
             ),
             time=time_window,
-            frequency=FrequencyRange(frequency=135, bandwidth=10),
         )
 
     @property

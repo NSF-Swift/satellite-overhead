@@ -35,17 +35,15 @@ def expected_reservation():
     return Reservation(
         facility=Facility(
             coordinates=Coordinates(longitude=-1, latitude=1),
-            receiver=Receiver(beamwidth=3),
+            receiver=Receiver(
+                beamwidth=3, frequency=FrequencyRange(bandwidth=10, frequency=135)
+            ),
             elevation=1,
             name="HCRO",
         ),
         time=TimeWindow(
             begin=datetime(2023, 11, 15, 8, 0, tzinfo=timezone.utc),
             end=datetime(2023, 11, 15, 8, 30, tzinfo=timezone.utc),
-        ),
-        frequency=FrequencyRange(
-            bandwidth=10,
-            frequency=135,
         ),
     )
 
@@ -65,7 +63,7 @@ class StubConfigFileLoader(ConfigFileLoaderBase):
 
     @property
     def frequency_range(self):
-        return expected_reservation().frequency
+        return expected_reservation().facility.receiver.frequency
 
     @property
     def runtime_settings(self):

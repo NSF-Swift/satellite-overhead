@@ -1,5 +1,6 @@
 from sopp.models.core import Coordinates, FrequencyRange, TimeWindow
 from sopp.models.ground.facility import Facility
+from sopp.models.ground.receiver import Receiver
 from sopp.models.reservation import Reservation
 from sopp.tardys.tardys4 import Tardys4Generator
 from sopp.utils.helpers import parse_time_and_convert_to_utc
@@ -12,6 +13,7 @@ class TestTards4Generator:
                 latitude=40.8178049,
                 longitude=-121.4695413,
             ),
+            receiver=Receiver(frequency=FrequencyRange(frequency=1575, bandwidth=20)),
             elevation=986,
             name="HCRO",
         )
@@ -27,7 +29,6 @@ class TestTards4Generator:
         reservation = Reservation(
             facility=facility,
             time=time_window,
-            frequency=FrequencyRange(frequency=1575, bandwidth=20),
         )
 
         generator = Tardys4Generator(

@@ -41,13 +41,14 @@ def test_facility(facility):
         "  Latitude:           10\n"
         "  Longitude:          10\n"
         "  Elevation:          1000 meters\n"
-        "  Beamwidth:          3 degrees"
+        "  Beamwidth:          3 degrees\n"
+        "  Frequency:          10 MHz"
     )
     assert str(facility) == expected
 
 
 def test_reservation(reservation):
-    expected = f"Reservation:\n{reservation.facility}\n{reservation.time}\n{reservation.frequency}"
+    expected = f"Reservation:\n{reservation.facility}\n{reservation.time}"
     assert str(reservation) == expected
 
 
@@ -77,18 +78,18 @@ def runtime_settings():
 
 
 @pytest.fixture
-def facility():
+def facility(frequency_range):
     return Facility(
         coordinates=Coordinates(10, 10),
-        receiver=Receiver(beamwidth=3),
+        receiver=Receiver(beamwidth=3, frequency=frequency_range),
         elevation=1000,
         name="TestFacility",
     )
 
 
 @pytest.fixture
-def reservation(facility, time_window, frequency_range):
-    return Reservation(facility, time_window, frequency_range)
+def reservation(facility, time_window):
+    return Reservation(facility=facility, time=time_window)
 
 
 @pytest.fixture
