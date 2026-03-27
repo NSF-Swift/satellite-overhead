@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -17,17 +17,19 @@ class Reservation:
     Attributes:
         facility: The radio astronomy facility.
         time: Time window of the observation.
-        frequency: Frequency band being observed.
+        frequency: Frequency band being observed. Optional for horizon-only queries.
     """
 
     facility: Facility
     time: TimeWindow
-    frequency: FrequencyRange
+    frequency: FrequencyRange | None = field(default=None)
 
     def __str__(self):
-        return (
-            f"{self.__class__.__name__}:\n"
-            f"{self.facility}\n"
-            f"{self.time}\n"
-            f"{self.frequency}"
-        )
+        parts = [
+            f"{self.__class__.__name__}:",
+            str(self.facility),
+            str(self.time),
+        ]
+        if self.frequency is not None:
+            parts.append(str(self.frequency))
+        return "\n".join(parts)

@@ -66,12 +66,12 @@ def test_validate_reservation_beamwidth():
         Receiver(beamwidth=0)
 
 
-def test_validate_invalid_antenna_config(satellite, reservation):
-    antenna_config = None
-    with pytest.raises(ValueError) as _:
-        _ = Configuration(
-            satellites=[satellite],
-            antenna_config=antenna_config,
-            reservation=reservation,
-            runtime_settings=RuntimeSettings(),
-        )
+def test_antenna_config_none_is_valid(satellite, reservation):
+    """antenna_config=None is valid for horizon-only queries."""
+    config = Configuration(
+        satellites=[satellite],
+        antenna_config=None,
+        reservation=reservation,
+        runtime_settings=RuntimeSettings(),
+    )
+    assert config.antenna_config is None

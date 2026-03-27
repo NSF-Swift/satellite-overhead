@@ -133,6 +133,16 @@ class Sopp:
             cached = load_trajectories("trajectories.arrow")
             results = engine.analyze(cached, GeometricStrategy())
         """
+        if self.configuration.antenna_config is None:
+            raise ValueError(
+                "analyze() requires antenna_config. Set an observation target, "
+                "static position, or custom trajectory in the configuration."
+            )
+        if self.configuration.reservation.frequency is None:
+            raise ValueError(
+                "analyze() requires frequency_range. Set it via "
+                "ConfigurationBuilder.set_frequency_range()."
+            )
         return analyze_interference(
             trajectories=trajectories,
             antenna_trajectory=self.antenna_trajectory,
@@ -192,6 +202,11 @@ class Sopp:
     @cached_property
     def antenna_trajectory(self) -> AntennaTrajectory:
         config = self.configuration.antenna_config
+        if config is None:
+            raise ValueError(
+                "antenna_trajectory requires antenna_config. Set an observation target, "
+                "static position, or custom trajectory in the configuration."
+            )
         times = self.master_time_grid
 
         match config:
