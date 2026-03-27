@@ -82,6 +82,7 @@ python = ["3.10", "3.11", "3.12"]
 
 [tool.hatch.envs.ci]
 template = "test"
+python = ""
 dev-mode = false
 
 [tool.hatch.envs.docs]

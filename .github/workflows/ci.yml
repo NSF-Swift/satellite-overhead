@@ -42,3 +42,20 @@ jobs:
           pip install hatch
       - name: Run tests
         run: hatch run ci:run
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Hatch
+        run: pip install hatch
+
+      - name: Build docs
+        run: hatch run docs:build
