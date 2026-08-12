@@ -22,7 +22,10 @@ from sopp.sopp import Sopp
 config = (
     ConfigurationBuilder()
     .set_facility(
-        latitude=40.8178, longitude=-121.4695, elevation=986, name="HCRO",
+        latitude=40.8178,
+        longitude=-121.4695,
+        elevation=986,
+        name="HCRO",
         receiver=Receiver(beamwidth=3),
     )
     .set_time_window(begin="2026-01-13T19:00:00", end="2026-01-13T20:00:00")
