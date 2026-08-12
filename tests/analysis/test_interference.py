@@ -36,7 +36,7 @@ def test_satellite_inside_beam_is_detected(
         antenna_trajectory=ant_traj,
         strategy=GeometricStrategy(),
         facility=reservation.facility,
-        frequency=reservation.frequency,
+        frequency=reservation.facility.receiver.frequency,
     )
 
     assert len(results) == 1
@@ -73,7 +73,7 @@ def test_satellite_outside_beam_is_ignored(
         antenna_trajectory=ant_traj,
         strategy=GeometricStrategy(),
         facility=reservation.facility,
-        frequency=reservation.frequency,
+        frequency=reservation.facility.receiver.frequency,
     )
 
     assert len(results) == 0
@@ -115,7 +115,7 @@ def test_satellite_enters_and_exits_beam(
         antenna_trajectory=ant_traj,
         strategy=GeometricStrategy(),
         facility=reservation.facility,
-        frequency=reservation.frequency,
+        frequency=reservation.facility.receiver.frequency,
     )
 
     assert len(results) == 1

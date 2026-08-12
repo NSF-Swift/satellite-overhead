@@ -40,7 +40,9 @@ def main():
     )
     print(f"Reservation start time: {configuration.reservation.time.begin}")
     print(f"Reservation end time: {configuration.reservation.time.end}")
-    print(f"Observation frequency: {configuration.reservation.frequency.frequency} MHz")
+    print(
+        f"Observation frequency: {configuration.reservation.facility.receiver.frequency.frequency} MHz"
+    )
 
     # Determine Satellite Interference
     sopp = Sopp(configuration=configuration)

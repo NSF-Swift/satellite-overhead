@@ -138,7 +138,8 @@ class Sopp:
                 "analyze() requires antenna_config. Set an observation target, "
                 "static position, or custom trajectory in the configuration."
             )
-        if self.configuration.reservation.frequency is None:
+        facility = self.configuration.reservation.facility
+        if facility.receiver.frequency is None:
             raise ValueError(
                 "analyze() requires frequency_range. Set it via "
                 "ConfigurationBuilder.set_frequency_range()."
@@ -147,8 +148,8 @@ class Sopp:
             trajectories=trajectories,
             antenna_trajectory=self.antenna_trajectory,
             strategy=strategy,
-            facility=self.configuration.reservation.facility,
-            frequency=self.configuration.reservation.frequency,
+            facility=facility,
+            frequency=facility.receiver.frequency,
         )
 
     def _compute_trajectories_parallel(

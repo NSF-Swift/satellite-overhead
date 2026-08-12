@@ -4,6 +4,7 @@ from datetime import timedelta
 
 from sopp.config.builder import ConfigurationBuilder
 from sopp.io.tle import load_satellites
+from sopp.models.ground.receiver import Receiver
 from sopp.sopp import Sopp
 from sopp.utils.helpers import read_datetime_string_as_utc
 
@@ -43,7 +44,7 @@ def run_benchmark(
             longitude=-121.4695413,
             elevation=986,
             name="HCRO",
-            beamwidth=3,
+            receiver=Receiver(beamwidth=3),
         )
         .set_frequency_range(bandwidth=10, frequency=135)
         .set_time_window(

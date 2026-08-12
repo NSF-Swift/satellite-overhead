@@ -8,6 +8,7 @@ from sopp.models.configuration import Configuration, RuntimeSettings
 from sopp.models.core import Coordinates, FrequencyRange, Position, TimeWindow
 from sopp.models.ground.config import CustomTrajectoryConfig
 from sopp.models.ground.facility import Facility
+from sopp.models.ground.receiver import Receiver
 from sopp.models.ground.trajectory import AntennaTrajectory
 from sopp.models.reservation import Reservation
 from sopp.models.satellite import InternationalDesignator, MeanMotion, TleInformation
@@ -75,8 +76,11 @@ def arbitrary_datetime():
 
 
 @pytest.fixture
-def facility():
-    return Facility(coordinates=Coordinates(latitude=0, longitude=0))
+def facility(frequency_range):
+    return Facility(
+        coordinates=Coordinates(latitude=0, longitude=0),
+        receiver=Receiver(frequency=frequency_range),
+    )
 
 
 @pytest.fixture
@@ -116,9 +120,11 @@ def frequency_range():
 @pytest.fixture
 def reservation(start_time, time_window_duration, frequency_range):
     return Reservation(
-        facility=Facility(coordinates=Coordinates(latitude=0, longitude=0)),
+        facility=Facility(
+            coordinates=Coordinates(latitude=0, longitude=0),
+            receiver=Receiver(frequency=frequency_range),
+        ),
         time=TimeWindow(begin=start_time, end=start_time + time_window_duration),
-        frequency=frequency_range,
     )
 
 
@@ -183,7 +189,6 @@ def make_reservation(facility):
         return Reservation(
             facility=facility,
             time=window,
-            frequency=frequency_range,
         )
 
     return _make

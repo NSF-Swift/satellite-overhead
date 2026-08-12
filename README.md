@@ -133,7 +133,10 @@ from sopp.sopp import Sopp
 config = (
     ConfigurationBuilder()
     .set_facility(
-        latitude=40.8, longitude=-121.4, elevation=986, name="HCRO",
+        latitude=40.8,
+        longitude=-121.4,
+        elevation=986,
+        name="HCRO",
         receiver=Receiver(beamwidth=3),
     )
     .set_runtime_settings(concurrency_level=4)
