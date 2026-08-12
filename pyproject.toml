@@ -97,7 +97,7 @@ deploy = "mkdocs gh-deploy --force"
 [tool.hatch.envs.lint]
 detached = true
 dependencies = [
-  "ruff",
+  "ruff~=0.16.2",
 ]
 
 [tool.hatch.envs.lint.scripts]
