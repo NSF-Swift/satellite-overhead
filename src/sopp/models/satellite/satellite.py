@@ -6,6 +6,7 @@ import math
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
+from skyfield.api import load
 from skyfield.sgp4lib import EarthSatellite
 
 if TYPE_CHECKING:
@@ -13,7 +14,7 @@ if TYPE_CHECKING:
     from sopp.models.satellite.tle import TleInformation
     from sopp.models.satellite.transmitter import Transmitter
 
-NUMBER_OF_LINES_PER_TLE_OBJECT = 3
+_SKYFIELD_TIMESCALE = load.timescale()
 
 
 @dataclass
@@ -37,14 +38,21 @@ class Satellite:
         return self.tle_information.satellite_number
 
     def to_skyfield(self) -> EarthSatellite:
-        """Convert to a Skyfield EarthSatellite. Requires TLE data."""
+        """Convert to a Skyfield EarthSatellite. Requires orbital elements.
+
+        Builds the SGP4 propagator directly from the parsed elements, so
+        satellite numbers beyond the TLE format's field width work fine.
+        """
         if self.tle_information is None:
             raise ValueError(
                 f"Satellite '{self.name}' has no TLE data. "
                 "Cannot convert to Skyfield without orbital parameters."
             )
-        line1, line2 = self.tle_information.to_tle_lines()
-        return EarthSatellite(line1=line1, line2=line2, name=self.name)
+        earth_satellite = EarthSatellite.from_satrec(
+            self.tle_information.to_satrec(), _SKYFIELD_TIMESCALE
+        )
+        earth_satellite.name = self.name
+        return earth_satellite
 
     @property
     def orbits_per_day(self) -> float:

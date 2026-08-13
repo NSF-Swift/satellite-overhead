@@ -1,12 +1,26 @@
-import pickle
-import re
-import types
+from dataclasses import replace
 
+import numpy as np
+import pytest
 from skyfield.api import EarthSatellite
 
 from tests.models.satellite.utilities import (
     expected_international_space_station_tle_as_satellite_cu,
 )
+
+EXACT_MODEL_ATTRIBUTES = ["satnum", "classification", "intldesg", "revnum"]
+FLOAT_MODEL_ATTRIBUTES = [
+    "argpo",
+    "bstar",
+    "ecco",
+    "inclo",
+    "mo",
+    "ndot",
+    "nddot",
+    "no_kozai",
+    "nodeo",
+]
+SIX_DIGIT_SATELLITE_NUMBER = 100000
 
 
 class TestSatelliteToSkyfield:
@@ -30,31 +44,59 @@ class TestSatelliteToSkyfield:
         self._converted_satellite = self._cu_satellite.to_skyfield()
 
     def then_the_satellites_should_match(self) -> None:
-        assert self._models_match() and self._non_model_properties_match()
+        assert self._converted_satellite.name == self._skyfield_satellite.name
+        assert self._models_match()
+        assert self._epochs_match()
+        assert self._propagated_positions_match()
 
     def _models_match(self) -> bool:
-        for attribute in dir(self._converted_satellite.model):
-            built_satellite_value = getattr(self._converted_satellite.model, attribute)
-            should_test_attribute = not re.compile("^_").match(attribute) and type(
-                built_satellite_value
-            ) not in [types.BuiltinMethodType, types.MethodType]
-            if should_test_attribute and built_satellite_value != getattr(
-                self._skyfield_satellite.model, attribute
-            ):
-                return False
-        return True
+        built = self._converted_satellite.model
+        expected = self._skyfield_satellite.model
 
-    def _non_model_properties_match(self) -> bool:
-        built_satellite_model = self._converted_satellite.model
-        expected_satellite_model = self._skyfield_satellite.model
-        self._converted_satellite.model = None
-        self._skyfield_satellite.model = None
+        exact_match = all(
+            getattr(built, attribute) == getattr(expected, attribute)
+            for attribute in EXACT_MODEL_ATTRIBUTES
+        )
+        float_match = all(
+            getattr(built, attribute)
+            == pytest.approx(getattr(expected, attribute), rel=1e-12)
+            for attribute in FLOAT_MODEL_ATTRIBUTES
+        )
+        return exact_match and float_match
 
-        is_match = pickle.dumps(self._converted_satellite) == pickle.dumps(
-            self._skyfield_satellite
+    def _epochs_match(self) -> bool:
+        built = self._converted_satellite.model
+        expected = self._skyfield_satellite.model
+
+        built_epoch = built.jdsatepoch + built.jdsatepochF
+        expected_epoch = expected.jdsatepoch + expected.jdsatepochF
+        return built_epoch == pytest.approx(expected_epoch, abs=1e-8)
+
+    def _propagated_positions_match(self) -> bool:
+        epoch = self._skyfield_satellite.epoch
+        times = epoch.ts.tt_jd(epoch.tt + np.linspace(0, 1, 5))
+
+        built_positions = self._converted_satellite.at(times).position.km
+        expected_positions = self._skyfield_satellite.at(times).position.km
+        return np.allclose(built_positions, expected_positions, rtol=0, atol=1e-3)
+
+
+class TestSatelliteToSkyfieldSixDigitNoradId:
+    def test_six_digit_norad_id_can_translate_to_skyfield(self):
+        """NORAD IDs above 99999 no longer fit the TLE format; conversion
+        to Skyfield must not round-trip through TLE lines."""
+        satellite = expected_international_space_station_tle_as_satellite_cu()
+        tle_information = satellite.tle_information
+        assert tle_information is not None
+        satellite = replace(
+            satellite,
+            tle_information=replace(
+                tle_information, satellite_number=SIX_DIGIT_SATELLITE_NUMBER
+            ),
         )
 
-        self._converted_satellite.model = built_satellite_model
-        self._skyfield_satellite.model = expected_satellite_model
+        skyfield_satellite = satellite.to_skyfield()
 
-        return is_match
+        assert skyfield_satellite.model.satnum == SIX_DIGIT_SATELLITE_NUMBER
+        geocentric = skyfield_satellite.at(skyfield_satellite.epoch)
+        assert np.isfinite(geocentric.position.km).all()
