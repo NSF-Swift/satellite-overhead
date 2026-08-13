@@ -2,10 +2,9 @@
 
 from dataclasses import dataclass
 
+from sgp4.api import WGS72, Satrec
 from sgp4.exporter import export_tle
 from sgp4.io import verify_checksum
-from sgp4.model import Satrec
-from sgp4.vallado_cpp import WGS72
 
 
 @dataclass
@@ -69,7 +68,8 @@ class TleInformation:
     classification: str = "U"
     international_designator: InternationalDesignator | None = None
 
-    def to_tle_lines(self):
+    def to_satrec(self) -> Satrec:
+        """Build an SGP4 Satrec propagator directly from the stored elements."""
         satrec = Satrec()
         satrec.sgp4init(
             WGS72,
@@ -94,12 +94,25 @@ class TleInformation:
         )
         satrec.revnum = self.revolution_number
 
-        return export_tle(satrec=satrec)
+        return satrec
+
+    def to_tle_lines(self):
+        """Export as TLE lines.
+
+        The TLE satellite number field is 5 characters, so plain digits
+        stop at 99999. sgp4 also writes the Alpha-5 extension, where a
+        leading letter counts as 10-33 ("A0000" is satellite 100000,
+        "Z9999" is 339999). Larger numbers raise ValueError.
+        """
+        return export_tle(satrec=self.to_satrec())
 
     @classmethod
     def from_tle_lines(cls, line1: str, line2: str) -> "TleInformation":
         verify_checksum(line1, line2)
-        satrec = Satrec.twoline2rv(line1=line1, line2=line2)
+        return cls.from_satrec(Satrec.twoline2rv(line1, line2))
+
+    @classmethod
+    def from_satrec(cls, satrec: Satrec) -> "TleInformation":
         international_designator = (
             InternationalDesignator.from_tle_string(satrec.intldesg)
             if satrec.intldesg
