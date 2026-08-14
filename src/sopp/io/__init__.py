@@ -1,7 +1,7 @@
 """I/O utilities for SOPP.
 
 This module provides functionality for:
-- Loading satellites from TLE files
+- Loading satellites from TLE and OMM files
 - Fetching TLEs from remote sources
 - Saving and loading trajectory data in various formats
 """
