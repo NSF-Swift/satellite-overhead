@@ -269,7 +269,7 @@ def arbitrary_satellite() -> Satellite:
             epoch_days=26633.28893622,
             inclination=1.1352005427406557,
             international_designator=InternationalDesignator(
-                year=88, launch_number=19, launch_piece="F"
+                year=1988, launch_number=19, launch_piece="F"
             ),
             mean_anomaly=4.188343400497881,
             mean_motion=MeanMotion(

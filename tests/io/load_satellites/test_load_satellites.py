@@ -30,7 +30,7 @@ class TestSatellitesLoaderFromFiles:
                 epoch_days=26884.2706323,
                 inclination=1.699973380722753,
                 international_designator=InternationalDesignator(
-                    year=23, launch_number=54, launch_piece="AL"
+                    year=2023, launch_number=54, launch_piece="AL"
                 ),
                 mean_anomaly=3.233793161984898,
                 mean_motion=MeanMotion(
@@ -59,7 +59,7 @@ class TestSatellitesLoaderFromFiles:
                 epoch_days=26884.61562828,
                 inclination=1.699962908747241,
                 international_designator=InternationalDesignator(
-                    year=23, launch_number=54, launch_piece="AK"
+                    year=2023, launch_number=54, launch_piece="AK"
                 ),
                 mean_anomaly=3.2457870646046025,
                 mean_motion=MeanMotion(
@@ -93,7 +93,7 @@ class TestSatellitesLoaderFromFiles:
                 epoch_days=26884.2706323,
                 inclination=1.699973380722753,
                 international_designator=InternationalDesignator(
-                    year=23, launch_number=54, launch_piece="AL"
+                    year=2023, launch_number=54, launch_piece="AL"
                 ),
                 mean_anomaly=3.233793161984898,
                 mean_motion=MeanMotion(
@@ -118,7 +118,7 @@ class TestSatellitesLoaderFromFiles:
                 epoch_days=26884.61562828,
                 inclination=1.699962908747241,
                 international_designator=InternationalDesignator(
-                    year=23, launch_number=54, launch_piece="AK"
+                    year=2023, launch_number=54, launch_piece="AK"
                 ),
                 mean_anomaly=3.2457870646046025,
                 mean_motion=MeanMotion(

@@ -104,7 +104,7 @@ def skyfield_fixture():
             epoch_days=26801.46955532,
             inclination=1.7179345640550268,
             international_designator=InternationalDesignator(
-                year=4, launch_number=25, launch_piece="F"
+                year=2004, launch_number=25, launch_piece="F"
             ),
             mean_anomaly=3.6295308619113436,
             mean_motion=MeanMotion(

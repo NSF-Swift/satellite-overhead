@@ -27,7 +27,7 @@ class InternationalDesignator:
     """International designator (COSPAR ID) identifying a launch and piece.
 
     Attributes:
-        year: Two-digit launch year.
+        year: Four-digit launch year.
         launch_number: Sequential launch number within the year.
         launch_piece: Piece identifier (e.g. 'A', 'B').
     """
@@ -37,14 +37,27 @@ class InternationalDesignator:
     launch_piece: str
 
     def to_tle_string(self) -> str:
-        return f"{str(self.year).zfill(2)}{str(self.launch_number).zfill(3)}{self.launch_piece}"
+        return f"{str(self.year % 100).zfill(2)}{str(self.launch_number).zfill(3)}{self.launch_piece}"
 
     @classmethod
     def from_tle_string(cls, tle_string: str) -> "InternationalDesignator":
+        # Two-digit years pivot at 57: nothing was launched before Sputnik (1957).
+        two_digit_year = int(tle_string[0:2])
+        century = 1900 if two_digit_year >= 57 else 2000
         return InternationalDesignator(
-            year=int(tle_string[0:2]),
+            year=century + two_digit_year,
             launch_number=int(tle_string[2:5]),
             launch_piece=tle_string[5:].strip(),
+        )
+
+    @classmethod
+    def from_object_id(cls, object_id: str) -> "InternationalDesignator":
+        """Parses an OMM OBJECT_ID such as '1998-067A'."""
+        year, launch = object_id.split("-")
+        return InternationalDesignator(
+            year=int(year),
+            launch_number=int(launch[:3]),
+            launch_piece=launch[3:].strip(),
         )
 
 

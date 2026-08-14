@@ -6,13 +6,14 @@ as a TLE but has no fixed-width fields.
 """
 
 import json
+from dataclasses import replace
 from pathlib import Path
 
 from sgp4 import omm as sgp4_omm
 from sgp4.api import Satrec
 
 from sopp.models.satellite.satellite import Satellite
-from sopp.models.satellite.tle import TleInformation
+from sopp.models.satellite.tle import InternationalDesignator, TleInformation
 
 # sgp4's omm.initialize() assumes these fields are present and non-null.
 # Analyst objects can lack them, so fill TLE-style defaults before parsing.
@@ -55,7 +56,19 @@ def _to_satellite(fields: dict) -> Satellite:
     satrec = Satrec()
     sgp4_omm.initialize(satrec, fields)
 
+    tle_information = TleInformation.from_satrec(satrec)
+
+    # sgp4 collapses OBJECT_ID to a two-digit year
+    # pull it back out of the OMM message if available
+    if fields["OBJECT_ID"]:
+        tle_information = replace(
+            tle_information,
+            international_designator=InternationalDesignator.from_object_id(
+                fields["OBJECT_ID"]
+            ),
+        )
+
     return Satellite(
         name=fields["OBJECT_NAME"].strip(),
-        tle_information=TleInformation.from_satrec(satrec),
+        tle_information=tle_information,
     )
