@@ -185,7 +185,7 @@ class TestSopp:
                 epoch_days=26801.52502783,
                 inclination=1.7021271170197139,
                 international_designator=InternationalDesignator(
-                    year=15, launch_number=49, launch_piece="K"
+                    year=2015, launch_number=49, launch_piece="K"
                 ),
                 mean_anomaly=1.1039888197272412,
                 mean_motion=MeanMotion(
@@ -213,7 +213,7 @@ class TestSopp:
                 epoch_days=26801.4833696,
                 inclination=1.7210307781480645,
                 international_designator=InternationalDesignator(
-                    year=98, launch_number=30, launch_piece="A"
+                    year=1998, launch_number=30, launch_piece="A"
                 ),
                 mean_anomaly=5.4831490673456615,
                 mean_motion=MeanMotion(
@@ -241,7 +241,7 @@ class TestSopp:
                 epoch_days=26801.40295236,
                 inclination=0.9012601004618398,
                 international_designator=InternationalDesignator(
-                    year=98, launch_number=67, launch_piece="A"
+                    year=1998, launch_number=67, launch_piece="A"
                 ),
                 mean_anomaly=0.0168668618912732,
                 mean_motion=MeanMotion(

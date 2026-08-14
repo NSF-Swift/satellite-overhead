@@ -1,6 +1,6 @@
 # I/O
 
-TLE loading and trajectory persistence.
+Satellite loading and trajectory persistence.
 
 ## Trajectory I/O
 
@@ -11,6 +11,10 @@ TLE loading and trajectory persistence.
 ::: sopp.io.tle.load_satellites
 
 ::: sopp.io.tle.fetch_tles
+
+## OMM Loading
+
+::: sopp.io.omm.parse_omm_file
 
 ## Frequency Data
 

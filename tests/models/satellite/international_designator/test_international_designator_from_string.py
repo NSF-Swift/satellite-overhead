@@ -4,13 +4,17 @@ from sopp.models.satellite.tle import (
 
 
 class TestInternationalDesignatorFromString:
-    def test_international_designator_year_is_padded(self):
-        arbitrary_single_digit_year = 2
-        tle_string_with_arbitrary_other_values = f"0{arbitrary_single_digit_year}111A  "
-        designator = InternationalDesignator.from_tle_string(
-            tle_string=tle_string_with_arbitrary_other_values
-        )
-        assert designator.year == arbitrary_single_digit_year
+    def test_international_designator_year_before_pivot_is_2000s(self):
+        designator = InternationalDesignator.from_tle_string(tle_string="02111A  ")
+        assert designator.year == 2002
+
+    def test_international_designator_year_at_pivot_is_1900s(self):
+        designator = InternationalDesignator.from_tle_string(tle_string="57001A  ")
+        assert designator.year == 1957
+
+    def test_international_designator_year_after_pivot_is_1900s(self):
+        designator = InternationalDesignator.from_tle_string(tle_string="98067A  ")
+        assert designator.year == 1998
 
     def test_international_designator_launch_number_is_padded(self):
         arbitrary_launch_number_less_than_three_digits = 2

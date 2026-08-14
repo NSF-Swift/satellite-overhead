@@ -144,12 +144,16 @@ class ConfigurationBuilder:
         return self
 
     def load_satellites(
-        self, tle_file: str | Path, frequency_file: str | Path | None = None
+        self,
+        tle_file: str | Path,
+        frequency_file: str | Path | None = None,
+        file_format: str = "auto",
     ) -> ConfigurationBuilder:
-        """Load satellites from a TLE file, optionally attaching frequency data."""
+        """Load satellites from a TLE or OMM file, optionally attaching frequency data."""
         self.satellites = load_satellites(
             tle_file=Path(tle_file),
             frequency_file=Path(frequency_file) if frequency_file else None,
+            file_format=file_format,
         )
         return self
 

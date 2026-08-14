@@ -1,4 +1,4 @@
-"""TLE file loading and remote fetching."""
+"""Satellite file loading (TLE and OMM) and remote fetching."""
 
 import os
 from dataclasses import replace
@@ -7,34 +7,57 @@ from pathlib import Path
 import requests
 
 from sopp.io.frequency import GetFrequencyDataFromCsv
+from sopp.io.omm import parse_omm_file
 from sopp.models.satellite.satellite import Satellite
 from sopp.models.satellite.tle import TleInformation
 
 NUMBER_OF_LINES_PER_TLE_OBJECT = 3
 
+OMM_FILE_FORMATS = ("csv", "json", "xml")
+
 
 def load_satellites(
-    tle_file: Path | str, frequency_file: Path | str | None = None
+    tle_file: Path | str,
+    frequency_file: Path | str | None = None,
+    file_format: str = "auto",
 ) -> list[Satellite]:
     """
-    Loads TLEs from disk and optionally attaches frequency data.
+    Loads satellites from a TLE or OMM file and optionally attaches
+    frequency data.
+
+    file_format may be "tle", "csv", "json", or "xml". The default
+    "auto" picks the format by file extension; anything without a
+    .csv/.json/.xml extension is treated as TLE.
     """
     tle_path = Path(tle_file)
-    freq_path = Path(frequency_file) if frequency_file else None
 
-    satellites = _parse_tle_file(tle_path)
+    if file_format == "auto":
+        suffix = tle_path.suffix.lower().lstrip(".")
+        file_format = suffix if suffix in OMM_FILE_FORMATS else "tle"
 
-    if freq_path:
-        freq_data = GetFrequencyDataFromCsv(filepath=freq_path).get()
+    if file_format == "tle":
+        satellites = _parse_tle_file(tle_path)
+    else:
+        satellites = parse_omm_file(tle_path, file_format)
 
-        satellites = [
-            replace(
-                sat, frequency=freq_data.get(sat.tle_information.satellite_number, [])
-            )
-            for sat in satellites
-        ]
+    if frequency_file:
+        satellites = _attach_frequency_data(satellites, Path(frequency_file))
 
     return satellites
+
+
+def _attach_frequency_data(
+    satellites: list[Satellite], frequency_file: Path
+) -> list[Satellite]:
+    freq_data = GetFrequencyDataFromCsv(filepath=frequency_file).get()
+
+    satellites_with_data = []
+    for sat in satellites:
+        number = sat.satellite_number
+        frequency = freq_data.get(number, []) if number is not None else []
+        satellites_with_data.append(replace(sat, frequency=frequency))
+
+    return satellites_with_data
 
 
 def _parse_tle_file(tlefilepath: Path) -> list[Satellite]:

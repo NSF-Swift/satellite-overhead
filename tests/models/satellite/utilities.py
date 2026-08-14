@@ -17,7 +17,7 @@ def expected_international_space_station_tle_as_satellite_cu() -> Satellite:
             epoch_days=25545.69339541,
             inclination=0.9013560935706996,
             international_designator=InternationalDesignator(
-                year=98, launch_number=67, launch_piece="A"
+                year=1998, launch_number=67, launch_piece="A"
             ),
             mean_anomaly=1.4946964807494398,
             mean_motion=MeanMotion(
