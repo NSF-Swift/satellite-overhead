@@ -31,11 +31,13 @@ pip install "sopp[cli]"
 SOPP provides a command-line interface for running simulations and managing data.
 
 ### 1. Download Data
-First, download the latest TLE (Two-Line Element) data. By default, this pulls active satellites from Celestrak.
+First, download the latest satellite orbital data. By default, this pulls active satellites from Celestrak in OMM CSV format.
 
 ```bash
 sopp download-tles
 ```
+
+Other formats are available with `--format` (csv, json, xml, tle). Note that the legacy TLE format cannot represent NORAD IDs above 99999, so it omits every satellite cataloged since July 2026 (see [Celestrak's GP data formats page](https://celestrak.org/NORAD/documentation/gp-data-formats.php)).
 
 ### 2. Run a Simulation
 Run a simulation using a configuration file (see below).
@@ -144,7 +146,7 @@ config = (
     .set_frequency_range(bandwidth=10, frequency=135)
     # Cygnus A
     .set_observation_target(declination="40d44m", right_ascension="19h59m")
-    .load_satellites(tle_file="satellites.tle")
+    .load_satellites(tle_file="satellites.csv")
     .add_filter(filter_name_does_not_contain("STARLINK"))
     .build()
 )
@@ -167,5 +169,5 @@ for event in interference_events:
 
 ## Data Sources
 
-*   **TLE Data:** Sourced from [Celestrak](https://celestrak.org) (public) or [Space-Track.org](https://www.space-track.org) (requires account/env vars).
+*   **Orbital Data:** OMM (csv/json/xml) or TLE, sourced from [Celestrak](https://celestrak.org) (public) or [Space-Track.org](https://www.space-track.org) (requires account/env vars).
 *   **Frequency Data:** Optional CSV file to populate satellite transmission frequency. [SSDB](https://github.com/NSF-Swift/sat-frequency-scraper) Format: `ID, Name, Frequency, Bandwidth`.
