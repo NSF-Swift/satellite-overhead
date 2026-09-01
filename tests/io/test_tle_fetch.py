@@ -92,3 +92,86 @@ class TestTleFetcher:
 
         with pytest.raises(ValueError, match="IDENTITY and PASSWORD"):
             fetch_tles(output_path=output_file, source="spacetrack")
+
+
+class TestDownloadFormats:
+    def _capture_celestrak_url(self, monkeypatch):
+        captured = {}
+
+        def fake_get(*args, **kwargs):
+            captured["url"] = kwargs.get("url", args[0] if args else None)
+            return MockRequestResponse()
+
+        monkeypatch.setattr(requests, "get", fake_get)
+        return captured
+
+    def _capture_spacetrack_query(self, monkeypatch):
+        monkeypatch.setenv("IDENTITY", "user")
+        monkeypatch.setenv("PASSWORD", "pass")
+        captured = {}
+
+        def fake_post(*args, **kwargs):
+            captured["query"] = kwargs["data"]["query"]
+            return MockRequestResponse()
+
+        monkeypatch.setattr(requests, "post", fake_post)
+        return captured
+
+    def test_celestrak_default_format_is_csv(self, monkeypatch, tmp_path):
+        captured = self._capture_celestrak_url(monkeypatch)
+
+        fetch_tles(output_path=tmp_path / "satellites.csv")
+
+        assert captured["url"].endswith("FORMAT=csv")
+
+    def test_celestrak_format_parameter_sets_url(self, monkeypatch, tmp_path):
+        captured = self._capture_celestrak_url(monkeypatch)
+
+        fetch_tles(output_path=tmp_path / "satellites.json", file_format="json")
+
+        assert captured["url"].endswith("FORMAT=json")
+
+    def test_celestrak_tle_format_warns_about_missing_satellites(
+        self, monkeypatch, tmp_path
+    ):
+        captured = self._capture_celestrak_url(monkeypatch)
+
+        with pytest.warns(UserWarning, match="NORAD IDs above 99999"):
+            fetch_tles(output_path=tmp_path / "satellites.tle", file_format="tle")
+
+        assert captured["url"].endswith("FORMAT=tle")
+
+    def test_spacetrack_tle_format_is_3le_and_warns_about_alpha5(
+        self, monkeypatch, tmp_path
+    ):
+        captured = self._capture_spacetrack_query(monkeypatch)
+
+        with pytest.warns(UserWarning, match="Alpha-5"):
+            fetch_tles(
+                output_path=tmp_path / "satellites.tle",
+                source="spacetrack",
+                file_format="tle",
+            )
+
+        assert captured["query"].endswith("format/3le")
+
+    def test_spacetrack_format_parameter_sets_query(self, monkeypatch, tmp_path):
+        captured = self._capture_spacetrack_query(monkeypatch)
+
+        fetch_tles(
+            output_path=tmp_path / "satellites.csv",
+            source="spacetrack",
+            file_format="csv",
+        )
+
+        assert captured["query"].endswith("format/csv")
+
+    def test_unknown_format_raises(self, tmp_path):
+        with pytest.raises(ValueError, match="Unknown download format"):
+            fetch_tles(output_path=tmp_path / "satellites.kvn", file_format="kvn")
+
+    def test_cli_download_format_choices_match_library(self):
+        from sopp.cli import DownloadFormat
+        from sopp.io.tle import DOWNLOAD_FILE_FORMATS
+
+        assert {choice.value for choice in DownloadFormat} == set(DOWNLOAD_FILE_FORMATS)

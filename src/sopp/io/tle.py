@@ -1,6 +1,7 @@
 """Satellite file loading (TLE and OMM) and remote fetching."""
 
 import os
+import warnings
 from dataclasses import replace
 from pathlib import Path
 
@@ -14,6 +15,33 @@ from sopp.models.satellite.tle import TleInformation
 NUMBER_OF_LINES_PER_TLE_OBJECT = 3
 
 OMM_FILE_FORMATS = ("csv", "json", "xml")
+DOWNLOAD_FILE_FORMATS = ("tle", *OMM_FILE_FORMATS)
+
+# Space-Track spells the TLE format "3le" in its query API.
+_SPACETRACK_FORMAT_NAMES = {"tle": "3le"}
+
+_TLE_FORMAT_WARNINGS = {
+    "celestrak": (
+        "Celestrak TLE output omits all satellites with NORAD IDs above 99999 "
+        "(everything cataloged since July 2026); use csv, json, or xml for "
+        "full coverage."
+    ),
+    "spacetrack": (
+        "Space-Track TLE output uses Alpha-5 spellings for NORAD IDs 100000 "
+        "to 339999 and omits objects above 339999; use csv, json, or xml for "
+        "full coverage."
+    ),
+}
+
+
+def infer_file_format(file: Path | str) -> str:
+    """Returns the satellite file format implied by a path's extension.
+
+    Extensions .csv/.json/.xml map to the OMM formats; anything else is
+    treated as TLE.
+    """
+    suffix = Path(file).suffix.lower().lstrip(".")
+    return suffix if suffix in OMM_FILE_FORMATS else "tle"
 
 
 def load_satellites(
@@ -32,8 +60,7 @@ def load_satellites(
     tle_path = Path(tle_file)
 
     if file_format == "auto":
-        suffix = tle_path.suffix.lower().lstrip(".")
-        file_format = suffix if suffix in OMM_FILE_FORMATS else "tle"
+        file_format = infer_file_format(tle_path)
 
     if file_format == "tle":
         satellites = _parse_tle_file(tle_path)
@@ -77,14 +104,25 @@ def _parse_tle_file(tlefilepath: Path) -> list[Satellite]:
     ]
 
 
-def fetch_tles(output_path: Path, source: str = "celestrak") -> Path:
+def fetch_tles(
+    output_path: Path, source: str = "celestrak", file_format: str = "csv"
+) -> Path:
     """
-    Downloads TLEs from a remote source and saves them to output_path.
+    Downloads satellite data from a remote source and saves it to output_path.
+
+    file_format may be "csv", "json", "xml", or "tle". The TLE format cannot
+    represent the full catalog anymore and emits a warning.
     """
+    if file_format not in DOWNLOAD_FILE_FORMATS:
+        raise ValueError(f"Unknown download format: {file_format}")
+
+    if file_format == "tle" and source in _TLE_FORMAT_WARNINGS:
+        warnings.warn(_TLE_FORMAT_WARNINGS[source], stacklevel=2)
+
     if source == "celestrak":
-        content = _fetch_celestrak()
+        content = _fetch_celestrak(file_format)
     elif source == "spacetrack":
-        content = _fetch_spacetrack()
+        content = _fetch_spacetrack(file_format)
     else:
         raise ValueError(f"Unknown TLE source: {source}")
 
@@ -96,14 +134,16 @@ def fetch_tles(output_path: Path, source: str = "celestrak") -> Path:
     return output_path
 
 
-def _fetch_celestrak() -> bytes:
-    url = "https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle"
+def _fetch_celestrak(file_format: str) -> bytes:
+    url = (
+        f"https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT={file_format}"
+    )
     response = requests.get(url=url, allow_redirects=True)
     response.raise_for_status()
     return response.content
 
 
-def _fetch_spacetrack() -> bytes:
+def _fetch_spacetrack(file_format: str) -> bytes:
     from dotenv import load_dotenv
 
     load_dotenv()
@@ -114,8 +154,12 @@ def _fetch_spacetrack() -> bytes:
     if not identity or not password:
         raise ValueError("IDENTITY and PASSWORD env vars required for SpaceTrack")
 
+    spacetrack_format = _SPACETRACK_FORMAT_NAMES.get(file_format, file_format)
     url = "https://www.space-track.org/ajaxauth/login"
-    query = "https://www.space-track.org/basicspacedata/query/class/gp/decay_date/null-val/epoch/%3Enow-30/orderby/norad_cat_id/format/3le"
+    query = (
+        "https://www.space-track.org/basicspacedata/query/class/gp/"
+        f"decay_date/null-val/epoch/%3Enow-30/orderby/norad_cat_id/format/{spacetrack_format}"
+    )
     data = {"identity": identity, "password": password, "query": query}
 
     response = requests.post(url=url, data=data)

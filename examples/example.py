@@ -25,7 +25,7 @@ def main():
         .set_runtime_settings(concurrency_level=8, time_resolution_seconds=1)
         # Alternatively set all of the above settings from a config file
         # .set_from_config_file(config_file='./supplements/config.json')
-        .load_satellites(tle_file="./satellites.tle")
+        .load_satellites(tle_file="./satellites.csv")
         .add_filter(filter_name_does_not_contain("STARLINK"))
         .add_filter(filter_orbit_is(orbit_type="leo"))
         .build()

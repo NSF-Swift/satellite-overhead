@@ -23,7 +23,7 @@ from sopp.filtering.presets import (
     filter_name_does_not_contain,
     filter_orbit_is,
 )
-from sopp.io.tle import fetch_tles
+from sopp.io.tle import fetch_tles, infer_file_format
 from sopp.models.satellite.trajectory import SatelliteTrajectory
 from sopp.sopp import Sopp
 
@@ -44,6 +44,18 @@ class OrbitType(str, Enum):
 class OutputFormat(str, Enum):
     table = "table"
     json = "json"
+
+
+class DownloadSource(str, Enum):
+    celestrak = "celestrak"
+    spacetrack = "spacetrack"
+
+
+class DownloadFormat(str, Enum):
+    csv = "csv"
+    json = "json"
+    xml = "xml"
+    tle = "tle"
 
 
 app = typer.Typer(
@@ -74,9 +86,11 @@ def run(
         typer.Option(
             "--tle",
             "-t",
-            help="Path to TLE file. Downloads from Celestrak if missing.",
+            help="Path to satellite file (OMM csv/json/xml or TLE). "
+            "Downloads from Celestrak if missing, in the format matching "
+            "the file extension.",
         ),
-    ] = Path("satellites.tle"),
+    ] = Path("satellites.csv"),
     frequency_file: Annotated[
         Path | None,
         typer.Option(
@@ -162,16 +176,20 @@ def run(
     if output_format == OutputFormat.table:
         _print_banner()
 
-    # TLE Management
+    # Satellite data management
     if not tle_file.exists():
         if output_format == OutputFormat.table:
             console.print(
-                f"[yellow]TLE file not found at {tle_file}. Downloading...[/yellow]"
+                f"[yellow]Satellite file not found at {tle_file}. Downloading...[/yellow]"
             )
         try:
-            fetch_tles(output_path=tle_file, source="celestrak")
+            fetch_tles(
+                output_path=tle_file,
+                source="celestrak",
+                file_format=infer_file_format(tle_file),
+            )
         except Exception as e:
-            console.print(f"[bold red]Failed to download TLEs:[/bold red] {e}")
+            console.print(f"[bold red]Failed to download satellites:[/bold red] {e}")
             raise typer.Exit(code=1) from e
 
     # Build Configuration
@@ -304,18 +322,33 @@ def run(
 
 @app.command()
 def download_tles(
-    output: Annotated[Path, typer.Argument(help="Path to save TLE file")] = Path(
-        "satellites.tle"
-    ),
+    output: Annotated[
+        Path | None,
+        typer.Argument(
+            help="Path to save the satellite file (default: satellites.<format>)"
+        ),
+    ] = None,
     source: Annotated[
-        str, typer.Option(help="Source to fetch from (celestrak/spacetrack)")
-    ] = "celestrak",
+        DownloadSource, typer.Option(help="Source to fetch from")
+    ] = DownloadSource.celestrak,
+    file_format: Annotated[
+        DownloadFormat,
+        typer.Option(
+            "--format",
+            help="Download format. The tle format cannot represent NORAD IDs "
+            "above 99999 and misses satellites cataloged since July 2026.",
+        ),
+    ] = DownloadFormat.csv,
 ):
+    if output is None:
+        output = Path(f"satellites.{file_format.value}")
     try:
-        path = fetch_tles(output_path=output, source=source)
-        console.print(f"[green]Successfully saved TLEs to {path}[/green]")
+        path = fetch_tles(
+            output_path=output, source=source.value, file_format=file_format.value
+        )
+        console.print(f"[green]Successfully saved satellite data to {path}[/green]")
     except Exception as e:
-        console.print(f"[bold red]Error fetching TLEs:[/bold red] {e}")
+        console.print(f"[bold red]Error fetching satellite data:[/bold red] {e}")
         raise typer.Exit(code=1) from e
 
 

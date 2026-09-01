@@ -31,7 +31,7 @@ config = (
     .set_time_window(begin="2026-01-13T19:00:00", end="2026-01-13T20:00:00")
     .set_frequency_range(frequency=135, bandwidth=10)
     .set_observation_target(declination="40d44m", right_ascension="19h59m")
-    .load_satellites(tle_file="satellites.tle")
+    .load_satellites(tle_file="satellites.csv")
     .build()
 )
 

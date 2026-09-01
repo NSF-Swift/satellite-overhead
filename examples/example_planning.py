@@ -26,7 +26,7 @@ def main():
         )
         .set_time_window(begin="2025-12-10T08:00:00", end="2025-12-10T09:00:00")
         .set_runtime_settings(concurrency_level=8, time_resolution_seconds=10)
-        .load_satellites(tle_file="./satellites.tle")
+        .load_satellites(tle_file="./satellites.csv")
         .build()
     )
 
